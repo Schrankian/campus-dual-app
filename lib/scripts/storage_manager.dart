@@ -1,11 +1,5 @@
+import "package:campus_dual_android/scripts/campus_dual_manager.dart";
 import "package:shared_preferences/shared_preferences.dart";
-
-class UserCredentials {
-  String username;
-  String hash;
-
-  UserCredentials(this.username, this.hash);
-}
 
 class StorageManager {
   dynamic _getData(SharedPreferences source, String key) {
