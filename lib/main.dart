@@ -5,16 +5,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'theme/themes.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final ThemeMode initTheme = await StorageManager().loadTheme();
   runApp(
-    const MyApp(),
+    MyApp(initTheme: initTheme),
   );
 }
 
 final navigatorKey = GlobalKey<NavigatorState>();
 
 class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+  const MyApp({super.key, required this.initTheme});
+
+  final ThemeMode initTheme;
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -22,20 +26,19 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   var themes = Themes();
-  // TODO get initial from storage
-  var themeMode = true ? ThemeMode.dark : ThemeMode.light;
+  late ThemeMode themeMode;
 
   void _onThemeChange(dynamic args) {
     setState(() {
-      // TODO switch for real
-      themeMode = true ? ThemeMode.dark : ThemeMode.light;
-      // TODO set  storage
+      themeMode = themeMode == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
+      StorageManager().saveTheme(themeMode);
     });
   }
 
   @override
   void initState() {
     super.initState();
+    themeMode = widget.initTheme;
     mainBus.onBus(event: "ToggleTheme", onEvent: _onThemeChange);
   }
 

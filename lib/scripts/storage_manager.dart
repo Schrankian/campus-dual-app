@@ -1,4 +1,5 @@
 import "package:campus_dual_android/scripts/campus_dual_manager.dart";
+import "package:flutter/material.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class StorageManager {
@@ -28,7 +29,7 @@ class StorageManager {
 
   Future<UserCredentials> loadUserAuthData() async {
     final disk = await SharedPreferences.getInstance();
-    UserCredentials creds = UserCredentials(_getData(disk, "username"), _getData(disk, "hash"));
+    UserCredentials creds = UserCredentials(_getData(disk, "username") ?? "", _getData(disk, "hash") ?? "");
     return creds;
   }
 
@@ -40,5 +41,19 @@ class StorageManager {
   void saveHash(String hash) async {
     final disk = await SharedPreferences.getInstance();
     _saveData(disk, "hash", hash);
+  }
+
+  Future<ThemeMode> loadTheme() async {
+    final disk = await SharedPreferences.getInstance();
+    final isDarkMode = _getData(disk, "isDarkMode");
+    if (isDarkMode == null) {
+      return ThemeMode.system;
+    }
+    return isDarkMode ? ThemeMode.dark : ThemeMode.light;
+  }
+
+  void saveTheme(ThemeMode theme) async {
+    final disk = await SharedPreferences.getInstance();
+    _saveData(disk, "isDarkMode", theme == ThemeMode.dark);
   }
 }
