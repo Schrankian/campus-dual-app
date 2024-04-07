@@ -1,4 +1,6 @@
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
+import 'package:campus_dual_android/screens/body/body_news.dart';
+import 'package:campus_dual_android/scripts/campus_dual_manager.dart';
 import '../widgets/settings_popup.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -16,15 +18,17 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _currentIndex = 0;
+  int _currentIndex = 1;
   bool settingIsActive = false;
 
   List<Widget> body = const [
+    News(),
     Overview(),
     TimeTable(),
   ];
   List<IconData> icons = [
-    Ionicons.home,
+    Ionicons.notifications_outline,
+    Ionicons.home_outline,
     Ionicons.calendar_outline,
     Ionicons.ellipsis_horizontal,
   ];
@@ -62,7 +66,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _pageController = PageController();
+    _pageController = PageController(initialPage: _currentIndex);
   }
 
   @override

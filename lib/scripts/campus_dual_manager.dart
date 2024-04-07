@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import '../extensions/color.dart';
 import 'package:http/http.dart' as http;
@@ -9,7 +11,7 @@ class UserCredentials {
   UserCredentials(this.username, this.hash);
 
   String authenticate(String uri) {
-    return "$uri?username=$username&hash=$hash";
+    return "$uri?user=$username&hash=$hash";
   }
 }
 
@@ -113,10 +115,96 @@ class Lesson {
   }
 }
 
-class CampusDualManager {
-  final UserCredentials userCreds;
+class UpcomingExam {
+  final DateTime begin;
+  final DateTime end;
+  final DateTime date;
+  final String comment;
+  final String instructor;
+  final String moduleShort;
+  final String moduleTitle;
+  final String room;
 
-  CampusDualManager(this.userCreds);
+  const UpcomingExam({
+    required this.begin,
+    required this.end,
+    required this.date,
+    required this.comment,
+    required this.instructor,
+    required this.moduleShort,
+    required this.moduleTitle,
+    required this.room,
+  });
+
+  factory UpcomingExam.fromJson(Map<String, dynamic> json) {
+    return switch (json) {
+      {
+        'BEGUZ': String begin,
+        'ENDUZ': String end,
+        'EVDAT': String date,
+        'COMMENT': String comment,
+        'INSTRUCTOR': String instructor,
+        'SM_SHORT': String moduleShort,
+        'SM_STEXT': String moduleTitle,
+        'SROOM': String room,
+      } =>
+        UpcomingExam(
+          begin: DateTime.parse('$date $begin'),
+          end: DateTime.parse('$date $end'),
+          date: DateTime.parse(date),
+          comment: comment,
+          instructor: instructor,
+          moduleShort: moduleShort,
+          moduleTitle: moduleTitle,
+          room: room,
+        ),
+      _ => throw const FormatException('Unexpected JSON type for UpcomingExam'),
+    };
+  }
+}
+
+class LatestExam {}
+
+class Notifications {
+  final int electives;
+  final int exams;
+  final int semester;
+  final List<UpcomingExam> upcoming;
+  final List<LatestExam> latest;
+
+  const Notifications({
+    required this.electives,
+    required this.exams,
+    required this.semester,
+    required this.upcoming,
+    required this.latest,
+  });
+
+  factory Notifications.fromJson(Map<String, dynamic> json) {
+    return switch (json) {
+      {
+        'ELECTIVES': int electives,
+        'EXAMS': int exams,
+        'SEMESTER': int semester,
+        'UPCOMING': List<dynamic> upcoming,
+        'LATEST': List<dynamic> latest,
+      } =>
+        Notifications(
+          electives: electives,
+          exams: exams,
+          semester: semester,
+          upcoming: upcoming.map((e) => UpcomingExam.fromJson(e as Map<String, dynamic>)).toList(),
+          latest: List.empty(),
+        ),
+      _ => throw const FormatException('Unexpected JSON type for Notifications'),
+    };
+  }
+}
+
+class CampusDualManager {
+  static UserCredentials? userCreds;
+
+  CampusDualManager();
 
   Future<http.Response> _fetch(String uri) async {
     final response = await http.get(Uri.parse(uri));
@@ -129,28 +217,34 @@ class CampusDualManager {
   }
 
   Future<ExamStats> fetchExamStats() async {
-    final response = await _fetch(userCreds.authenticate("https://selfservice.campus-dual.de/dash/getexamstats"));
+    final response = await _fetch(userCreds!.authenticate("https://selfservice.campus-dual.de/dash/getexamstats"));
 
-    return ExamStats.fromJson(response.body as Map<String, dynamic>);
+    return ExamStats.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   Future<int> fetchCurrentSemester() async {
-    final response = await _fetch(userCreds.authenticate("https://selfservice.campus-dual.de/dash/getfs"));
+    final response = await _fetch(userCreds!.authenticate("https://selfservice.campus-dual.de/dash/getfs"));
 
-    return int.parse(response.body);
+    return int.parse(response.body.replaceAll(" ", "").replaceAll("\"", ""));
   }
 
   Future<int> fetchCreditPoints() async {
-    final response = await _fetch(userCreds.authenticate("https://selfservice.campus-dual.de/dash/getcp"));
+    final response = await _fetch(userCreds!.authenticate("https://selfservice.campus-dual.de/dash/getcp"));
 
     return int.parse(response.body);
   }
 
   Future<List<Lesson>> fetchTimeTable() async {
-    final response = await _fetch(userCreds.authenticate("https://selfservice.campus-dual.de/room/json"));
+    final response = await _fetch(userCreds!.authenticate("https://selfservice.campus-dual.de/room/json"));
 
     final List<dynamic> json = response.body as List<dynamic>;
 
     return json.map((e) => Lesson.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  Future<Notifications> fetchNotifications() async {
+    final response = await _fetch(userCreds!.authenticate("https://selfservice.campus-dual.de/dash/getreminders"));
+
+    return Notifications.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 }

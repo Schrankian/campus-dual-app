@@ -27,9 +27,15 @@ class StorageManager {
     }
   }
 
-  Future<UserCredentials> loadUserAuthData() async {
+  Future<UserCredentials?> loadUserAuthData() async {
     final disk = await SharedPreferences.getInstance();
-    UserCredentials creds = UserCredentials(_getData(disk, "username") ?? "", _getData(disk, "hash") ?? "");
+    final String? username = _getData(disk, "username");
+    final String? hash = _getData(disk, "hash");
+
+    if (username == null || username == "" || hash == null || hash == "") {
+      return null;
+    }
+    UserCredentials creds = UserCredentials(username, hash);
     return creds;
   }
 
