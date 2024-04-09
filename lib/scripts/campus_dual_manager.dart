@@ -42,6 +42,52 @@ class GeneralUserData {
   });
 }
 
+class Evaluation {
+  final String module;
+  final String title;
+  final String type;
+  final double grade;
+  final bool isPassed;
+  final DateTime dateGraded;
+  final DateTime dateAnnounced;
+  final bool isPartlyGraded;
+  final String semester;
+
+  const Evaluation({
+    required this.module,
+    required this.title,
+    required this.type,
+    required this.grade,
+    required this.isPassed,
+    required this.dateGraded,
+    required this.dateAnnounced,
+    required this.isPartlyGraded,
+    required this.semester,
+  });
+}
+
+class MasterEvaluation {
+  final String module;
+  final String title;
+  final double grade;
+  final bool isPassed;
+  final bool isPartlyGraded;
+  final String semester;
+  final int credits;
+  final List<Evaluation> subEvaluations;
+
+  const MasterEvaluation({
+    required this.module,
+    required this.title,
+    required this.grade,
+    required this.isPassed,
+    required this.isPartlyGraded,
+    required this.semester,
+    required this.credits,
+    required this.subEvaluations,
+  });
+}
+
 class ExamStats {
   final int exams;
   final int success;
@@ -409,8 +455,12 @@ class CampusDualManager {
     );
   }
 
-  Future<void> test() async {
+  Future<List<MasterEvaluation>> scrapeEvaluations() async {
     final session = await _initAuthSession();
-    final _ = await _scrape(session, "https://selfservice.campus-dual.de/index/login");
+    final doc = await _scrape(session, "https://selfservice.campus-dual.de/acwork/index");
+
+    // TODO
+
+    return List.empty();
   }
 }
