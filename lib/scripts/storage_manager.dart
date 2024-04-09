@@ -29,22 +29,45 @@ class StorageManager {
 
   Future<UserCredentials?> loadUserAuthData() async {
     final disk = await SharedPreferences.getInstance();
-    final String? username = _getData(disk, "username");
-    final String? password = _getData(disk, "password");
-    final String? hash = _getData(disk, "hash");
+    final String username = _getData(disk, "username") ?? "";
+    final String password = _getData(disk, "password") ?? "";
+    final String hash = _getData(disk, "hash") ?? "";
 
-    if (username == null || username == "" || hash == null || hash == "" || password == null || password == "") {
+    if (username == "" || hash == "" || password == "") {
       return null;
     }
     UserCredentials creds = UserCredentials(username, password, hash);
     return creds;
   }
 
-  void saveUserAuthData(String username, String password, String hash) async {
+  void saveUserAuthData(UserCredentials data) async {
     final disk = await SharedPreferences.getInstance();
-    _saveData(disk, "username", username);
-    _saveData(disk, "password", password);
-    _saveData(disk, "hash", hash);
+    _saveData(disk, "username", data.username);
+    _saveData(disk, "password", data.password);
+    _saveData(disk, "hash", data.hash);
+  }
+
+  Future<GeneralUserData?> loadGeneralUserData() async {
+    final disk = await SharedPreferences.getInstance();
+    final String firstName = _getData(disk, "firstName") ?? "";
+    final String lastName = _getData(disk, "lastName") ?? "";
+    final String group = _getData(disk, "group") ?? "";
+    final String course = _getData(disk, "course") ?? "";
+
+    if (firstName == "" || lastName == "" || group == "" || course == "") {
+      return null;
+    }
+
+    GeneralUserData data = GeneralUserData(firstName: firstName, lastName: lastName, group: group, course: course);
+    return data;
+  }
+
+  void saveGeneralUserData(GeneralUserData data) async {
+    final disk = await SharedPreferences.getInstance();
+    _saveData(disk, "firstName", data.firstName);
+    _saveData(disk, "lastName", data.lastName);
+    _saveData(disk, "group", data.group);
+    _saveData(disk, "course", data.course);
   }
 
   Future<ThemeMode> loadTheme() async {

@@ -1,8 +1,11 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:html/dom.dart';
 import '../extensions/color.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_cookie_store/http_cookie_store.dart';
+import 'package:html/parser.dart';
 
 String addQueryParams(String uri, Map<String, String> params) {
   // Check if the uri already has a query
@@ -23,6 +26,20 @@ class UserCredentials {
   String addAuthParams(String uri) {
     return addQueryParams(uri, {"user": username, "userid": username, "hash": hash});
   }
+}
+
+class GeneralUserData {
+  final String firstName;
+  final String lastName;
+  final String group;
+  final String course;
+
+  const GeneralUserData({
+    required this.firstName,
+    required this.lastName,
+    required this.group,
+    required this.course,
+  });
 }
 
 class ExamStats {
@@ -213,17 +230,26 @@ class Notifications {
 
 class CampusDualManager {
   static UserCredentials? userCreds;
-  static http.Session _session;
-  
-  const Map<String, dynamic> stdHeaders = {
-    "TODO": "Todo"
+
+  static const Map<String, String> stdHeaders = {
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+    "Accept-Language": "de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7",
+    "Cache-Control": "max-age=0",
+    "Connection": "keep-alive",
+    "origin": "https://erp.campus-dual.de",
+    "Referer": "https://erp.campus-dual.de/sap/bc/webdynpro/sap/zba_initss?sap-client=100&sap-language=de&uri=https%3a%2f%2fselfservice.campus-dual.de%2findex%2flogin",
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "same-site",
+    "Sec-Fetch-User": "?1",
+    "Upgrade-Insecure-Requests": "1",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+    "sec-ch-ua": '"Google Chrome";v="123", "Not:A-Brand";v="8", "Chromium";v="123"',
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": "Windows"
   };
 
-  CampusDualManager(
-    if(!_session){
-      _session = http.Session();
-    }
-  );
+  CampusDualManager();
 
   Future<http.Response> _fetch(String uri) async {
     final response = await http.get(Uri.parse(uri));
@@ -235,19 +261,61 @@ class CampusDualManager {
     }
   }
 
-  Future<List<Map<String,dynamic>>> _scrape(String uri) async {
-    final response = await _session.get(Uri.parse(uri));
+  Future<Document> _scrape(CookieClient session, String uri) async {
+    final response = await session.get(Uri.parse(uri), headers: stdHeaders);
 
-    // TODO check response, weither it is valid
-    // if not, initAuthSession
-    // if yes, parse into list of maps
-    // return map
+    if (response.statusCode != 200) {
+      throw Exception("Failed to scrape from: $uri");
+    }
+
+    return parse(response.body);
   }
 
-  Future<void> _initAuthSession() async {
-      _session = http.Session();
+  /*
+  * This function initializes gets the session cookie and therefore logs in the user
+  */
+  Future<CookieClient> _initAuthSession() async {
+    final Uri loginUri = Uri.parse("https://erp.campus-dual.de/sap/bc/webdynpro/sap/zba_initss?sap-client=100&sap-language=de&uri=https%3a%2f%2fselfservice.campus-dual.de%2findex%2flogin");
 
-      // TODO Initiate request chain to get auth cookie
+    CookieClient session = CookieClient();
+
+    // Initial request to get the XSRF token and the xsrf cookie
+    final initResponse = await session.get(loginUri, headers: stdHeaders);
+    if (initResponse.statusCode != 200) {
+      throw Exception("Failed to fetch from: $loginUri");
+    }
+
+    // Parse the response and get the XSRF token
+    final doc = parse(initResponse.body);
+    // Get the XSRF token. Hint: The session cookie hides in an hidden input field
+    final xsrfToken = doc.querySelector("input[name='sap-login-XSRF']")?.attributes["value"];
+
+    // Request to login and get the session cookie
+    final loginResponse = await session.post(
+      loginUri,
+      headers: stdHeaders,
+      body: {
+        "FOCUS_ID": "sap-user",
+        "sap-system-login-oninputprocessing": "onLogin",
+        "sap-urlscheme": "",
+        "sap-system-login": "onLogin",
+        "sap-system-login-basic_auth": "",
+        "sap-client": "100",
+        "sap-language": "DE",
+        "sap-accessibility": "",
+        "sap-login-XSRF": xsrfToken,
+        "sap-system-login-cookie_disabled": "",
+        "sap-user": userCreds!.username,
+        "sap-password": userCreds!.password,
+        "SAPEVENTQUEUE": "Form_Submit~E002Id~E004SL__FORM~E003~E002ClientAction~E004submit~E005ActionUrl~E004~E005ResponseData~E004full~E005PrepareScript~E004~E003~E002~E003"
+      },
+    );
+
+    if (loginResponse.statusCode != 302 || loginResponse.body.contains("loginForm")) {
+      throw Exception("Failed to login");
+    }
+
+    return session;
   }
 
   Future<ExamStats> fetchExamStats() async {
@@ -291,5 +359,58 @@ class CampusDualManager {
     final response = await _fetch(userCreds!.addAuthParams("https://selfservice.campus-dual.de/dash/getreminders"));
 
     return Notifications.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+  }
+
+  Future<GeneralUserData> scrapeGeneralUserData() async {
+    final session = await _initAuthSession();
+    final doc = await _scrape(session, "https://selfservice.campus-dual.de/index/login");
+
+    final studInfo = doc.querySelector("#studinfo")!.querySelector("td")!;
+
+    // Iterate over the children of the studinfo table cell
+    // Form:
+    // <td width="85%">
+    //  <strong>Name: </strong>Schuster, Fabian (3004717),
+    //  <strong> Seminargruppe: </strong> 3IT22-1
+    //  <br>Studiengang Informationstechnologie/SR Informationstechnik
+    // </td>
+    String? group;
+    String? course;
+    String? firstName;
+    String? lastName;
+    for (int i = 0; i < studInfo.nodes.length; i++) {
+      final child = studInfo.nodes[i].text!.trim();
+
+      if (child.contains("Studiengang")) {
+        course = child.replaceAll("Studiengang ", "");
+        continue;
+      }
+      switch (child) {
+        case "Name:":
+          {
+            final nameList = studInfo.nodes[i + 1].text!.trim().split(" ");
+            lastName = nameList[0].trim().replaceAll(",", "");
+            firstName = nameList[1].trim();
+            break;
+          }
+        case "Seminargruppe:":
+          {
+            group = studInfo.nodes[i + 1].text!.trim();
+            break;
+          }
+      }
+    }
+
+    return GeneralUserData(
+      firstName: firstName ?? "",
+      lastName: lastName ?? "",
+      group: group ?? "",
+      course: course ?? "",
+    );
+  }
+
+  Future<void> test() async {
+    final session = await _initAuthSession();
+    final _ = await _scrape(session, "https://selfservice.campus-dual.de/index/login");
   }
 }

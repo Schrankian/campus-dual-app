@@ -43,10 +43,11 @@ class _HomePageState extends State<HomePage> {
     {
       'icon': Ionicons.settings_outline,
       'function': (context) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const Settings()),
-        );
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(builder: (context) => const Settings()),
+        // );
+        CampusDualManager().scrapeGeneralUserData();
       }
     }
   ];

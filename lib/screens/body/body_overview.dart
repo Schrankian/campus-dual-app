@@ -45,7 +45,7 @@ class _OverviewState extends State<Overview> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Matrikelnummer:',
+                            'Hey,',
                             style: TextStyle(
                               color: Theme.of(context).colorScheme.onPrimary,
                               fontSize: 22,
@@ -54,13 +54,17 @@ class _OverviewState extends State<Overview> {
                           SizedBox(
                             height: 15,
                           ),
-                          Text(
-                            CampusDualManager.userCreds!.username,
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.onPrimary,
-                              fontSize: 30,
-                            ),
-                          )
+                          FutureBuilder(
+                              future: CampusDualManager().scrapeGeneralUserData(),
+                              builder: (context, snapshot) {
+                                return Text(
+                                  snapshot.connectionState == ConnectionState.done ? snapshot.data!.firstName : '...',
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.onPrimary,
+                                    fontSize: 22,
+                                  ),
+                                );
+                              }),
                         ],
                       ),
                     ),
