@@ -4,6 +4,15 @@ import 'package:flutter/material.dart';
 import '../extensions/color.dart';
 import 'package:http/http.dart' as http;
 
+String addQueryParams(String uri, Map<String, String> params) {
+  // Check if the uri already has a query
+  if (uri.contains("?")) {
+    return "$uri&${params.entries.map((e) => "${e.key}=${e.value}").join("&")}";
+  } else {
+    return "$uri?${params.entries.map((e) => "${e.key}=${e.value}").join("&")}";
+  }
+}
+
 class UserCredentials {
   String username;
   String hash;
@@ -11,7 +20,7 @@ class UserCredentials {
   UserCredentials(this.username, this.hash);
 
   String authenticate(String uri) {
-    return "$uri?user=$username&hash=$hash";
+    return addQueryParams(uri, {"user": username, "userid": username, "hash": hash});
   }
 }
 
@@ -234,10 +243,21 @@ class CampusDualManager {
     return int.parse(response.body);
   }
 
-  Future<List<Lesson>> fetchTimeTable() async {
-    final response = await _fetch(userCreds!.authenticate("https://selfservice.campus-dual.de/room/json"));
+  Future<List<Lesson>> fetchTimeTable(DateTime start, DateTime end) async {
+    final response = await _fetch(addQueryParams(userCreds!.authenticate("https://selfservice.campus-dual.de/room/json"), {
+      "start": (start.millisecondsSinceEpoch / 1000).toString(),
+      "end": (end.millisecondsSinceEpoch / 1000).toString(),
+    }));
 
-    final List<dynamic> json = response.body as List<dynamic>;
+    final List<dynamic> json = jsonDecode(response.body) as List<dynamic>;
+
+    // Filter out every item in json, which is not in the timeframe start to end
+    json.removeWhere((element) {
+      final DateTime elStart = DateTime.fromMillisecondsSinceEpoch((element["start"] as int) * 1000);
+      final DateTime elEnd = DateTime.fromMillisecondsSinceEpoch((element["end"] as int) * 1000);
+
+      return elStart.isBefore(start) || elEnd.isAfter(end);
+    });
 
     return json.map((e) => Lesson.fromJson(e as Map<String, dynamic>)).toList();
   }

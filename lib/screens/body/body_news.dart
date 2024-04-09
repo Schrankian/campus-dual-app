@@ -28,15 +28,37 @@ class _NewsState extends State<News> {
                 child: Text('An error occurred'),
               );
             }
-            return ListView.builder(
-              physics: const ScrollPhysics(),
-              itemCount: snapshot.data!.upcoming.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(snapshot.data!.upcoming[index].moduleTitle),
-                  subtitle: Text(snapshot.data!.upcoming[index].date.toString()),
-                );
-              },
+            return Column(
+              children: [
+                Text("Anstehende Prüfungen:"),
+                SizedBox(
+                  height: 350,
+                  child: ListView.builder(
+                    physics: const ScrollPhysics(),
+                    itemCount: snapshot.data!.upcoming.length,
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        title: Text(snapshot.data!.upcoming[index].moduleTitle),
+                        subtitle: Text(snapshot.data!.upcoming[index].date.toString()),
+                      );
+                    },
+                  ),
+                ),
+                Text("Letzte Ergebnisse:"),
+                SizedBox(
+                  height: 350,
+                  child: ListView.builder(
+                    physics: const ScrollPhysics(),
+                    itemCount: snapshot.data!.latest.length,
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        title: Text(snapshot.data!.latest[index].toString()),
+                        subtitle: Text(snapshot.data!.latest[index].toString()),
+                      );
+                    },
+                  ),
+                ),
+              ],
             );
           }),
     );
