@@ -30,22 +30,20 @@ class StorageManager {
   Future<UserCredentials?> loadUserAuthData() async {
     final disk = await SharedPreferences.getInstance();
     final String? username = _getData(disk, "username");
+    final String? password = _getData(disk, "password");
     final String? hash = _getData(disk, "hash");
 
-    if (username == null || username == "" || hash == null || hash == "") {
+    if (username == null || username == "" || hash == null || hash == "" || password == null || password == "") {
       return null;
     }
-    UserCredentials creds = UserCredentials(username, hash);
+    UserCredentials creds = UserCredentials(username, password, hash);
     return creds;
   }
 
-  void saveUsername(String username) async {
+  void saveUserAuthData(String username, String password, String hash) async {
     final disk = await SharedPreferences.getInstance();
     _saveData(disk, "username", username);
-  }
-
-  void saveHash(String hash) async {
-    final disk = await SharedPreferences.getInstance();
+    _saveData(disk, "password", password);
     _saveData(disk, "hash", hash);
   }
 

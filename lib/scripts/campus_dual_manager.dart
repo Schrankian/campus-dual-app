@@ -14,12 +14,13 @@ String addQueryParams(String uri, Map<String, String> params) {
 }
 
 class UserCredentials {
-  String username;
-  String hash;
+  final String username;
+  final String password;
+  final String hash;
 
-  UserCredentials(this.username, this.hash);
+  UserCredentials(this.username, this.password, this.hash);
 
-  String authenticate(String uri) {
+  String addAuthParams(String uri) {
     return addQueryParams(uri, {"user": username, "userid": username, "hash": hash});
   }
 }
@@ -212,8 +213,17 @@ class Notifications {
 
 class CampusDualManager {
   static UserCredentials? userCreds;
+  static http.Session _session;
+  
+  const Map<String, dynamic> stdHeaders = {
+    "TODO": "Todo"
+  };
 
-  CampusDualManager();
+  CampusDualManager(
+    if(!_session){
+      _session = http.Session();
+    }
+  );
 
   Future<http.Response> _fetch(String uri) async {
     final response = await http.get(Uri.parse(uri));
@@ -225,26 +235,41 @@ class CampusDualManager {
     }
   }
 
+  Future<List<Map<String,dynamic>>> _scrape(String uri) async {
+    final response = await _session.get(Uri.parse(uri));
+
+    // TODO check response, weither it is valid
+    // if not, initAuthSession
+    // if yes, parse into list of maps
+    // return map
+  }
+
+  Future<void> _initAuthSession() async {
+      _session = http.Session();
+
+      // TODO Initiate request chain to get auth cookie
+  }
+
   Future<ExamStats> fetchExamStats() async {
-    final response = await _fetch(userCreds!.authenticate("https://selfservice.campus-dual.de/dash/getexamstats"));
+    final response = await _fetch(userCreds!.addAuthParams("https://selfservice.campus-dual.de/dash/getexamstats"));
 
     return ExamStats.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   Future<int> fetchCurrentSemester() async {
-    final response = await _fetch(userCreds!.authenticate("https://selfservice.campus-dual.de/dash/getfs"));
+    final response = await _fetch(userCreds!.addAuthParams("https://selfservice.campus-dual.de/dash/getfs"));
 
     return int.parse(response.body.replaceAll(" ", "").replaceAll("\"", ""));
   }
 
   Future<int> fetchCreditPoints() async {
-    final response = await _fetch(userCreds!.authenticate("https://selfservice.campus-dual.de/dash/getcp"));
+    final response = await _fetch(userCreds!.addAuthParams("https://selfservice.campus-dual.de/dash/getcp"));
 
     return int.parse(response.body);
   }
 
   Future<List<Lesson>> fetchTimeTable(DateTime start, DateTime end) async {
-    final response = await _fetch(addQueryParams(userCreds!.authenticate("https://selfservice.campus-dual.de/room/json"), {
+    final response = await _fetch(addQueryParams(userCreds!.addAuthParams("https://selfservice.campus-dual.de/room/json"), {
       "start": (start.millisecondsSinceEpoch / 1000).toString(),
       "end": (end.millisecondsSinceEpoch / 1000).toString(),
     }));
@@ -263,7 +288,7 @@ class CampusDualManager {
   }
 
   Future<Notifications> fetchNotifications() async {
-    final response = await _fetch(userCreds!.authenticate("https://selfservice.campus-dual.de/dash/getreminders"));
+    final response = await _fetch(userCreds!.addAuthParams("https://selfservice.campus-dual.de/dash/getreminders"));
 
     return Notifications.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
