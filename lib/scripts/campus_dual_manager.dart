@@ -455,11 +455,60 @@ class CampusDualManager {
     );
   }
 
+  Future<String> scrapeHash() async {
+    final session = await _initAuthSession();
+    final doc = await _scrape(session, "https://selfservice.campus-dual.de/index/login");
+
+    final scriptTag = doc.querySelector("#main")?.querySelector("script")!.innerHtml;
+
+    final hashRegExp = RegExp(r'hash="([^"]*)"');
+    final match = hashRegExp.firstMatch(scriptTag!);
+
+    if (match != null && match.groupCount > 0) {
+      final hash = match.group(1)!;
+      return hash;
+    } else {
+      throw Exception("Failed to scrape hash");
+    }
+  }
+
   Future<List<MasterEvaluation>> scrapeEvaluations() async {
     final session = await _initAuthSession();
     final doc = await _scrape(session, "https://selfservice.campus-dual.de/acwork/index");
 
-    // TODO
+    final table = doc.querySelector("#acwork")!.querySelector("tbody")!;
+
+    final evaluations = <MasterEvaluation>[];
+
+    for (final element in table.children) {
+      print(element.className);
+      if (element.className.contains("child-of-node-0")) {
+        final moduleTitleString = element.children[0].querySelector("strong")!.text.trim().split(" ");
+        final module = moduleTitleString[1].replaceAll(r'\(|\)', "");
+        final title = moduleTitleString[0];
+
+        final grade = double.parse(element.children[1].querySelector("#none")!.text.trim().replaceAll(",", ".")); // TODO support "T"
+        final isPassed = element.children[2].querySelector("img")!.attributes["src"]! == "/images/green.png";
+        final credits = int.parse(element.children[3].text.trim());
+        final isPartlyGraded = false; //TODO: Implement
+        final semester = element.children.last.text.trim();
+        evaluations.add(MasterEvaluation(module: module, title: title, grade: grade, isPassed: isPassed, isPartlyGraded: isPartlyGraded, semester: semester, credits: credits, subEvaluations: <Evaluation>[]));
+      } else if (!element.className.contains("head")) {
+        final moduleTitleTypeString = element.children[0].text.trim().split(" ");
+        final module = moduleTitleTypeString[3].replaceAll(r'\(|\)', "");
+        final title = moduleTitleTypeString[1];
+        final type = moduleTitleTypeString[2].replaceAll(r'\(|\)', "");
+        //TODO weitermachen
+        final grade = 0.0;
+        final isPassed = false;
+        final dateGraded = DateTime.now();
+        final dateAnnounced = DateTime.now();
+        final isPartlyGraded = false;
+        final semester = "";
+
+        evaluations.last.subEvaluations.add(Evaluation(module: module, title: title, type: type, grade: grade, isPassed: isPassed, dateGraded: dateGraded, dateAnnounced: dateAnnounced, isPartlyGraded: isPartlyGraded, semester: semester));
+      }
+    }
 
     return List.empty();
   }
