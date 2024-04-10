@@ -487,7 +487,7 @@ class CampusDualManager {
         final module = moduleTitleString[1].replaceAll(r'\(|\)', "");
         final title = moduleTitleString[0];
 
-        final grade = double.parse(element.children[1].querySelector("#none")!.text.trim().replaceAll(",", ".")); // TODO support "T"
+        final grade = double.tryParse(element.children[1].querySelector("#none")!.text.trim().replaceAll(",", ".")) ?? -1;
         final isPassed = element.children[2].querySelector("img")!.attributes["src"]! == "/images/green.png";
         final credits = int.parse(element.children[3].text.trim());
         final isPartlyGraded = false; //TODO: Implement
@@ -498,18 +498,19 @@ class CampusDualManager {
         final module = moduleTitleTypeString[3].replaceAll(r'\(|\)', "");
         final title = moduleTitleTypeString[1];
         final type = moduleTitleTypeString[2].replaceAll(r'\(|\)', "");
-        //TODO weitermachen
-        final grade = 0.0;
-        final isPassed = false;
-        final dateGraded = DateTime.now();
-        final dateAnnounced = DateTime.now();
-        final isPartlyGraded = false;
-        final semester = "";
+
+        final grade = double.tryParse(element.children[1].querySelector(".mscore")!.text.trim().replaceAll(",",".")) ?? -1;
+        final isPassed = element.children[2].querySelector("img")!.attributes["src"]! == "/images/green.png";
+        final dateGraded = DateTime.parse(element.children[4]);
+        final dateAnnounced = DateTime.parse(element.children[5]);
+        final isPartlyGraded = false; // TODO: implement
+        final semester = element.children.last.text.trim();
 
         evaluations.last.subEvaluations.add(Evaluation(module: module, title: title, type: type, grade: grade, isPassed: isPassed, dateGraded: dateGraded, dateAnnounced: dateAnnounced, isPartlyGraded: isPartlyGraded, semester: semester));
       }
     }
-
-    return List.empty();
+    // TODO test
+    print(evaluations);
+    return evaluations;
   }
 }
