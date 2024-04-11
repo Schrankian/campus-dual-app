@@ -10,14 +10,14 @@ class Overview extends StatefulWidget {
   State<Overview> createState() => _OverviewState();
 }
 
-class _OverviewState extends State<Overview> {
+class _OverviewState extends State<Overview> with AutomaticKeepAliveClientMixin<Overview>{
+
   @override
-  void initState() {
-    super.initState();
-  }
+  bool get wantKeepAlive => true;
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -58,7 +58,7 @@ class _OverviewState extends State<Overview> {
                               future: CampusDualManager().scrapeGeneralUserData(),
                               builder: (context, snapshot) {
                                 return Text(
-                                  snapshot.connectionState == ConnectionState.done ? snapshot.data!.firstName : '...',
+                                  snapshot.connectionState == ConnectionState.done ? "${snapshot.data!.firstName} (${CampusDualManager.userCreds!.username})" : '... (${CampusDualManager.userCreds!.username})',
                                   style: TextStyle(
                                     color: Theme.of(context).colorScheme.onPrimary,
                                     fontSize: 22,

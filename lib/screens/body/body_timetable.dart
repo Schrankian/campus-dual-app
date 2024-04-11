@@ -8,11 +8,15 @@ class TimeTable extends StatefulWidget {
   State<TimeTable> createState() => _TimeTableState();
 }
 
-class _TimeTableState extends State<TimeTable> {
+class _TimeTableState extends State<TimeTable> with AutomaticKeepAliveClientMixin<TimeTable>{
   DateTime now = DateTime.now().toLocal();
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
         appBar: AppBar(
           title: const Text('Stundenplan'),

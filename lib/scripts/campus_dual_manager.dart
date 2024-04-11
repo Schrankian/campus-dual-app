@@ -481,11 +481,10 @@ class CampusDualManager {
     final evaluations = <MasterEvaluation>[];
 
     for (final element in table.children) {
-      print(element.className);
       if (element.className.contains("child-of-node-0")) {
         final moduleTitleString = element.children[0].querySelector("strong")!.text.trim().split(" ");
-        final module = moduleTitleString[1].replaceAll(r'\(|\)', "");
-        final title = moduleTitleString[0];
+        final module = moduleTitleString[moduleTitleString.length - 1].replaceAll(r'\(|\)', "");
+        final title = moduleTitleString.sublist(0, moduleTitleString.length - 1).join(" ");
 
         final grade = double.tryParse(element.children[1].querySelector("#none")!.text.trim().replaceAll(",", ".")) ?? -1;
         final isPassed = element.children[2].querySelector("img")!.attributes["src"]! == "/images/green.png";
@@ -495,22 +494,26 @@ class CampusDualManager {
         evaluations.add(MasterEvaluation(module: module, title: title, grade: grade, isPassed: isPassed, isPartlyGraded: isPartlyGraded, semester: semester, credits: credits, subEvaluations: <Evaluation>[]));
       } else if (!element.className.contains("head")) {
         final moduleTitleTypeString = element.children[0].text.trim().split(" ");
-        final module = moduleTitleTypeString[3].replaceAll(r'\(|\)', "");
-        final title = moduleTitleTypeString[1];
-        final type = moduleTitleTypeString[2].replaceAll(r'\(|\)', "");
+        final module = moduleTitleTypeString[moduleTitleTypeString.length - 1].replaceAll(r'\(|\)', "");
+        final title = moduleTitleTypeString.sublist(0, moduleTitleTypeString.length - 2).join(" ");
+        final type = moduleTitleTypeString[moduleTitleTypeString.length - 2].replaceAll(r'\(|\)', "");
 
         final grade = double.tryParse(element.children[1].querySelector(".mscore")!.text.trim().replaceAll(",",".")) ?? -1;
         final isPassed = element.children[2].querySelector("img")!.attributes["src"]! == "/images/green.png";
-        final dateGraded = DateTime.parse(element.children[4]);
-        final dateAnnounced = DateTime.parse(element.children[5]);
+
+        final splitDateGraded = element.children[4].text.split(".");
+        final dateGraded = DateTime.parse(splitDateGraded[2] + splitDateGraded[1] + splitDateGraded[0]);
+
+        final splitDateAnnounced = element.children[5].text.split(".");
+        final dateAnnounced = DateTime.parse(splitDateAnnounced[2] + splitDateAnnounced[1] + splitDateAnnounced[0]);
+
         final isPartlyGraded = false; // TODO: implement
         final semester = element.children.last.text.trim();
 
         evaluations.last.subEvaluations.add(Evaluation(module: module, title: title, type: type, grade: grade, isPassed: isPassed, dateGraded: dateGraded, dateAnnounced: dateAnnounced, isPartlyGraded: isPartlyGraded, semester: semester));
       }
     }
-    // TODO test
-    print(evaluations);
+
     return evaluations;
   }
 }

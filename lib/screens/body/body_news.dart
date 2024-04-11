@@ -8,9 +8,14 @@ class News extends StatefulWidget {
   State<News> createState() => _NewsState();
 }
 
-class _NewsState extends State<News> {
+class _NewsState extends State<News> with AutomaticKeepAliveClientMixin<News>{
+
+  @override
+  bool get wantKeepAlive => true;
+
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('News'),
