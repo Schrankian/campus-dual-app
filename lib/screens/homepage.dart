@@ -1,4 +1,5 @@
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
+import 'package:campus_dual_android/screens/body/body_evaluations.dart';
 import 'package:campus_dual_android/screens/body/body_news.dart';
 import 'package:campus_dual_android/scripts/campus_dual_manager.dart';
 import '../widgets/settings_popup.dart';
@@ -25,11 +26,13 @@ class _HomePageState extends State<HomePage> {
     News(),
     Overview(),
     TimeTable(),
+    EvaluationsPage(),
   ];
   List<IconData> icons = [
     Ionicons.notifications_outline,
     Ionicons.home_outline,
     Ionicons.calendar_outline,
+    Ionicons.book_outline,
     Ionicons.ellipsis_horizontal,
   ];
   //This contains all actions which always popup if settings has been pressed
@@ -59,6 +62,7 @@ class _HomePageState extends State<HomePage> {
     //person debts
     [],
     //qr code
+    [],
     [],
   ];
 
@@ -142,7 +146,7 @@ class _HomePageState extends State<HomePage> {
         notchSmoothness: NotchSmoothness.sharpEdge,
         activeIndex: _currentIndex,
         onTap: (index) => setState(() {
-          if (index != 3) {
+          if (index != 4) {
             _currentIndex = index;
             _pageController.animateToPage(index, duration: Duration(milliseconds: 250), curve: Curves.easeOut);
           }
