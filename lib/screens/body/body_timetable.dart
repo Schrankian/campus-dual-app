@@ -1,5 +1,8 @@
 import 'package:campus_dual_android/scripts/campus_dual_manager.dart';
+import 'package:campus_dual_android/widgets/day_calendar.dart';
+import 'package:campus_dual_android/widgets/day_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:ionicons/ionicons.dart';
 
 class TimeTable extends StatefulWidget {
   const TimeTable({super.key});
@@ -8,8 +11,28 @@ class TimeTable extends StatefulWidget {
   State<TimeTable> createState() => _TimeTableState();
 }
 
-class _TimeTableState extends State<TimeTable> with AutomaticKeepAliveClientMixin<TimeTable>{
-  DateTime now = DateTime.now().toLocal();
+class _TimeTableState extends State<TimeTable> with AutomaticKeepAliveClientMixin<TimeTable> {
+  static const bufferSize = 10;
+
+  Map<DateTime, List<Lesson>>? dataCache;
+
+  late DateTime currentDate;
+
+  @override
+  void initState() {
+    super.initState();
+    DateTime now = DateTime.now();
+    currentDate = DateTime(now.year, now.month, now.day);
+  }
+
+  Future<Map<DateTime, List<Lesson>>> fetchData() async {
+    final cd = CampusDualManager();
+
+    final lessons = await cd.fetchTimeTable(currentDate.subtract(Duration(days: bufferSize)), currentDate.add(Duration(days: bufferSize)));
+
+    dataCache = lessons;
+    return lessons;
+  }
 
   @override
   bool get wantKeepAlive => true;
@@ -18,40 +41,59 @@ class _TimeTableState extends State<TimeTable> with AutomaticKeepAliveClientMixi
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Stundenplan'),
-        ),
-        body: FutureBuilder(
-            future: CampusDualManager().fetchTimeTable(DateTime(now.year, now.month, now.day, 0, 0, 0), DateTime(now.year, now.month, now.day, 23, 0, 0)),
-            builder: ((context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-              if (snapshot.hasError) {
-                return const Center(
-                  child: Text('An error occurred'),
-                );
-              }
-              return Column(
-                children: [
-                  Text("Stundenplan:"),
-                  SizedBox(
-                    height: 600,
-                    child: ListView.builder(
-                      physics: const ScrollPhysics(),
-                      itemCount: snapshot.data!.length,
-                      itemBuilder: (context, index) {
-                        return ListTile(
-                          title: Text(snapshot.data![index].title),
-                          subtitle: Text(snapshot.data![index].room),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              );
-            })));
+      appBar: AppBar(
+        title: const Text('Stundenplan'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 10),
+            child: IconButton(
+              iconSize: 35,
+              icon: const Icon(Ionicons.refresh_outline),
+              onPressed: () {
+                setState(() {
+                  DateTime now = DateTime.now();
+                  currentDate = DateTime(now.year, now.month, now.day);
+                });
+              },
+            ),
+          ),
+        ],
+      ),
+      body: FutureBuilder(
+        initialData: dataCache,
+        future: fetchData(),
+        builder: ((context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+          if (snapshot.hasError) {
+            return const Center(
+              child: Text('An error occurred'),
+            );
+          }
+          return Column(
+            children: [
+              DayPicker(
+                currentDate: currentDate,
+                onDateChanged: (date) {
+                  setState(() {
+                    currentDate = date;
+                  });
+                },
+              ),
+              DayCalendar(
+                items: snapshot.data![currentDate],
+                startHour: 7,
+                endHour: 19,
+                stepSize: 65,
+                useFuzzyColor: true,
+              ),
+            ],
+          );
+        }),
+      ),
+    );
   }
 }

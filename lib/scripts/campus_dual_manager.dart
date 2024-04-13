@@ -137,6 +137,7 @@ class Lesson {
   final String instructor;
   final String sInstructor;
   final String remarks;
+  final String type = "Vorlesung";
 
   const Lesson({
     required this.title,
@@ -196,6 +197,7 @@ class UpcomingExam {
   final String instructor;
   final String moduleShort;
   final String moduleTitle;
+  final String type;
   final String room;
 
   const UpcomingExam({
@@ -206,6 +208,7 @@ class UpcomingExam {
     required this.instructor,
     required this.moduleShort,
     required this.moduleTitle,
+    required this.type,
     required this.room,
   });
 
@@ -228,7 +231,8 @@ class UpcomingExam {
           comment: comment,
           instructor: instructor,
           moduleShort: moduleShort,
-          moduleTitle: moduleTitle,
+          moduleTitle: moduleTitle.endsWith(")") ? moduleTitle.split(" ").sublist(0, moduleTitle.split(" ").length - 1).join(" ") : moduleTitle,
+          type: moduleTitle.endsWith(")") ? moduleTitle.split(" ").last : "(?)",
           room: room,
         ),
       _ => throw const FormatException('Unexpected JSON type for UpcomingExam'),
@@ -333,7 +337,7 @@ class CampusDualManager {
 
     // Parse the response and get the XSRF token
     final doc = parse(initResponse.body);
-    // Get the XSRF token. Hint: The session cookie hides in an hidden input field
+    // Get the XSRF token. Hint: The token hides in an hidden input field
     final xsrfToken = doc.querySelector("input[name='sap-login-XSRF']")?.attributes["value"];
 
     // Request to login and get the session cookie
@@ -382,7 +386,7 @@ class CampusDualManager {
     return int.parse(response.body);
   }
 
-  Future<List<Lesson>> fetchTimeTable(DateTime start, DateTime end) async {
+  Future<Map<DateTime, List<Lesson>>> fetchTimeTable(DateTime start, DateTime end) async {
     final response = await _fetch(addQueryParams(userCreds!.addAuthParams("https://selfservice.campus-dual.de/room/json"), {
       "start": (start.millisecondsSinceEpoch / 1000).toString(),
       "end": (end.millisecondsSinceEpoch / 1000).toString(),
@@ -390,15 +394,27 @@ class CampusDualManager {
 
     final List<dynamic> json = jsonDecode(response.body) as List<dynamic>;
 
-    // Filter out every item in json, which is not in the timeframe start to end
-    json.removeWhere((element) {
-      final DateTime elStart = DateTime.fromMillisecondsSinceEpoch((element["start"] as int) * 1000);
-      final DateTime elEnd = DateTime.fromMillisecondsSinceEpoch((element["end"] as int) * 1000);
+    // // Filter out every item in json, which is not in the timeframe start to end
+    // json.removeWhere((element) {
+    //   final DateTime elStart = DateTime.fromMillisecondsSinceEpoch((element["start"] as int) * 1000);
+    //   final DateTime elEnd = DateTime.fromMillisecondsSinceEpoch((element["end"] as int) * 1000);
 
-      return elStart.isBefore(start) || elEnd.isAfter(end);
-    });
+    //   return elStart.isBefore(start) || elEnd.isAfter(end);
+    // });
 
-    return json.map((e) => Lesson.fromJson(e as Map<String, dynamic>)).toList();
+    final Map<DateTime, List<Lesson>> lessons = {};
+    for (final element in json) {
+      final lesson = Lesson.fromJson(element as Map<String, dynamic>);
+      final date = DateTime(lesson.start.year, lesson.start.month, lesson.start.day);
+
+      if (lessons.containsKey(date)) {
+        lessons[date]!.add(lesson);
+      } else {
+        lessons[date] = [lesson];
+      }
+    }
+
+    return lessons;
   }
 
   Future<Notifications> fetchNotifications() async {
@@ -498,7 +514,7 @@ class CampusDualManager {
         final title = moduleTitleTypeString.sublist(0, moduleTitleTypeString.length - 2).join(" ");
         final type = moduleTitleTypeString[moduleTitleTypeString.length - 2].replaceAll(r'\(|\)', "");
 
-        final grade = double.tryParse(element.children[1].querySelector(".mscore")!.text.trim().replaceAll(",",".")) ?? -1;
+        final grade = double.tryParse(element.children[1].querySelector(".mscore")!.text.trim().replaceAll(",", ".")) ?? -1;
         final isPassed = element.children[2].querySelector("img")!.attributes["src"]! == "/images/green.png";
 
         final splitDateGraded = element.children[4].text.split(".");

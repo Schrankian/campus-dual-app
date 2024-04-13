@@ -97,8 +97,8 @@ class _HomePageState extends State<HomePage> {
       ),
       bottomNavigationBar: AnimatedBottomNavigationBar.builder(
         backgroundColor: Theme.of(context).colorScheme.background,
-        height: 60,
-        elevation: 0,
+        height: 75,
+        elevation: 10,
         splashRadius: 0,
         itemCount: body.length + 1,
         hideAnimationCurve: Curves.elasticOut,
@@ -107,23 +107,26 @@ class _HomePageState extends State<HomePage> {
         rightCornerRadius: 32,
         tabBuilder: (index, isActive) {
           if (index != body.length) {
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Icon(
-                  icons[index],
-                  size: 30,
-                  color: isActive ? Theme.of(context).colorScheme.primary : null,
-                ),
-                Text(
-                  isActive ? '•' : ' ',
-                  style: TextStyle(
-                    fontSize: 20,
+            return Padding(
+              padding: const EdgeInsets.only(top: 15),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Icon(
+                    icons[index],
+                    size: 30,
                     color: isActive ? Theme.of(context).colorScheme.primary : null,
-                    fontFamily: 'roboto',
                   ),
-                )
-              ],
+                  Text(
+                    isActive ? '•' : ' ',
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: isActive ? Theme.of(context).colorScheme.primary : null,
+                      fontFamily: 'roboto',
+                    ),
+                  )
+                ],
+              ),
             );
           } else {
             return SettingsPopup(
@@ -132,7 +135,7 @@ class _HomePageState extends State<HomePage> {
                 (settingIcons.map((e) => e['function']).toList() + extraSettingIcons[_currentIndex].map((e) => e['function']).toList())[index](context);
               },
               child: Padding(
-                padding: EdgeInsets.only(bottom: 23),
+                padding: EdgeInsets.only(bottom: 15),
                 child: Icon(
                   icons[index],
                   size: 27,
