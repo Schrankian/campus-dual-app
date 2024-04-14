@@ -1,9 +1,28 @@
+import "dart:convert";
+
 import "package:campus_dual_android/scripts/campus_dual_manager.dart";
 import "package:flutter/material.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
+enum Type { int, double, string, bool, stringList }
+
 class StorageManager {
-  dynamic _getData(SharedPreferences source, String key) {
+  dynamic _getData(SharedPreferences source, String key, {Type? type}) {
+    if (type != null) {
+      switch (type) {
+        case Type.int:
+          return source.getInt(key);
+        case Type.double:
+          return source.getDouble(key);
+        case Type.string:
+          return source.getString(key);
+        case Type.bool:
+          return source.getBool(key);
+        case Type.stringList:
+          return source.getStringList(key);
+      }
+    }
+
     if (source.containsKey(key)) {
       return source.get(key);
     }
@@ -47,29 +66,6 @@ class StorageManager {
     _saveData(disk, "hash", data.hash);
   }
 
-  Future<GeneralUserData?> loadGeneralUserData() async {
-    final disk = await SharedPreferences.getInstance();
-    final String firstName = _getData(disk, "firstName") ?? "";
-    final String lastName = _getData(disk, "lastName") ?? "";
-    final String group = _getData(disk, "group") ?? "";
-    final String course = _getData(disk, "course") ?? "";
-
-    if (firstName == "" || lastName == "" || group == "" || course == "") {
-      return null;
-    }
-
-    GeneralUserData data = GeneralUserData(firstName: firstName, lastName: lastName, group: group, course: course);
-    return data;
-  }
-
-  void saveGeneralUserData(GeneralUserData data) async {
-    final disk = await SharedPreferences.getInstance();
-    _saveData(disk, "firstName", data.firstName);
-    _saveData(disk, "lastName", data.lastName);
-    _saveData(disk, "group", data.group);
-    _saveData(disk, "course", data.course);
-  }
-
   Future<ThemeMode> loadTheme() async {
     final disk = await SharedPreferences.getInstance();
     final isDarkMode = _getData(disk, "isDarkMode");
@@ -82,5 +78,43 @@ class StorageManager {
   void saveTheme(ThemeMode theme) async {
     final disk = await SharedPreferences.getInstance();
     _saveData(disk, "isDarkMode", theme == ThemeMode.dark);
+  }
+
+  Future<Map<String, dynamic>?> loadObject(String key) async {
+    final disk = await SharedPreferences.getInstance();
+    final jsonData = _getData(disk, key, type: Type.string);
+    if (jsonData == null) {
+      return null;
+    }
+    return jsonDecode(jsonData);
+  }
+
+  void saveObject(String key, Object data) async {
+    final disk = await SharedPreferences.getInstance();
+    _saveData(disk, key, jsonEncode(data));
+  }
+
+  Future<List<Map<String, dynamic>>?> loadObjectList(String key) async {
+    final disk = await SharedPreferences.getInstance();
+    final jsonData = _getData(disk, key, type: Type.stringList) as List<String>?;
+    if (jsonData == null) {
+      return null;
+    }
+    return jsonData.map((e) => jsonDecode(e) as Map<String, dynamic>).toList();
+  }
+
+  void saveObjectList(String key, List<Object> data) async {
+    final disk = await SharedPreferences.getInstance();
+    _saveData(disk, key, data.map((e) => jsonEncode(e)).toList());
+  }
+
+  Future<int?> loadInt(String key) async {
+    final disk = await SharedPreferences.getInstance();
+    return _getData(disk, key, type: Type.int);
+  }
+
+  void saveInt(String key, int value) async {
+    final disk = await SharedPreferences.getInstance();
+    _saveData(disk, key, value);
   }
 }

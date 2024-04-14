@@ -1,4 +1,5 @@
 import 'package:campus_dual_android/scripts/campus_dual_manager.dart';
+import 'package:campus_dual_android/scripts/storage_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 
@@ -12,12 +13,18 @@ class EvaluationsPage extends StatefulWidget {
 class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAliveClientMixin<EvaluationsPage> {
   List<MasterEvaluation>? dataCache;
 
-  Future<List<MasterEvaluation>> loadData() async {
+  Stream<List<MasterEvaluation>> loadData() async* {
+    final storage = StorageManager();
+    final storedData = await storage.loadObjectList("evaluations");
+    if (storedData != null) {
+      yield List<MasterEvaluation>.from(storedData.map((e) => MasterEvaluation.fromJson(e)));
+    }
+
     final cd = CampusDualManager();
     final evaluations = await cd.scrapeEvaluations();
-
+    storage.saveObjectList("evaluations", evaluations);
     dataCache = evaluations;
-    return evaluations;
+    yield evaluations;
   }
 
   @override
@@ -30,9 +37,9 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
       appBar: AppBar(
         title: const Text('Noten'),
       ),
-      body: FutureBuilder(
+      body: StreamBuilder(
         initialData: dataCache,
-        future: loadData(),
+        stream: loadData(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(

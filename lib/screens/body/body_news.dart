@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:campus_dual_android/extensions/date.dart';
 import 'package:campus_dual_android/scripts/campus_dual_manager.dart';
+import 'package:campus_dual_android/scripts/storage_manager.dart';
 import 'package:flutter/material.dart';
 
 class News extends StatefulWidget {
@@ -12,12 +15,18 @@ class News extends StatefulWidget {
 class _NewsState extends State<News> with AutomaticKeepAliveClientMixin<News> {
   Notifications? dataCache;
 
-  Future<Notifications> loadData() async {
+  Stream<Notifications> loadData() async* {
+    final storage = StorageManager();
+    final storedData = await storage.loadObject("notifications");
+    if (storedData != null) {
+      yield Notifications.fromJson(storedData);
+    }
+
     final cd = CampusDualManager();
     final notifications = await cd.fetchNotifications();
-
+    storage.saveObject("notifications", notifications);
     dataCache = notifications;
-    return notifications;
+    yield notifications;
   }
 
   @override
@@ -30,9 +39,9 @@ class _NewsState extends State<News> with AutomaticKeepAliveClientMixin<News> {
       appBar: AppBar(
         title: const Text('News'),
       ),
-      body: FutureBuilder(
+      body: StreamBuilder(
           initialData: dataCache,
-          future: loadData(),
+          stream: loadData(),
           builder: (context, snapshot) {
             if (!snapshot.hasData) {
               return const Center(

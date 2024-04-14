@@ -40,6 +40,24 @@ class GeneralUserData {
     required this.group,
     required this.course,
   });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'firstName': firstName,
+      'lastName': lastName,
+      'group': group,
+      'course': course,
+    };
+  }
+
+  factory GeneralUserData.fromJson(Map<String, dynamic> json) {
+    return GeneralUserData(
+      firstName: json['firstName'] as String,
+      lastName: json['lastName'] as String,
+      group: json['group'] as String,
+      course: json['course'] as String,
+    );
+  }
 }
 
 class Evaluation {
@@ -64,6 +82,34 @@ class Evaluation {
     required this.isPartlyGraded,
     required this.semester,
   });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'module': module,
+      'title': title,
+      'type': type,
+      'grade': grade,
+      'isPassed': isPassed,
+      'dateGraded': dateGraded.toIso8601String(),
+      'dateAnnounced': dateAnnounced.toIso8601String(),
+      'isPartlyGraded': isPartlyGraded,
+      'semester': semester,
+    };
+  }
+
+  factory Evaluation.fromJson(Map<String, dynamic> json) {
+    return Evaluation(
+      module: json['module'] as String,
+      title: json['title'] as String,
+      type: json['type'] as String,
+      grade: json['grade'] as double,
+      isPassed: json['isPassed'] as bool,
+      dateGraded: DateTime.parse(json['dateGraded'] as String),
+      dateAnnounced: DateTime.parse(json['dateAnnounced'] as String),
+      isPartlyGraded: json['isPartlyGraded'] as bool,
+      semester: json['semester'] as String,
+    );
+  }
 }
 
 class MasterEvaluation {
@@ -86,6 +132,32 @@ class MasterEvaluation {
     required this.credits,
     required this.subEvaluations,
   });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'module': module,
+      'title': title,
+      'grade': grade,
+      'isPassed': isPassed,
+      'isPartlyGraded': isPartlyGraded,
+      'semester': semester,
+      'credits': credits,
+      'subEvaluations': subEvaluations.map((e) => e.toJson()).toList(),
+    };
+  }
+
+  factory MasterEvaluation.fromJson(Map<String, dynamic> json) {
+    return MasterEvaluation(
+      module: json['module'] as String,
+      title: json['title'] as String,
+      grade: json['grade'] as double,
+      isPassed: json['isPassed'] as bool,
+      isPartlyGraded: json['isPartlyGraded'] as bool,
+      semester: json['semester'] as String,
+      credits: json['credits'] as int,
+      subEvaluations: (json['subEvaluations'] as List<dynamic>).map((e) => Evaluation.fromJson(e as Map<String, dynamic>)).toList(),
+    );
+  }
 }
 
 class ExamStats {
@@ -107,7 +179,7 @@ class ExamStats {
     required this.mBooked,
   });
 
-  factory ExamStats.fromJson(Map<String, dynamic> json) {
+  factory ExamStats.fromData(Map<String, dynamic> json) {
     return switch (json) {
       {
         'EXAMS': int exams,
@@ -121,6 +193,30 @@ class ExamStats {
         ExamStats(exams: exams, success: success, failure: failure, wpCount: wpCount, modules: modules, booked: booked, mBooked: mBooked),
       _ => throw const FormatException('Unexpected JSON type for ExamStats'),
     };
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'exams': exams,
+      'success': success,
+      'failure': failure,
+      'wpCount': wpCount,
+      'modules': modules,
+      'booked': booked,
+      'mBooked': mBooked,
+    };
+  }
+
+  factory ExamStats.fromJson(Map<String, dynamic> json) {
+    return ExamStats(
+      exams: json['exams'] as int,
+      success: json['success'] as int,
+      failure: json['failure'] as int,
+      wpCount: json['wpCount'] as int,
+      modules: json['modules'] as int,
+      booked: json['booked'] as int,
+      mBooked: json['mBooked'] as int,
+    );
   }
 }
 
@@ -154,7 +250,7 @@ class Lesson {
     required this.remarks,
   });
 
-  factory Lesson.fromJson(Map<String, dynamic> json) {
+  factory Lesson.fromData(Map<String, dynamic> json) {
     return switch (json) {
       {
         'title': String title,
@@ -187,6 +283,40 @@ class Lesson {
       _ => throw const FormatException('Unexpected JSON type for Lesson'),
     };
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'start': start.toIso8601String(),
+      'end': end.toIso8601String(),
+      'allDay': allDay,
+      'description': description,
+      'color': color.toHex(),
+      'editable': editable,
+      'room': room,
+      'sRoom': sRoom,
+      'instructor': instructor,
+      'sInstructor': sInstructor,
+      'remarks': remarks,
+    };
+  }
+
+  factory Lesson.fromJson(Map<String, dynamic> json) {
+    return Lesson(
+      title: json['title'] as String,
+      start: DateTime.parse(json['start'] as String),
+      end: DateTime.parse(json['end'] as String),
+      allDay: json['allDay'] as bool,
+      description: json['description'] as String,
+      color: HexColor.fromHex(json['color'] as String),
+      editable: json['editable'] as bool,
+      room: json['room'] as String,
+      sRoom: json['sRoom'] as String,
+      instructor: json['instructor'] as String,
+      sInstructor: json['sInstructor'] as String,
+      remarks: json['remarks'] as String,
+    );
+  }
 }
 
 class UpcomingExam {
@@ -212,7 +342,7 @@ class UpcomingExam {
     required this.room,
   });
 
-  factory UpcomingExam.fromJson(Map<String, dynamic> json) {
+  factory UpcomingExam.fromData(Map<String, dynamic> json) {
     return switch (json) {
       {
         'BEGUZ': String begin,
@@ -238,6 +368,34 @@ class UpcomingExam {
       _ => throw const FormatException('Unexpected JSON type for UpcomingExam'),
     };
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'begin': begin.toIso8601String(),
+      'end': end.toIso8601String(),
+      'date': date.toIso8601String(),
+      'comment': comment,
+      'instructor': instructor,
+      'moduleShort': moduleShort,
+      'moduleTitle': moduleTitle,
+      'type': type,
+      'room': room,
+    };
+  }
+
+  factory UpcomingExam.fromJson(Map<String, dynamic> json) {
+    return UpcomingExam(
+      begin: DateTime.parse(json['begin'] as String),
+      end: DateTime.parse(json['end'] as String),
+      date: DateTime.parse(json['date'] as String),
+      comment: json['comment'] as String,
+      instructor: json['instructor'] as String,
+      moduleShort: json['moduleShort'] as String,
+      moduleTitle: json['moduleTitle'] as String,
+      type: json['type'] as String,
+      room: json['room'] as String,
+    );
+  }
 }
 
 class LatestExam {}
@@ -257,7 +415,7 @@ class Notifications {
     required this.latest,
   });
 
-  factory Notifications.fromJson(Map<String, dynamic> json) {
+  factory Notifications.fromData(Map<String, dynamic> json) {
     return switch (json) {
       {
         'ELECTIVES': int electives,
@@ -270,11 +428,31 @@ class Notifications {
           electives: electives,
           exams: exams,
           semester: semester,
-          upcoming: upcoming.map((e) => UpcomingExam.fromJson(e as Map<String, dynamic>)).toList(),
+          upcoming: upcoming.map((e) => UpcomingExam.fromData(e as Map<String, dynamic>)).toList(),
           latest: List.empty(),
         ),
       _ => throw const FormatException('Unexpected JSON type for Notifications'),
     };
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'electives': electives,
+      'exams': exams,
+      'semester': semester,
+      'upcoming': upcoming.map((e) => e.toJson()).toList(),
+      'latest': List.empty(),
+    };
+  }
+
+  factory Notifications.fromJson(Map<String, dynamic> json) {
+    return Notifications(
+      electives: json['electives'] as int,
+      exams: json['exams'] as int,
+      semester: json['semester'] as int,
+      upcoming: (json['upcoming'] as List<dynamic>).map((e) => UpcomingExam.fromJson(e as Map<String, dynamic>)).toList(),
+      latest: List.empty(),
+    );
   }
 }
 
@@ -371,7 +549,7 @@ class CampusDualManager {
   Future<ExamStats> fetchExamStats() async {
     final response = await _fetch(userCreds!.addAuthParams("https://selfservice.campus-dual.de/dash/getexamstats"));
 
-    return ExamStats.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return ExamStats.fromData(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   Future<int> fetchCurrentSemester() async {
@@ -404,7 +582,7 @@ class CampusDualManager {
 
     final Map<DateTime, List<Lesson>> lessons = {};
     for (final element in json) {
-      final lesson = Lesson.fromJson(element as Map<String, dynamic>);
+      final lesson = Lesson.fromData(element as Map<String, dynamic>);
       final date = DateTime(lesson.start.year, lesson.start.month, lesson.start.day);
 
       if (lessons.containsKey(date)) {
@@ -420,7 +598,7 @@ class CampusDualManager {
   Future<Notifications> fetchNotifications() async {
     final response = await _fetch(userCreds!.addAuthParams("https://selfservice.campus-dual.de/dash/getreminders"));
 
-    return Notifications.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return Notifications.fromData(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   Future<GeneralUserData> scrapeGeneralUserData() async {

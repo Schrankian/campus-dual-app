@@ -27,13 +27,32 @@ class BodyOverviewData {
 class _OverviewState extends State<Overview> with AutomaticKeepAliveClientMixin<Overview> {
   BodyOverviewData? dataCache;
 
-  Future<BodyOverviewData> loadData() async {
+  Stream<BodyOverviewData> loadData() async* {
+    final storage = StorageManager();
+    final storedGeneralUserData = await storage.loadObject("generalUserData");
+    final storedCurrentSemester = await storage.loadInt("currentSemester");
+    final storedCreditPoints = await storage.loadInt("creditPoints");
+    final storedExamStats = await storage.loadObject("examStats");
+
+    if (storedGeneralUserData != null && storedCurrentSemester != null && storedCreditPoints != null && storedExamStats != null) {
+      yield BodyOverviewData(
+        generalUserData: GeneralUserData.fromJson(storedGeneralUserData),
+        currentSemester: storedCurrentSemester,
+        creditPoints: storedCreditPoints,
+        examStats: ExamStats.fromJson(storedExamStats),
+      );
+    }
+
     final cd = CampusDualManager();
 
     final generalUserData = await cd.scrapeGeneralUserData();
+    storage.saveObject("generalUserData", generalUserData);
     final currentSemester = await cd.fetchCurrentSemester();
+    storage.saveInt("currentSemester", currentSemester);
     final creditPoints = await cd.fetchCreditPoints();
+    storage.saveInt("creditPoints", creditPoints);
     final examStats = await cd.fetchExamStats();
+    storage.saveObject("examStats", examStats);
 
     final data = BodyOverviewData(
       generalUserData: generalUserData,
@@ -43,7 +62,7 @@ class _OverviewState extends State<Overview> with AutomaticKeepAliveClientMixin<
     );
 
     dataCache = data;
-    return data;
+    yield data;
   }
 
   @override
@@ -53,9 +72,9 @@ class _OverviewState extends State<Overview> with AutomaticKeepAliveClientMixin<
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
-      body: FutureBuilder(
+      body: StreamBuilder(
           initialData: dataCache,
-          future: loadData(),
+          stream: loadData(),
           builder: (context, snapshot) {
             final dataHasArrived = snapshot.hasData;
 
