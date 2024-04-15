@@ -2,6 +2,7 @@ import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.da
 import 'package:campus_dual_android/screens/body/body_evaluations.dart';
 import 'package:campus_dual_android/screens/body/body_news.dart';
 import 'package:campus_dual_android/scripts/campus_dual_manager.dart';
+import 'package:preload_page_view/preload_page_view.dart';
 import '../widgets/settings_popup.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -66,12 +67,12 @@ class _HomePageState extends State<HomePage> {
     [],
   ];
 
-  late PageController _pageController;
+  late PreloadPageController _pageController;
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(initialPage: _currentIndex);
+    _pageController = PreloadPageController(initialPage: _currentIndex);
   }
 
   @override
@@ -84,7 +85,8 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     settingIcons[0]['icon'] = Theme.of(context).brightness == Brightness.dark ? Ionicons.sunny_outline : Ionicons.moon_outline;
     return Scaffold(
-      body: PageView(
+      body: PreloadPageView(
+        preloadPagesCount: 4,
         physics: const NeverScrollableScrollPhysics(),
         pageSnapping: true,
         controller: _pageController,

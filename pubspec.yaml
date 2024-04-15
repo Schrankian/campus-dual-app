@@ -43,6 +43,7 @@ dependencies:
   http_cookie_store: ^0.0.2
   html: ^0.15.4
   crypto: ^3.0.3
+  preload_page_view: ^0.2.0
 
 dev_dependencies:
   flutter_test:

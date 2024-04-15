@@ -2,6 +2,7 @@ import 'package:campus_dual_android/scripts/campus_dual_manager.dart';
 import 'package:campus_dual_android/scripts/storage_manager.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:ionicons/ionicons.dart';
 
 class Overview extends StatefulWidget {
   const Overview({super.key});
@@ -97,6 +98,8 @@ class _OverviewState extends State<Overview> with AutomaticKeepAliveClientMixin<
                       padding: const EdgeInsets.only(top: 10, bottom: 20),
                       child: Row(
                         mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Padding(
                             padding: const EdgeInsets.only(left: 30),
@@ -123,6 +126,23 @@ class _OverviewState extends State<Overview> with AutomaticKeepAliveClientMixin<
                               ],
                             ),
                           ),
+                          snapshot.connectionState != ConnectionState.done
+                              ? Padding(
+                                  padding: const EdgeInsets.only(right: 30),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Ionicons.sync_outline,
+                                        color: Theme.of(context).colorScheme.onPrimary,
+                                      ),
+                                      Text(
+                                        " Synchronisiere",
+                                        style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+                                      )
+                                    ],
+                                  ),
+                                )
+                              : SizedBox.shrink()
                         ],
                       ),
                     ),

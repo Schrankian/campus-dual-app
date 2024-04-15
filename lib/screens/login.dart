@@ -166,7 +166,7 @@ class _LoginState extends State<Login> {
                                 mainBus.emit(event: "Login", args: userCreds);
                                 return;
                               }
-                              //TODO show error message
+
                               setState(() {
                                 lastErrors.add({
                                   "username": _usernameController.text,
