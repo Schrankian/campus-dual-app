@@ -15,6 +15,7 @@ class Themes {
     );
 
     _cleanLight = ThemeData(
+      useMaterial3: true,
       brightness: Brightness.light,
       colorScheme: _colorsLight,
       scaffoldBackgroundColor: _colorsLight.background,
@@ -41,6 +42,7 @@ class Themes {
       ),
     );
     _cleanDark = ThemeData(
+      useMaterial3: true,
       brightness: Brightness.dark,
       colorScheme: _colorsDark,
       scaffoldBackgroundColor: _colorsDark.background,

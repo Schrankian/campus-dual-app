@@ -46,6 +46,11 @@ class StorageManager {
     }
   }
 
+  void clearAll() async {
+    final disk = await SharedPreferences.getInstance();
+    disk.clear();
+  }
+
   Future<UserCredentials?> loadUserAuthData() async {
     final disk = await SharedPreferences.getInstance();
     final String username = _getData(disk, "username") ?? "";

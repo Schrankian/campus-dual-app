@@ -502,7 +502,7 @@ class CampusDualManager {
   /*
   * This function initializes gets the session cookie and therefore logs in the user
   */
-  Future<CookieClient> _initAuthSession() async {
+  Future<CookieClient> _initAuthSession({String? username, String? password}) async {
     final Uri loginUri = Uri.parse("https://erp.campus-dual.de/sap/bc/webdynpro/sap/zba_initss?sap-client=100&sap-language=de&uri=https%3a%2f%2fselfservice.campus-dual.de%2findex%2flogin");
 
     CookieClient session = CookieClient();
@@ -533,8 +533,8 @@ class CampusDualManager {
         "sap-accessibility": "",
         "sap-login-XSRF": xsrfToken,
         "sap-system-login-cookie_disabled": "",
-        "sap-user": userCreds!.username,
-        "sap-password": userCreds!.password,
+        "sap-user": username ?? userCreds!.username,
+        "sap-password": password ?? userCreds!.password,
         "SAPEVENTQUEUE": "Form_Submit~E002Id~E004SL__FORM~E003~E002ClientAction~E004submit~E005ActionUrl~E004~E005ResponseData~E004full~E005PrepareScript~E004~E003~E002~E003"
       },
     );
@@ -649,8 +649,12 @@ class CampusDualManager {
     );
   }
 
-  Future<String> scrapeHash() async {
-    final session = await _initAuthSession();
+  Future<String> scrapeHash({String? username, String? password}) async {
+    if ((username == null || password == null) && userCreds == null) {
+      throw Exception("No user credentials provided");
+    }
+
+    final session = await _initAuthSession(username: username, password: password);
     final doc = await _scrape(session, "https://selfservice.campus-dual.de/index/login");
 
     final scriptTag = doc.querySelector("#main")?.querySelector("script")!.innerHtml;

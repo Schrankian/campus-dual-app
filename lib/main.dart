@@ -16,8 +16,8 @@ void main() async {
   ByteData data = await PlatformAssetBundle().load('assets/ca/selfservice.campus-dual.de.crt');
   SecurityContext.defaultContext.setTrustedCertificatesBytes(data.buffer.asUint8List());
 
-  // CampusDualManager.userCreds = await StorageManager().loadUserAuthData();
-  CampusDualManager.userCreds = UserCredentials("3004717", "BreakLoab-38", "54caf288eb3e1e5d12c046404a43fb9c");
+  CampusDualManager.userCreds = await StorageManager().loadUserAuthData();
+  // CampusDualManager.userCreds = UserCredentials("3004717", "BreakLoab-38", "54caf288eb3e1e5d12c046404a43fb9c");
 
   final ThemeMode initTheme = await StorageManager().loadTheme();
   runApp(
@@ -48,10 +48,21 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _onLogout(dynamic args) {
+    StorageManager().clearAll();
     setState(() {
       CampusDualManager.userCreds = null;
-      StorageManager().saveUserAuthData(UserCredentials("", "", ""));
     });
+  }
+
+  void _onLogin(dynamic args) {
+    if (args is UserCredentials) {
+      setState(() {
+        CampusDualManager.userCreds = args;
+        StorageManager().saveUserAuthData(args);
+      });
+    } else {
+      throw Exception("Invalid argument type");
+    }
   }
 
   @override
@@ -60,12 +71,14 @@ class _MyAppState extends State<MyApp> {
     themeMode = widget.initTheme;
     mainBus.onBus(event: "ToggleTheme", onEvent: _onThemeChange);
     mainBus.onBus(event: "Logout", onEvent: _onLogout);
+    mainBus.onBus(event: "Login", onEvent: _onLogin);
   }
 
   @override
   void dispose() {
     mainBus.offBus(event: "ToggleTheme", callBack: _onThemeChange);
     mainBus.offBus(event: "Logout", callBack: _onLogout);
+    mainBus.offBus(event: "Login", callBack: _onLogin);
     super.dispose();
   }
 

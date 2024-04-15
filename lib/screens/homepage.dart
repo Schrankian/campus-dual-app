@@ -50,7 +50,7 @@ class _HomePageState extends State<HomePage> {
         //   context,
         //   MaterialPageRoute(builder: (context) => const Settings()),
         // );
-        CampusDualManager().scrapeEvaluations();
+        mainBus.emit(event: "Logout", args: []);
       }
     }
   ];
