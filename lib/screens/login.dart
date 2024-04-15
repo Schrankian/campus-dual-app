@@ -1,8 +1,6 @@
 import 'package:campus_dual_android/scripts/campus_dual_manager.dart';
 import 'package:campus_dual_android/scripts/event_bus.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:ionicons/ionicons.dart';
 
 class Login extends StatefulWidget {
@@ -18,7 +16,7 @@ class _LoginState extends State<Login> {
 
   Future<UserCredentials?> _testCredentials(String username, String password) async {
     final cd = CampusDualManager();
-    final hash;
+    final String hash;
     try {
       hash = await cd.scrapeHash(username: username, password: password);
     } catch (e) {

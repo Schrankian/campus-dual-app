@@ -56,9 +56,9 @@ class _MyAppState extends State<MyApp> {
 
   void _onLogin(dynamic args) {
     if (args is UserCredentials) {
+      StorageManager().saveUserAuthData(args);
       setState(() {
         CampusDualManager.userCreds = args;
-        StorageManager().saveUserAuthData(args);
       });
     } else {
       throw Exception("Invalid argument type");
