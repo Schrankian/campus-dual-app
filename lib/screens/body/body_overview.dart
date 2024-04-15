@@ -43,7 +43,7 @@ class _OverviewState extends State<Overview> with AutomaticKeepAliveClientMixin<
       );
     }
 
-    final cd = CampusDualManager();
+    final cd = await CampusDualManager.withSharedSession();
 
     final generalUserData = await cd.scrapeGeneralUserData();
     storage.saveObject("generalUserData", generalUserData);

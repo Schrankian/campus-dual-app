@@ -458,6 +458,7 @@ class Notifications {
 
 class CampusDualManager {
   static UserCredentials? userCreds;
+  CookieClient? sharedSession;
 
   static const Map<String, String> stdHeaders = {
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
@@ -478,6 +479,12 @@ class CampusDualManager {
   };
 
   CampusDualManager();
+
+  static Future<CampusDualManager> withSharedSession() async {
+    final manager = CampusDualManager();
+    manager.sharedSession = await manager._initAuthSession();
+    return manager;
+  }
 
   Future<http.Response> _fetch(String uri) async {
     final response = await http.get(Uri.parse(uri));
@@ -602,7 +609,7 @@ class CampusDualManager {
   }
 
   Future<GeneralUserData> scrapeGeneralUserData() async {
-    final session = await _initAuthSession();
+    final session = sharedSession ?? await _initAuthSession();
     final doc = await _scrape(session, "https://selfservice.campus-dual.de/index/login");
 
     final studInfo = doc.querySelector("#studinfo")!.querySelector("td")!;
@@ -654,7 +661,7 @@ class CampusDualManager {
       throw Exception("No user credentials provided");
     }
 
-    final session = await _initAuthSession(username: username, password: password);
+    final session = sharedSession ?? await _initAuthSession(username: username, password: password);
     final doc = await _scrape(session, "https://selfservice.campus-dual.de/index/login");
 
     final scriptTag = doc.querySelector("#main")?.querySelector("script")!.innerHtml;
@@ -671,7 +678,7 @@ class CampusDualManager {
   }
 
   Future<List<MasterEvaluation>> scrapeEvaluations() async {
-    final session = await _initAuthSession();
+    final session = sharedSession ?? await _initAuthSession();
     final doc = await _scrape(session, "https://selfservice.campus-dual.de/acwork/index");
 
     final table = doc.querySelector("#acwork")!.querySelector("tbody")!;

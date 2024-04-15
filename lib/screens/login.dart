@@ -3,6 +3,15 @@ import 'package:campus_dual_android/scripts/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 
+enum ValidationState {
+  valid,
+  empty,
+  loading,
+  wrong,
+  lastWrong,
+  error,
+}
+
 class Login extends StatefulWidget {
   const Login({super.key});
 
@@ -26,20 +35,32 @@ class _LoginState extends State<Login> {
     return UserCredentials(username, password, hash);
   }
 
-  bool buttonEnabled = true;
+  bool isLoading = true;
+  List<Map<String, String>> lastErrors = [];
 
-  bool _validateInput(String username, String password) {
-    if (!buttonEnabled) {
-      return false;
+  ValidationState _validateInput(String username, String password) {
+    for (final entry in lastErrors) {
+      if (entry["username"] == username && entry["password"] == password) {
+        // check, if the current entry is the newest in the list
+        if (lastErrors.indexOf(entry) == lastErrors.length - 1) {
+          return ValidationState.wrong;
+        }
+        return ValidationState.lastWrong;
+      }
+    }
+
+    if (!isLoading) {
+      return ValidationState.loading;
     }
     if (username.isNotEmpty && password.isNotEmpty) {
-      return true;
+      return ValidationState.valid;
     }
-    return false;
+    return ValidationState.empty;
   }
 
   @override
   Widget build(BuildContext context) {
+    ValidationState _state = _validateInput(_usernameController.text, _passwordController.text);
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.primary,
       body: SizedBox.expand(
@@ -77,6 +98,7 @@ class _LoginState extends State<Login> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     TextField(
+                      onChanged: (value) => setState(() {}),
                       keyboardType: TextInputType.numberWithOptions(decimal: false, signed: true),
                       textInputAction: TextInputAction.next,
                       controller: _usernameController,
@@ -87,9 +109,15 @@ class _LoginState extends State<Login> {
                         filled: true,
                         prefixIcon: Icon(Ionicons.person_outline),
                         labelText: "Matrikelnummer",
+                        errorText: _state == ValidationState.wrong
+                            ? "Falsche Anmeldeinformationen"
+                            : _state == ValidationState.lastWrong
+                                ? "Bereits falsch eingegeben"
+                                : null,
                       ),
                     ),
                     TextField(
+                      onChanged: (value) => setState(() {}),
                       obscureText: true,
                       textInputAction: TextInputAction.done,
                       controller: _passwordController,
@@ -100,6 +128,11 @@ class _LoginState extends State<Login> {
                         filled: true,
                         prefixIcon: Icon(Ionicons.key_outline),
                         labelText: "Passwort",
+                        errorText: _state == ValidationState.wrong
+                            ? "Falsche Anmeldeinformationen"
+                            : _state == ValidationState.lastWrong
+                                ? "Bereits falsch eingegeben"
+                                : null,
                       ),
                     ),
                     ElevatedButton(
@@ -110,23 +143,46 @@ class _LoginState extends State<Login> {
                           borderRadius: BorderRadius.circular(20),
                         ),
                       ),
-                      onPressed: () async {
-                        if (!_validateInput(_usernameController.text, _passwordController.text)) return;
-                        print("Button actions started");
-                        buttonEnabled = false;
-                        final userCreds = await _testCredentials(_usernameController.text, _passwordController.text);
-                        buttonEnabled = true;
-                        if (userCreds != null) {
-                          mainBus.emit(event: "Login", args: userCreds);
-                        }
-                        //TODO show error message
-                      },
-                      child: const Padding(
+                      onPressed: _state == ValidationState.valid
+                          ? () async {
+                              setState(() {
+                                isLoading = false;
+                              });
+
+                              final stopwatch = Stopwatch()..start();
+                              final userCreds = await _testCredentials(_usernameController.text, _passwordController.text);
+                              final elapsed = stopwatch.elapsed;
+
+                              // Make sure the loading spinner is shown for at least 2 second
+                              if (elapsed < Duration(seconds: 2)) {
+                                await Future.delayed(Duration(seconds: 2) - elapsed);
+                              }
+
+                              setState(() {
+                                isLoading = true;
+                              });
+
+                              if (userCreds != null) {
+                                mainBus.emit(event: "Login", args: userCreds);
+                                return;
+                              }
+                              //TODO show error message
+                              setState(() {
+                                lastErrors.add({
+                                  "username": _usernameController.text,
+                                  "password": _passwordController.text,
+                                });
+                              });
+                            }
+                          : null,
+                      child: Padding(
                         padding: EdgeInsets.only(left: 40, right: 40, top: 15, bottom: 15),
-                        child: Text(
-                          "Login",
-                          style: TextStyle(fontSize: 20),
-                        ),
+                        child: _state == ValidationState.loading
+                            ? CircularProgressIndicator()
+                            : Text(
+                                "Login",
+                                style: TextStyle(fontSize: 20),
+                              ),
                       ),
                     ),
                   ],
