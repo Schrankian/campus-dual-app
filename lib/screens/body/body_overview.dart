@@ -1,5 +1,6 @@
 import 'package:campus_dual_android/scripts/campus_dual_manager.dart';
 import 'package:campus_dual_android/scripts/storage_manager.dart';
+import 'package:campus_dual_android/widgets/sync_indicator.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
@@ -28,7 +29,7 @@ class BodyOverviewData {
 class _OverviewState extends State<Overview> with AutomaticKeepAliveClientMixin<Overview> {
   BodyOverviewData? dataCache;
 
-  Stream<BodyOverviewData> loadData() async* {
+  Stream<BodyOverviewData?> loadData() async* {
     final storage = StorageManager();
     final storedGeneralUserData = await storage.loadObject("generalUserData");
     final storedCurrentSemester = await storage.loadInt("currentSemester");
@@ -45,7 +46,7 @@ class _OverviewState extends State<Overview> with AutomaticKeepAliveClientMixin<
     }
 
     final cd = await CampusDualManager.withSharedSession();
-
+    // TODO: add better error handling
     final generalUserData = await cd.scrapeGeneralUserData();
     storage.saveObject("generalUserData", generalUserData);
     final currentSemester = await cd.fetchCurrentSemester();
@@ -61,7 +62,6 @@ class _OverviewState extends State<Overview> with AutomaticKeepAliveClientMixin<
       creditPoints: creditPoints,
       examStats: examStats,
     );
-
     dataCache = data;
     yield data;
   }
@@ -77,7 +77,8 @@ class _OverviewState extends State<Overview> with AutomaticKeepAliveClientMixin<
           initialData: dataCache,
           stream: loadData(),
           builder: (context, snapshot) {
-            final dataHasArrived = snapshot.hasData;
+            final data = snapshot.hasError ? dataCache : snapshot.data;
+            final dataHasArrived = data != null;
 
             return Container(
               decoration: BoxDecoration(
@@ -117,7 +118,7 @@ class _OverviewState extends State<Overview> with AutomaticKeepAliveClientMixin<
                                   height: 15,
                                 ),
                                 Text(
-                                  dataHasArrived ? "${snapshot.data!.generalUserData.firstName} (${CampusDualManager.userCreds!.username})" : '... (${CampusDualManager.userCreds!.username})',
+                                  dataHasArrived ? "${data.generalUserData.firstName} (${CampusDualManager.userCreds!.username})" : '... (${CampusDualManager.userCreds!.username})',
                                   style: TextStyle(
                                     color: Theme.of(context).colorScheme.onPrimary,
                                     fontSize: 22,
@@ -126,23 +127,10 @@ class _OverviewState extends State<Overview> with AutomaticKeepAliveClientMixin<
                               ],
                             ),
                           ),
-                          snapshot.connectionState != ConnectionState.done
-                              ? Padding(
-                                  padding: const EdgeInsets.only(right: 30),
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        Ionicons.sync_outline,
-                                        color: Theme.of(context).colorScheme.onPrimary,
-                                      ),
-                                      Text(
-                                        " Synchronisiere",
-                                        style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
-                                      )
-                                    ],
-                                  ),
-                                )
-                              : SizedBox.shrink()
+                          SyncIndicator(
+                            state: snapshot.connectionState,
+                            hasData: snapshot.hasData,
+                          ),
                         ],
                       ),
                     ),
@@ -173,7 +161,7 @@ class _OverviewState extends State<Overview> with AutomaticKeepAliveClientMixin<
                                 Column(
                                   children: [
                                     Text(
-                                      'Fachsemester: ${dataHasArrived ? snapshot.data!.currentSemester.toString() : '...'} / 6',
+                                      'Fachsemester: ${dataHasArrived ? data.currentSemester.toString() : '...'} / 6',
                                       style: const TextStyle(
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -183,7 +171,7 @@ class _OverviewState extends State<Overview> with AutomaticKeepAliveClientMixin<
                                       child: LinearProgressIndicator(
                                         minHeight: 15,
                                         borderRadius: BorderRadius.circular(10),
-                                        value: dataHasArrived ? snapshot.data!.currentSemester / 6 : 0,
+                                        value: dataHasArrived ? data.currentSemester / 6 : 0,
                                         backgroundColor: Theme.of(context).colorScheme.secondary.withAlpha(80),
                                         valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
                                       ),
@@ -193,7 +181,7 @@ class _OverviewState extends State<Overview> with AutomaticKeepAliveClientMixin<
                                 Column(
                                   children: [
                                     Text(
-                                      'ECTS-Credits: ${dataHasArrived ? snapshot.data!.creditPoints.toString() : '...'} / 180',
+                                      'ECTS-Credits: ${dataHasArrived ? data.creditPoints.toString() : '...'} / 180',
                                       style: const TextStyle(
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -203,7 +191,7 @@ class _OverviewState extends State<Overview> with AutomaticKeepAliveClientMixin<
                                       child: LinearProgressIndicator(
                                         minHeight: 15,
                                         borderRadius: BorderRadius.circular(10),
-                                        value: dataHasArrived ? snapshot.data!.creditPoints / 180 : 0,
+                                        value: dataHasArrived ? data.creditPoints / 180 : 0,
                                         backgroundColor: Theme.of(context).colorScheme.secondary.withAlpha(80),
                                         valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
                                       ),
@@ -230,15 +218,15 @@ class _OverviewState extends State<Overview> with AutomaticKeepAliveClientMixin<
                                       ),
                                       PieChartSectionData(
                                         color: Theme.of(context).colorScheme.primary,
-                                        value: dataHasArrived ? snapshot.data!.examStats.success / snapshot.data!.examStats.exams : 0,
-                                        title: dataHasArrived ? "${(snapshot.data!.examStats.success / snapshot.data!.examStats.exams * 100).toStringAsFixed(0)}%" : "Lädt...",
+                                        value: dataHasArrived ? data.examStats.success / data.examStats.exams : 0,
+                                        title: dataHasArrived ? "${(data.examStats.success / data.examStats.exams * 100).toStringAsFixed(0)}%" : "Lädt...",
                                         titleStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
                                         radius: 125,
                                       ),
                                       PieChartSectionData(
                                         color: Theme.of(context).colorScheme.error,
-                                        value: dataHasArrived ? snapshot.data!.examStats.failure / snapshot.data!.examStats.exams : 0,
-                                        title: dataHasArrived ? "${(snapshot.data!.examStats.failure / snapshot.data!.examStats.exams * 100).toStringAsFixed(0)}%" : "Lädt...",
+                                        value: dataHasArrived ? data.examStats.failure / data.examStats.exams : 0,
+                                        title: dataHasArrived ? "${(data.examStats.failure / data.examStats.exams * 100).toStringAsFixed(0)}%" : "Lädt...",
                                         titleStyle: TextStyle(color: Theme.of(context).colorScheme.onError),
                                         radius: 125,
                                       ),
@@ -265,7 +253,7 @@ class _OverviewState extends State<Overview> with AutomaticKeepAliveClientMixin<
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
-                                        Text('${dataHasArrived ? snapshot.data!.examStats.exams : "..."}'),
+                                        Text('${dataHasArrived ? data.examStats.exams : "..."}'),
                                       ],
                                     ),
                                     Row(
@@ -278,7 +266,7 @@ class _OverviewState extends State<Overview> with AutomaticKeepAliveClientMixin<
                                           color: Theme.of(context).colorScheme.primary,
                                         ),
                                         const Text('mit Erfolg abgeschlossen:'),
-                                        Text('${dataHasArrived ? snapshot.data!.examStats.success : "..."}'),
+                                        Text('${dataHasArrived ? data.examStats.success : "..."}'),
                                       ],
                                     ),
                                     Row(
@@ -291,7 +279,7 @@ class _OverviewState extends State<Overview> with AutomaticKeepAliveClientMixin<
                                           color: Theme.of(context).colorScheme.error,
                                         ),
                                         const Text('ohne Erfolg abgeschlossen:'),
-                                        Text('${dataHasArrived ? snapshot.data!.examStats.failure : "..."}'),
+                                        Text('${dataHasArrived ? data.examStats.failure : "..."}'),
                                       ],
                                     ),
                                     Row(
@@ -304,7 +292,7 @@ class _OverviewState extends State<Overview> with AutomaticKeepAliveClientMixin<
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
-                                        Text('${dataHasArrived ? snapshot.data!.examStats.mBooked : "..."}'),
+                                        Text('${dataHasArrived ? data.examStats.mBooked : "..."}'),
                                       ],
                                     ),
                                     Row(
@@ -317,7 +305,7 @@ class _OverviewState extends State<Overview> with AutomaticKeepAliveClientMixin<
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
-                                        Text('${dataHasArrived ? snapshot.data!.examStats.modules : "..."}'),
+                                        Text('${dataHasArrived ? data.examStats.modules : "..."}'),
                                       ],
                                     ),
                                   ],

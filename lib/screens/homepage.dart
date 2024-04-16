@@ -35,7 +35,7 @@ class _HomePageState extends State<HomePage> {
     Ionicons.calendar_outline,
     Ionicons.book_outline,
     Ionicons.ellipsis_horizontal,
-  ];
+  ]; // TODO: remove eleipisis from dynamic menu, just make it permanent
   //This contains all actions which always popup if settings has been pressed
   List<Map<String, dynamic>> settingIcons = [
     {
@@ -84,6 +84,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     settingIcons[0]['icon'] = Theme.of(context).brightness == Brightness.dark ? Ionicons.sunny_outline : Ionicons.moon_outline;
+    // TODO: implement pull to refresh
     return Scaffold(
       body: PreloadPageView(
         preloadPagesCount: 4,

@@ -457,6 +457,7 @@ class Notifications {
 }
 
 class CampusDualManager {
+  // TODO: add better error handling in class
   static UserCredentials? userCreds;
   CookieClient? sharedSession;
 
