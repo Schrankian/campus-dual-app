@@ -398,7 +398,48 @@ class UpcomingExam {
   }
 }
 
-class LatestExam {}
+// Format
+/*
+
+ACAD_SESSION: "Winterperiode"---------------------------------------Semester
+ACAD_YEAR: "Akad. Jahr 2023/2024"-----------------------------------Semester
+AGRDATE: "20240131"-------------------------------------------------
+AGRTYPE: "Teilleistungsbeurteilung"---------------------------------
+AWOBJECT: "P2 PM3 Ingenieurmäßiges Arbeiten"------------------------
+AWOBJECT_SHORT: "3IM-PMIT3-02"--------------------------------------
+AWOTYPE: "Studienmodul"---------------------------------------------
+AWSTATUS: "Erfolgreich abgeschlossen"-------------------------------
+BOOKDATE: "20240109"------------------------------------------------
+BOOKREASON: ""????????????????????????????
+CPGRADED: "  0.00000"?????????????????????
+CPUNIT: "ECTS-Credits"????????????????????
+GRADESYMBOL: "1,0"--------------------------------------------------
+*/
+class LatestExam {
+  final String moduleShort;
+  final String moduleTitle;
+  final String moduleType;
+  final double grade;
+  final String semester;
+  final DateTime dateGraded;
+  final DateTime dateBooked;
+  final String examType; // TODO: maybe just bool but isPartGraded
+  final String status; //TODO: maybe just bool but isPassed
+
+  const LatestExam({
+    required this.moduleShort,
+    required this.moduleTitle,
+    required this.moduleType,
+    required this.grade,
+    required this.semester,
+    required this.dateGraded,
+    required this.dateBooked,
+    required this.examType,
+    required this.status
+  });
+
+  //TODO factorys
+}
 
 class Notifications {
   final int electives;
