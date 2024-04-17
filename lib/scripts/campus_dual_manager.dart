@@ -398,23 +398,6 @@ class UpcomingExam {
   }
 }
 
-// Format
-/*
-
-ACAD_SESSION: "Winterperiode"---------------------------------------Semester
-ACAD_YEAR: "Akad. Jahr 2023/2024"-----------------------------------Semester
-AGRDATE: "20240131"-------------------------------------------------
-AGRTYPE: "Teilleistungsbeurteilung"---------------------------------
-AWOBJECT: "P2 PM3 Ingenieurmäßiges Arbeiten"------------------------
-AWOBJECT_SHORT: "3IM-PMIT3-02"--------------------------------------
-AWOTYPE: "Studienmodul"---------------------------------------------
-AWSTATUS: "Erfolgreich abgeschlossen"-------------------------------
-BOOKDATE: "20240109"------------------------------------------------
-BOOKREASON: ""????????????????????????????
-CPGRADED: "  0.00000"?????????????????????
-CPUNIT: "ECTS-Credits"????????????????????
-GRADESYMBOL: "1,0"--------------------------------------------------
-*/
 class LatestExam {
   final String moduleShort;
   final String moduleTitle;
@@ -435,10 +418,65 @@ class LatestExam {
     required this.dateGraded,
     required this.dateBooked,
     required this.examType,
-    required this.status
+    required this.status,
   });
 
-  //TODO factorys
+  factory LatestExam.fromData(Map<String, dynamic> json) {
+    return switch (json) {
+      {
+        'AWOBJECT_SHORT': String moduleShort,
+        'AWOBJECT': String moduleTitle,
+        'AWOTYPE': String moduleType,
+        'GRADESYMBOL': String grade,
+        'ACAD_SESSION': String semesterPart1,
+        'ACAD_YEAR': String semesterPart2,
+        'AGRDATE': String dateGraded,
+        'BOOKDATE': String dateBooked,
+        'AGRTYPE': String examType,
+        'AWSTATUS': String status,
+      } =>
+        LatestExam(
+          moduleShort: moduleShort,
+          moduleTitle: moduleTitle,
+          moduleType: moduleType,
+          grade: double.parse(grade.replaceAll(",", ".")),
+          semester: "${semesterPart1[0]}S ${semesterPart2.split(" ").last}",
+          dateGraded: DateTime.parse(dateGraded),
+          dateBooked: DateTime.parse(dateBooked),
+          examType: examType,
+          status: status,
+        ),
+      _ => throw const FormatException('Unexpected JSON type for LatestExam'),
+    };
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'moduleShort': moduleShort,
+      'moduleTitle': moduleTitle,
+      'moduleType': moduleType,
+      'grade': grade,
+      'semester': semester,
+      'dateGraded': dateGraded.toIso8601String(),
+      'dateBooked': dateBooked.toIso8601String(),
+      'examType': examType,
+      'status': status,
+    };
+  }
+
+  factory LatestExam.fromJson(Map<String, dynamic> json) {
+    return LatestExam(
+      moduleShort: json['moduleShort'] as String,
+      moduleTitle: json['moduleTitle'] as String,
+      moduleType: json['moduleType'] as String,
+      grade: json['grade'] as double,
+      semester: json['semester'] as String,
+      dateGraded: DateTime.parse(json['dateGraded'] as String),
+      dateBooked: DateTime.parse(json['dateBooked'] as String),
+      examType: json['examType'] as String,
+      status: json['status'] as String,
+    );
+  }
 }
 
 class Notifications {
@@ -470,7 +508,7 @@ class Notifications {
           exams: exams,
           semester: semester,
           upcoming: upcoming.map((e) => UpcomingExam.fromData(e as Map<String, dynamic>)).toList(),
-          latest: List.empty(),
+          latest: latest.map((e) => LatestExam.fromData(e as Map<String, dynamic>)).toList(),
         ),
       _ => throw const FormatException('Unexpected JSON type for Notifications'),
     };
@@ -482,18 +520,17 @@ class Notifications {
       'exams': exams,
       'semester': semester,
       'upcoming': upcoming.map((e) => e.toJson()).toList(),
-      'latest': List.empty(),
+      'latest': latest.map((e) => e.toJson()).toList(),
     };
   }
 
   factory Notifications.fromJson(Map<String, dynamic> json) {
     return Notifications(
-      electives: json['electives'] as int,
-      exams: json['exams'] as int,
-      semester: json['semester'] as int,
-      upcoming: (json['upcoming'] as List<dynamic>).map((e) => UpcomingExam.fromJson(e as Map<String, dynamic>)).toList(),
-      latest: List.empty(),
-    );
+        electives: json['electives'] as int,
+        exams: json['exams'] as int,
+        semester: json['semester'] as int,
+        upcoming: (json['upcoming'] as List<dynamic>).map((e) => UpcomingExam.fromJson(e as Map<String, dynamic>)).toList(),
+        latest: (json['latest'] as List<dynamic>).map((e) => LatestExam.fromJson(e as Map<String, dynamic>)).toList());
   }
 }
 

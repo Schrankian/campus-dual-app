@@ -2,6 +2,7 @@ import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.da
 import 'package:campus_dual_android/screens/body/body_evaluations.dart';
 import 'package:campus_dual_android/screens/body/body_news.dart';
 import 'package:campus_dual_android/scripts/campus_dual_manager.dart';
+import 'package:campus_dual_android/widgets/sync_starter.dart';
 import 'package:preload_page_view/preload_page_view.dart';
 import '../widgets/settings_popup.dart';
 import 'package:flutter/gestures.dart';
@@ -22,20 +23,39 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 1;
   bool settingIsActive = false;
+  late PreloadPageController _pageController;
 
-  List<Widget> body = const [
-    News(),
-    Overview(),
-    TimeTable(),
-    EvaluationsPage(),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PreloadPageController(initialPage: _currentIndex);
+
+    // Generate keys for all pages and asign them
+    keys = List.generate(4, (index) => GlobalKey());
+    body = [
+      News(key: keys[0]),
+      Overview(key: keys[1]),
+      TimeTable(key: keys[2]),
+      EvaluationsPage(key: keys[3]),
+    ];
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  // The list for all possible pages together with their keys. Is initialized in initState
+  late final List<GlobalKey> keys;
+  late final List<Widget> body;
+  // The list for the icons in the bottom navigation bar. Should match the body list
   List<IconData> icons = [
     Ionicons.notifications_outline,
     Ionicons.home_outline,
     Ionicons.calendar_outline,
     Ionicons.book_outline,
-    Ionicons.ellipsis_horizontal,
-  ]; // TODO: remove eleipisis from dynamic menu, just make it permanent
+  ];
   //This contains all actions which always popup if settings has been pressed
   List<Map<String, dynamic>> settingIcons = [
     {
@@ -58,45 +78,35 @@ class _HomePageState extends State<HomePage> {
 
   //These are extra actions which only popup on the specific size (index in list correspond to the slide it pops up)
   List<List<Map<String, dynamic>>> extraSettingIcons = [
-    //homepage
     [],
-    //person debts
     [],
-    //qr code
     [],
     [],
   ];
 
-  late PreloadPageController _pageController;
-
-  @override
-  void initState() {
-    super.initState();
-    _pageController = PreloadPageController(initialPage: _currentIndex);
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     settingIcons[0]['icon'] = Theme.of(context).brightness == Brightness.dark ? Ionicons.sunny_outline : Ionicons.moon_outline;
-    // TODO: implement pull to refresh
+    // TODO add sync indicator to all pages
     return Scaffold(
-      body: PreloadPageView(
-        preloadPagesCount: 4,
-        physics: const NeverScrollableScrollPhysics(),
-        pageSnapping: true,
-        controller: _pageController,
-        onPageChanged: (value) {
-          setState(() {
-            _currentIndex = value;
-          });
+      body: SyncStarter(
+        onSync: () {
+          for (final key in keys) {
+            key.currentState?.setState(() {});
+          }
         },
-        children: body,
+        child: PreloadPageView(
+          preloadPagesCount: body.length,
+          physics: const NeverScrollableScrollPhysics(),
+          pageSnapping: true,
+          controller: _pageController,
+          onPageChanged: (value) {
+            setState(() {
+              _currentIndex = value;
+            });
+          },
+          children: body,
+        ),
       ),
       bottomNavigationBar: AnimatedBottomNavigationBar.builder(
         backgroundColor: Theme.of(context).colorScheme.background,
@@ -140,7 +150,7 @@ class _HomePageState extends State<HomePage> {
               child: Padding(
                 padding: EdgeInsets.only(bottom: 15),
                 child: Icon(
-                  icons[index],
+                  Ionicons.ellipsis_horizontal,
                   size: 27,
                   color: isActive ? Theme.of(context).colorScheme.primary : null,
                 ),
@@ -152,7 +162,7 @@ class _HomePageState extends State<HomePage> {
         notchSmoothness: NotchSmoothness.sharpEdge,
         activeIndex: _currentIndex,
         onTap: (index) => setState(() {
-          if (index != 4) {
+          if (index < body.length) {
             _currentIndex = index;
             _pageController.animateToPage(index, duration: Duration(milliseconds: 250), curve: Curves.easeOut);
           }

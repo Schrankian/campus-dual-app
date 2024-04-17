@@ -91,8 +91,13 @@ class _NewsState extends State<News> with AutomaticKeepAliveClientMixin<News> {
                   ),
                   for (final latestItem in snapshot.data!.latest)
                     ListTile(
-                      title: Text(latestItem.toString()),
-                      subtitle: Text(latestItem.toString()),
+                      trailing: Text(latestItem.dateGraded.toDateString()),
+                      title: Text(latestItem.moduleTitle),
+                      leading: Text(
+                        latestItem.grade.toString().replaceAll(".", ","),
+                        style: TextStyle(fontSize: 20),
+                      ),
+                      subtitle: Text(latestItem.status),
                     ),
                   if (snapshot.data!.latest.isEmpty)
                     const Padding(
