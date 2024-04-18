@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 
 class SyncIndicator extends StatefulWidget {
-  const SyncIndicator({super.key, required this.state, required this.hasData});
+  const SyncIndicator({super.key, required this.state, required this.hasData, required this.textColor});
   final ConnectionState state;
   final bool hasData;
+  final Color textColor;
 
   @override
   State<SyncIndicator> createState() => _SyncIndicatorState();
@@ -20,11 +21,11 @@ class _SyncIndicatorState extends State<SyncIndicator> with TickerProviderStateM
           children: [
             Icon(
               Ionicons.checkmark_circle_outline,
-              color: Theme.of(context).colorScheme.onPrimary,
+              color: widget.textColor,
             ),
             Text(
               " Synchronisiert",
-              style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+              style: TextStyle(color: widget.textColor),
             )
           ],
         ),
@@ -37,11 +38,11 @@ class _SyncIndicatorState extends State<SyncIndicator> with TickerProviderStateM
           children: [
             Icon(
               Ionicons.cloud_offline_outline,
-              color: Theme.of(context).colorScheme.onPrimary,
+              color: widget.textColor,
             ),
             Text(
               " Fehler",
-              style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+              style: TextStyle(color: widget.textColor),
             )
           ],
         ),
@@ -59,12 +60,12 @@ class _SyncIndicatorState extends State<SyncIndicator> with TickerProviderStateM
             )..repeat(),
             child: Icon(
               Ionicons.sync_outline,
-              color: Theme.of(context).colorScheme.onPrimary,
+              color: widget.textColor,
             ),
           ),
           Text(
             " Synchronisiere",
-            style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+            style: TextStyle(color: widget.textColor),
           )
         ],
       ),

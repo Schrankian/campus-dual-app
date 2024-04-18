@@ -25,7 +25,7 @@ class _SyncStarterState extends State<SyncStarter> {
         _startOffset = details.position;
       },
       onPointerMove: (details) {
-        if (details.delta.dy == 0) return;
+        if (details.delta.dy == 0 || _startOffset == Offset.zero) return;
 
         setState(() {
           _pullOffset = details.position - _startOffset;
@@ -39,23 +39,35 @@ class _SyncStarterState extends State<SyncStarter> {
           _pullOffset = Offset.zero;
         });
       },
-      child: Stack(
-        alignment: AlignmentDirectional.topCenter,
-        children: [
-          widget.child,
-          Positioned(
-            top: (!isThreshold ? _pullOffset.dy : syncThreshold) - 50,
-            child: CircleAvatar(
-              radius: 25,
-              backgroundColor: !isThreshold ? Theme.of(context).colorScheme.background.withAlpha(alphaValue) : Theme.of(context).colorScheme.primary.withAlpha(alphaValue),
-              child: Icon(
-                !isThreshold ? Ionicons.cloud_outline : Ionicons.cloud_download_outline,
-                color: !isThreshold ? Theme.of(context).colorScheme.primary.withAlpha(alphaValue) : Theme.of(context).colorScheme.background.withAlpha(alphaValue),
-                size: 40,
+      child: NotificationListener<ScrollNotification>(
+        onNotification: (notification) {
+          // Only allow pull down, if no other scrollable is active in the widget tree
+          if (notification is ScrollStartNotification) {
+            // Check if the scrollable is at the top
+            if (notification.metrics.pixels != 0) {
+              _startOffset = Offset.zero;
+            }
+          }
+          return false;
+        },
+        child: Stack(
+          alignment: AlignmentDirectional.topCenter,
+          children: [
+            widget.child,
+            Positioned(
+              top: (!isThreshold ? _pullOffset.dy : syncThreshold) - 50,
+              child: CircleAvatar(
+                radius: 25,
+                backgroundColor: !isThreshold ? Theme.of(context).colorScheme.background.withAlpha(alphaValue) : Theme.of(context).colorScheme.primary.withAlpha(alphaValue),
+                child: Icon(
+                  !isThreshold ? Ionicons.cloud_outline : Ionicons.cloud_download_outline,
+                  color: !isThreshold ? Theme.of(context).colorScheme.primary.withAlpha(alphaValue) : Theme.of(context).colorScheme.background.withAlpha(alphaValue),
+                  size: 40,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

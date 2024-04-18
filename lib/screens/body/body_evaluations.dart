@@ -1,5 +1,6 @@
 import 'package:campus_dual_android/scripts/campus_dual_manager.dart';
 import 'package:campus_dual_android/scripts/storage_manager.dart';
+import 'package:campus_dual_android/widgets/sync_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 
@@ -33,26 +34,33 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Noten'),
-      ),
-      body: StreamBuilder(
-        initialData: dataCache,
-        stream: loadData(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-          if (snapshot.hasError) {
-            return const Center(
-              child: Text('An error occurred'),
-            );
-          }
+    return StreamBuilder(
+      initialData: dataCache,
+      stream: loadData(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+        if (snapshot.hasError) {
+          return const Center(
+            child: Text('An error occurred'),
+          );
+        }
 
-          return SingleChildScrollView(
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Noten'),
+            actions: [
+              SyncIndicator(
+                state: snapshot.connectionState,
+                hasData: snapshot.hasData,
+                textColor: Theme.of(context).appBarTheme.titleTextStyle!.color!,
+              ),
+            ],
+          ),
+          body: SingleChildScrollView(
             physics: ScrollPhysics(),
             child: Column(
               children: [
@@ -90,9 +98,9 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
                   ),
               ],
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }
