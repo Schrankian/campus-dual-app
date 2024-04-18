@@ -56,7 +56,6 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
               SyncIndicator(
                 state: snapshot.connectionState,
                 hasData: snapshot.hasData,
-                textColor: Theme.of(context).appBarTheme.titleTextStyle!.color!,
               ),
             ],
           ),

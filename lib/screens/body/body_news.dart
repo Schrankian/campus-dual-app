@@ -58,7 +58,6 @@ class _NewsState extends State<News> with AutomaticKeepAliveClientMixin<News> {
                 SyncIndicator(
                   state: snapshot.connectionState,
                   hasData: snapshot.hasData,
-                  textColor: Theme.of(context).appBarTheme.titleTextStyle!.color!,
                 ),
               ],
             ),

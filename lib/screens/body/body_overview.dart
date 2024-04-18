@@ -129,7 +129,6 @@ class _OverviewState extends State<Overview> with AutomaticKeepAliveClientMixin<
                       SyncIndicator(
                         state: snapshot.connectionState,
                         hasData: snapshot.hasData,
-                        textColor: Theme.of(context).colorScheme.onPrimary,
                       ),
                     ],
                   ),
