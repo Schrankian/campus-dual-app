@@ -15,7 +15,11 @@ class _SyncIndicatorState extends State<SyncIndicator> with TickerProviderStateM
     duration: const Duration(seconds: 1),
     vsync: this,
   );
-  late final Animation<Offset> _position = Tween<Offset>(
+  late final AnimationController _loadingController = AnimationController(
+          duration: const Duration(seconds: 1, milliseconds: 500),
+          vsync: this,
+        );
+  late final Animation<Offset> _positionAnimation = Tween<Offset>(
     begin: Offset(1.5, 0),
     end: Offset.zero,
   ).animate(
@@ -24,10 +28,12 @@ class _SyncIndicatorState extends State<SyncIndicator> with TickerProviderStateM
       curve: Curves.ease,
     ),
   );
+  late final Animation<double> _loadingAnimation = _loadingController..repeat();
 
   @override
   void dispose() {
     _positionController.dispose();
+    _loadingController.dispose(); // TODO test if on logout still error occurs
     super.dispose();
   }
 
@@ -68,10 +74,7 @@ class _SyncIndicatorState extends State<SyncIndicator> with TickerProviderStateM
     return buildContainer(
       Colors.orange,
       RotationTransition(
-        turns: AnimationController(
-          duration: const Duration(seconds: 1, milliseconds: 500),
-          vsync: this,
-        )..repeat(),
+        turns: _loadingAnimation,
         child: Icon(
           Ionicons.sync_outline,
           color: color,
@@ -84,7 +87,7 @@ class _SyncIndicatorState extends State<SyncIndicator> with TickerProviderStateM
 
   Widget buildContainer(Color color, Widget icon, String text, Color textColor) {
     return SlideTransition(
-      position: _position,
+      position: _positionAnimation,
       child: Container(
         padding: const EdgeInsets.all(5),
         width: 150,

@@ -582,7 +582,7 @@ class CampusDualManager {
       throw Exception("Failed to scrape from: $uri");
     }
 
-    return parse(response.body);
+    return parse(utf8.decode(response.bodyBytes));
   }
 
   /*

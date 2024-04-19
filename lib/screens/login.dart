@@ -149,6 +149,7 @@ class _LoginState extends State<Login> {
                                 isLoading = false;
                               });
 
+                              FocusManager.instance.primaryFocus?.unfocus(); // TODO test
                               final stopwatch = Stopwatch()..start();
                               final userCreds = await _testCredentials(_usernameController.text, _passwordController.text);
                               final elapsed = stopwatch.elapsed;
