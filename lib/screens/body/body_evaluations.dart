@@ -2,6 +2,7 @@ import 'package:campus_dual_android/scripts/campus_dual_manager.dart';
 import 'package:campus_dual_android/scripts/storage_manager.dart';
 import 'package:campus_dual_android/widgets/sync_indicator.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:ionicons/ionicons.dart';
 
 class EvaluationsPage extends StatefulWidget {
@@ -49,6 +50,8 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
           );
         }
 
+        final average = snapshot.data!.where((e) => e.grade != -1).map((e) => e.grade).reduce((a, b) => a + b) / snapshot.data!.where((e) => e.grade != -1).length;
+
         return Scaffold(
           appBar: AppBar(
             title: const Text('Noten'),
@@ -63,6 +66,36 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
             physics: ScrollPhysics(),
             child: Column(
               children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 10, bottom: 20),
+                  child: Container(
+                    alignment: Alignment.center,
+                    height: 70,
+                    width: 200,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primary.withAlpha(220),
+                      borderRadius: BorderRadius.circular(50),
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          "Durchschnitt",
+                          style: TextStyle(
+                            fontSize: 21,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
+                        ),
+                        Text(
+                          average.toStringAsFixed(2).replaceAll(".", ","),
+                          style: TextStyle(
+                            fontSize: 24,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
                 for (final evaluation in snapshot.data!.reversed)
                   Column(
                     children: [
@@ -72,6 +105,7 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
                           largeSize: 32,
                           padding: const EdgeInsets.only(left: 20, right: 20),
                           backgroundColor: evaluation.isPassed ? Colors.green : Colors.red,
+                          textColor: Colors.white,
                           label: Text(evaluation.grade == -1 ? "Teilgenommen" : evaluation.grade.toString().replaceAll(".", ",")),
                           textStyle: TextStyle(fontSize: 16),
                         ),
@@ -86,6 +120,7 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
                             largeSize: 32,
                             padding: const EdgeInsets.only(left: 10, right: 10),
                             backgroundColor: subEvaluation.isPassed ? Colors.green.withAlpha(200) : Colors.red.withAlpha(200),
+                            textColor: Colors.white,
                             label: Text(subEvaluation.grade == -1 ? "Teilgenommen" : subEvaluation.grade.toString().replaceAll(".", ",")),
                           ),
                         ),

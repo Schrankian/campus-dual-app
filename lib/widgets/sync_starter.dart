@@ -10,7 +10,25 @@ class SyncStarter extends StatefulWidget {
   State<SyncStarter> createState() => _SyncStarterState();
 }
 
-class _SyncStarterState extends State<SyncStarter> {
+class _SyncStarterState extends State<SyncStarter> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 150),
+      vsync: this,
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   static const double syncThreshold = 200;
 
   Offset _pullOffset = Offset.zero;
@@ -22,6 +40,7 @@ class _SyncStarterState extends State<SyncStarter> {
 
     return Listener(
       onPointerDown: (details) {
+        _controller.stop();
         _startOffset = details.position;
       },
       onPointerMove: (details) {
@@ -35,9 +54,18 @@ class _SyncStarterState extends State<SyncStarter> {
         if (isThreshold) {
           widget.onSync();
         }
-        setState(() {
-          _pullOffset = Offset.zero;
-        });
+        late final Animation<Offset> animation;
+        animation = Tween<Offset>(
+          begin: _pullOffset,
+          end: Offset.zero,
+        ).animate(_controller)
+          ..addListener(() {
+            setState(() {
+              _pullOffset = animation.value;
+            });
+          });
+        _controller.reset();
+        _controller.forward();
       },
       child: NotificationListener<ScrollNotification>(
         onNotification: (notification) {

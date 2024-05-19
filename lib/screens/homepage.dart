@@ -67,11 +67,10 @@ class _HomePageState extends State<HomePage> {
     {
       'icon': Ionicons.settings_outline,
       'function': (context) {
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(builder: (context) => const Settings()),
-        // );
-        mainBus.emit(event: "Logout", args: []);
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const Settings()),
+        );
       }
     }
   ];
