@@ -17,7 +17,6 @@ void main() async {
   SecurityContext.defaultContext.setTrustedCertificatesBytes(data.buffer.asUint8List());
 
   CampusDualManager.userCreds = await StorageManager().loadUserAuthData();
-  // CampusDualManager.userCreds = UserCredentials("3004717", "BreakLoab-38", "54caf288eb3e1e5d12c046404a43fb9c");
 
   final ThemeMode initTheme = await StorageManager().loadTheme();
   runApp(
