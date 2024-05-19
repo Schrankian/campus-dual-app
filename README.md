@@ -1,16 +1,26 @@
-# campus_dual_android
+# Campus Dual Helper
+Campus Dual Helper is an App designed to provide an alternative Interface to the Campus Dual web application. To achieve this, it uses Api Endpoints or just scrapes the website and parses it to get the necessary data.
 
-A new Flutter project.
+# Prerequisites
+- Flutter
+- Some Android tools (Check flutter documentation)
 
-## Getting Started
+# Installation
+The newest Release can be found in the releases section of this repository. Simply download the apk and install it.
 
-This project is a starting point for a Flutter application.
+## Build from source
+If you have all prerequisites, simply clone this repository and run `flutter build apk`. <br>
+This should output an apk at *./build/app/outputs/apk/release/*
 
-A few resources to get you started if this is your first Flutter project:
+# Development
+Make sure you have all Prerequisites, and in addition to that, either and Android device or an android emulator for development purposes.<br>
+The connect the device and run `flutter run`. This should start an development server and launch the application on the connected device
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+# Contributing
+To contribute to Campus Dual Helper, follow these steps:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- Fork this repository
+- Create a branch: git checkout -b '<branch_name>'.
+- Make your changes and commit them: git commit -m '<commit_message>'
+- Push the changes: git push
+- Create a pull request
