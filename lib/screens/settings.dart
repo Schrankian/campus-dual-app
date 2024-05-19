@@ -23,14 +23,25 @@ class _SettingsState extends State<Settings> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Row(mainAxisSize: MainAxisSize.max),
-              Text("Darstellung"),
-              Text("Abmelden"),
-              FloatingActionButton(
-                onPressed: () {
+              InkWell(
+                onTap: () {
                   mainBus.emit(event: "Logout");
                   Navigator.pop(context);
                 },
-                child: Text("Logout"),
+                child: Container(
+                  padding: const EdgeInsets.only(top: 15, bottom: 15, left: 30, right: 30),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    color: Theme.of(context).colorScheme.tertiary,
+                  ),
+                  child: Text(
+                    "Abmelden",
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onTertiary,
+                      fontSize: 20,
+                    ),
+                  ),
+                ),
               ),
             ],
           ),

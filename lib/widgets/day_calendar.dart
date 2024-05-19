@@ -14,63 +14,61 @@ class DayCalendar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.only(left: 20, right: 10),
-        physics: const ScrollPhysics(),
-        child: Stack(
-          children: [
-            Column(
-              children: [
-                for (final hour in List<int>.generate(endHour - startHour + 1, (i) => i + startHour))
-                  Row(
-                    mainAxisSize: MainAxisSize.max,
+    return SingleChildScrollView(
+      padding: const EdgeInsets.only(left: 20, right: 10),
+      physics: const ScrollPhysics(),
+      child: Stack(
+        children: [
+          Column(
+            children: [
+              for (final hour in List<int>.generate(endHour - startHour + 1, (i) => i + startHour))
+                Row(
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Text("${hour.toString().padLeft(2, '0')}:00 "),
+                    Expanded(
+                      child: Divider(
+                        height: stepSize,
+                        thickness: 1,
+                      ),
+                    )
+                  ],
+                ),
+            ],
+          ),
+          if (items != null)
+            for (final item in items!)
+              Positioned(
+                top: (item.start.hour - startHour) * stepSize + item.start.minute / 60 * stepSize + stepSize / 2,
+                left: 50,
+                right: 10,
+                child: Container(
+                  height: item.end.difference(item.start).inMinutes / 60 * stepSize,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.background,
+                    border: Border.all(color: useFuzzyColor ? FuzzyColor.fromString(item.title) : Theme.of(context).colorScheme.primary),
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                  child: Row(
                     children: [
-                      Text("${hour.toString().padLeft(2, '0')}:00 "),
+                      Container(
+                        width: 10,
+                        color: useFuzzyColor ? FuzzyColor.fromString(item.title) : Theme.of(context).colorScheme.primary,
+                      ),
                       Expanded(
-                        child: Divider(
-                          height: stepSize,
-                          thickness: 1,
+                        child: ListTile(
+                          isThreeLine: true,
+                          title: Text(item.title),
+                          subtitle: Text('${item.room}\n${item.instructor}'),
+                          trailing: Text(item.type),
+                          // trailing : Text(item.start.toTimeDiff(item.end, showDifference: false)),
                         ),
-                      )
+                      ),
                     ],
                   ),
-              ],
-            ),
-            if (items != null)
-              for (final item in items!)
-                Positioned(
-                  top: (item.start.hour - startHour) * stepSize + item.start.minute / 60 * stepSize + stepSize / 2,
-                  left: 50,
-                  right: 10,
-                  child: Container(
-                    height: item.end.difference(item.start).inMinutes / 60 * stepSize,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.background,
-                      border: Border.all(color: useFuzzyColor ? FuzzyColor.fromString(item.title) : Theme.of(context).colorScheme.primary),
-                      borderRadius: BorderRadius.circular(3),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 10,
-                          color: useFuzzyColor ? FuzzyColor.fromString(item.title) : Theme.of(context).colorScheme.primary,
-                        ),
-                        Expanded(
-                          child: ListTile(
-                            isThreeLine: true,
-                            title: Text(item.title),
-                            subtitle: Text('${item.room}\n${item.instructor}'),
-                            trailing: Text(item.type),
-                            // trailing : Text(item.start.toTimeDiff(item.end, showDifference: false)),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                 ),
-          ],
-        ),
+              ),
+        ],
       ),
     );
   }

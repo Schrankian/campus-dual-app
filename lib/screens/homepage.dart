@@ -21,7 +21,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _currentIndex = 1;
+  int _currentIndex = 2;
   bool settingIsActive = false;
   late PreloadPageController _pageController;
 
@@ -34,9 +34,9 @@ class _HomePageState extends State<HomePage> {
     keys = List.generate(4, (index) => GlobalKey());
     body = [
       News(key: keys[0]),
-      Overview(key: keys[1]),
-      TimeTable(key: keys[2]),
-      EvaluationsPage(key: keys[3]),
+      EvaluationsPage(key: keys[1]),
+      Overview(key: keys[2]),
+      TimeTable(key: keys[3]),
     ];
   }
 
@@ -52,9 +52,9 @@ class _HomePageState extends State<HomePage> {
   // The list for the icons in the bottom navigation bar. Should match the body list
   List<IconData> icons = [
     Ionicons.notifications_outline,
+    Ionicons.book_outline,
     Ionicons.home_outline,
     Ionicons.calendar_outline,
-    Ionicons.book_outline,
   ];
   //This contains all actions which always popup if settings has been pressed
   List<Map<String, dynamic>> settingIcons = [
