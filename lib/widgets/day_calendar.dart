@@ -45,7 +45,7 @@ class DayCalendar extends StatelessWidget {
                 child: Container(
                   height: item.end.difference(item.start).inMinutes / 60 * stepSize,
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.background,
+                    color: Theme.of(context).colorScheme.surface,
                     border: Border.all(color: useFuzzyColor ? FuzzyColor.fromString(item.title) : Theme.of(context).colorScheme.primary),
                     borderRadius: BorderRadius.circular(3),
                   ),

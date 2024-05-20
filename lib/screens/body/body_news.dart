@@ -20,7 +20,9 @@ class _NewsState extends State<News> with AutomaticKeepAliveClientMixin<News> {
     final storage = StorageManager();
     final storedData = await storage.loadObject("notifications");
     if (storedData != null) {
-      yield Notifications.fromJson(storedData);
+      final data = Notifications.fromJson(storedData);
+      dataCache = dataCache ?? data;
+      yield data;
     }
 
     final cd = CampusDualManager();
@@ -40,14 +42,12 @@ class _NewsState extends State<News> with AutomaticKeepAliveClientMixin<News> {
         initialData: dataCache,
         stream: loadData(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData) {
+          final data = snapshot.hasError ? dataCache : snapshot.data;
+          final dataHasArrived = data != null;
+          // TODO add better loading animation
+          if (!dataHasArrived) {
             return const Center(
               child: CircularProgressIndicator(),
-            );
-          }
-          if (snapshot.hasError) {
-            return const Center(
-              child: Text('An error occurred'),
             );
           }
 
@@ -58,6 +58,7 @@ class _NewsState extends State<News> with AutomaticKeepAliveClientMixin<News> {
                 SyncIndicator(
                   state: snapshot.connectionState,
                   hasData: snapshot.hasData,
+                  error: snapshot.error,
                 ),
               ],
             ),
@@ -73,14 +74,14 @@ class _NewsState extends State<News> with AutomaticKeepAliveClientMixin<News> {
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
-                  for (final upcomingItem in snapshot.data!.upcoming)
+                  for (final upcomingItem in data.upcoming)
                     ListTile(
                       leading: Text(upcomingItem.date.toDateString()),
                       title: Text(upcomingItem.moduleTitle),
                       trailing: Text(upcomingItem.type),
                       subtitle: Text("Raum: ${upcomingItem.room} | ${upcomingItem.begin.toTimeDiff(upcomingItem.end)} "),
                     ),
-                  if (snapshot.data!.upcoming.isEmpty)
+                  if (data.upcoming.isEmpty)
                     const Padding(
                       padding: EdgeInsets.only(top: 16, bottom: 16),
                       child: Center(
@@ -96,7 +97,7 @@ class _NewsState extends State<News> with AutomaticKeepAliveClientMixin<News> {
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
-                  for (final latestItem in snapshot.data!.latest)
+                  for (final latestItem in data.latest)
                     ListTile(
                       trailing: Text(latestItem.dateGraded.toDateString()),
                       title: Text(latestItem.moduleTitle),
@@ -106,7 +107,7 @@ class _NewsState extends State<News> with AutomaticKeepAliveClientMixin<News> {
                       ),
                       subtitle: Text(latestItem.status),
                     ),
-                  if (snapshot.data!.latest.isEmpty)
+                  if (data.latest.isEmpty)
                     const Padding(
                       padding: EdgeInsets.only(top: 16, bottom: 16),
                       child: Center(

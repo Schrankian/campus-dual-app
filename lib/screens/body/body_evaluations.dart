@@ -19,7 +19,9 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
     final storage = StorageManager();
     final storedData = await storage.loadObjectList("evaluations");
     if (storedData != null) {
-      yield List<MasterEvaluation>.from(storedData.map((e) => MasterEvaluation.fromJson(e)));
+      final data = List<MasterEvaluation>.from(storedData.map((e) => MasterEvaluation.fromJson(e)));
+      dataCache = dataCache ?? data;
+      yield data;
     }
 
     final cd = CampusDualManager();
@@ -39,18 +41,16 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
       initialData: dataCache,
       stream: loadData(),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) {
+        final data = snapshot.hasError ? dataCache : snapshot.data;
+        final dataHasArrived = data != null;
+        // TODO add better loading animation
+        if (!dataHasArrived) {
           return const Center(
             child: CircularProgressIndicator(),
           );
         }
-        if (snapshot.hasError) {
-          return const Center(
-            child: Text('An error occurred'),
-          );
-        }
 
-        final average = snapshot.data!.where((e) => e.grade != -1).map((e) => e.grade).reduce((a, b) => a + b) / snapshot.data!.where((e) => e.grade != -1).length;
+        final average = data.where((e) => e.grade != -1).map((e) => e.grade).reduce((a, b) => a + b) / data.where((e) => e.grade != -1).length;
 
         return Scaffold(
           appBar: AppBar(
@@ -59,6 +59,7 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
               SyncIndicator(
                 state: snapshot.connectionState,
                 hasData: snapshot.hasData,
+                error: snapshot.error,
               ),
             ],
           ),
@@ -69,35 +70,36 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
                 Padding(
                   padding: const EdgeInsets.only(top: 10, bottom: 20),
                   child: Container(
-                    padding: const EdgeInsets.only(top: 3),
                     alignment: Alignment.center,
-                    height: 70,
+                    height: 80,
                     width: 200,
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary.withAlpha(220),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.primary.withAlpha(220),
+                        width: 2,
+                      ),
                       borderRadius: BorderRadius.circular(50),
                     ),
                     child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
                           "Durchschnitt",
                           style: TextStyle(
                             fontSize: 21,
-                            color: Theme.of(context).colorScheme.onPrimary,
                           ),
                         ),
                         Text(
                           average.toStringAsFixed(2).replaceAll(".", ","),
                           style: TextStyle(
                             fontSize: 24,
-                            color: Theme.of(context).colorScheme.onPrimary,
                           ),
                         ),
                       ],
                     ),
                   ),
                 ),
-                for (final evaluation in snapshot.data!.reversed)
+                for (final evaluation in data.reversed)
                   Column(
                     children: [
                       ListTile(

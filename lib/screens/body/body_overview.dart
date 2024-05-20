@@ -37,16 +37,17 @@ class _OverviewState extends State<Overview> with AutomaticKeepAliveClientMixin<
     final storedExamStats = await storage.loadObject("examStats");
 
     if (storedGeneralUserData != null && storedCurrentSemester != null && storedCreditPoints != null && storedExamStats != null) {
-      yield BodyOverviewData(
+      final data = BodyOverviewData(
         generalUserData: GeneralUserData.fromJson(storedGeneralUserData),
         currentSemester: storedCurrentSemester,
         creditPoints: storedCreditPoints,
         examStats: ExamStats.fromJson(storedExamStats),
       );
+      dataCache = dataCache ?? data;
+      yield data;
     }
 
     final cd = await CampusDualManager.withSharedSession();
-    // TODO: add better error handling
     final generalUserData = await cd.scrapeGeneralUserData();
     storage.saveObject("generalUserData", generalUserData);
     final currentSemester = await cd.fetchCurrentSemester();
@@ -87,7 +88,7 @@ class _OverviewState extends State<Overview> with AutomaticKeepAliveClientMixin<
               end: Alignment.bottomCenter,
               colors: [
                 Theme.of(context).colorScheme.primary,
-                Theme.of(context).colorScheme.background,
+                Theme.of(context).colorScheme.surface,
               ],
             ),
           ),
@@ -129,6 +130,7 @@ class _OverviewState extends State<Overview> with AutomaticKeepAliveClientMixin<
                       SyncIndicator(
                         state: snapshot.connectionState,
                         hasData: snapshot.hasData,
+                        error: snapshot.error,
                       ),
                     ],
                   ),
@@ -140,7 +142,7 @@ class _OverviewState extends State<Overview> with AutomaticKeepAliveClientMixin<
                   decoration: BoxDecoration(
                     color: Theme.of(context).scaffoldBackgroundColor,
                     borderRadius: const BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
-                    border: Border.all(color: Theme.of(context).colorScheme.background, width: 2),
+                    border: Border.all(color: Theme.of(context).colorScheme.surface, width: 2),
                     boxShadow: [
                       BoxShadow(
                         color: Theme.of(context).colorScheme.shadow.withAlpha(70),

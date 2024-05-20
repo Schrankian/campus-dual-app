@@ -24,7 +24,7 @@ class _LoginState extends State<Login> {
   final TextEditingController _passwordController = TextEditingController();
 
   Future<UserCredentials?> _testCredentials(String username, String password) async {
-    final cd = CampusDualManager();
+    final cd = CampusDualManager(allowNoCreds: true);
     final String hash;
     try {
       hash = await cd.scrapeHash(username: username, password: password);
@@ -74,7 +74,7 @@ class _LoginState extends State<Login> {
                 style: TextStyle(
                   fontSize: 40,
                   fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.background,
+                  color: Theme.of(context).colorScheme.surface,
                 ),
               ),
               Container(
@@ -82,7 +82,7 @@ class _LoginState extends State<Login> {
                 height: 400,
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.background,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
@@ -149,7 +149,7 @@ class _LoginState extends State<Login> {
                                 isLoading = false;
                               });
 
-                              FocusManager.instance.primaryFocus?.unfocus(); // TODO test
+                              FocusManager.instance.primaryFocus?.unfocus();
                               final stopwatch = Stopwatch()..start();
                               final userCreds = await _testCredentials(_usernameController.text, _passwordController.text);
                               final elapsed = stopwatch.elapsed;

@@ -535,7 +535,6 @@ class Notifications {
 }
 
 class CampusDualManager {
-  // TODO: add better error handling in class
   static UserCredentials? userCreds;
   CookieClient? sharedSession;
 
@@ -557,7 +556,11 @@ class CampusDualManager {
     "sec-ch-ua-platform": "Windows"
   };
 
-  CampusDualManager();
+  CampusDualManager({bool? allowNoCreds}) {
+    if ((allowNoCreds != null && !allowNoCreds) && userCreds == null) {
+      throw Exception("No user credentials provided");
+    }
+  }
 
   static Future<CampusDualManager> withSharedSession() async {
     final manager = CampusDualManager();
@@ -586,7 +589,7 @@ class CampusDualManager {
   }
 
   /*
-  * This function initializes gets the session cookie and therefore logs in the user
+  * This function initializes the session cookie and therefore logs in the user
   */
   Future<CookieClient> _initAuthSession({String? username, String? password}) async {
     final Uri loginUri = Uri.parse("https://erp.campus-dual.de/sap/bc/webdynpro/sap/zba_initss?sap-client=100&sap-language=de&uri=https%3a%2f%2fselfservice.campus-dual.de%2findex%2flogin");
@@ -596,13 +599,16 @@ class CampusDualManager {
     // Initial request to get the XSRF token and the xsrf cookie
     final initResponse = await session.get(loginUri, headers: stdHeaders);
     if (initResponse.statusCode != 200) {
-      throw Exception("Failed to fetch from: $loginUri");
+      throw Exception("Failed to initialize the login session");
     }
 
     // Parse the response and get the XSRF token
     final doc = parse(initResponse.body);
     // Get the XSRF token. Hint: The token hides in an hidden input field
     final xsrfToken = doc.querySelector("input[name='sap-login-XSRF']")?.attributes["value"];
+    if (xsrfToken == null) {
+      throw Exception("Failed to get the XSRF token");
+    }
 
     // Request to login and get the session cookie
     final loginResponse = await session.post(

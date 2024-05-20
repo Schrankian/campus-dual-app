@@ -30,7 +30,7 @@ class _SyncStarterState extends State<SyncStarter> with SingleTickerProviderStat
   }
 
   static const double syncThreshold = 200;
-
+  bool isSyncing = false;
   Offset _pullOffset = Offset.zero;
   Offset _startOffset = Offset.zero;
   @override
@@ -53,19 +53,30 @@ class _SyncStarterState extends State<SyncStarter> with SingleTickerProviderStat
       onPointerUp: (details) {
         if (isThreshold) {
           widget.onSync();
-        }
-        late final Animation<Offset> animation;
-        animation = Tween<Offset>(
-          begin: _pullOffset,
-          end: Offset.zero,
-        ).animate(_controller)
-          ..addListener(() {
+          Future.delayed(const Duration(milliseconds: 700), () {
             setState(() {
-              _pullOffset = animation.value;
+              isSyncing = false;
+              _controller.reset();
+              _pullOffset = Offset.zero;
             });
           });
-        _controller.reset();
-        _controller.forward();
+          setState(() {
+            isSyncing = true;
+          });
+        } else {
+          late final Animation<Offset> animation;
+          animation = Tween<Offset>(
+            begin: _pullOffset,
+            end: Offset.zero,
+          ).animate(_controller)
+            ..addListener(() {
+              setState(() {
+                _pullOffset = animation.value;
+              });
+            });
+          _controller.reset();
+          _controller.forward();
+        }
       },
       child: NotificationListener<ScrollNotification>(
         onNotification: (notification) {
@@ -86,10 +97,14 @@ class _SyncStarterState extends State<SyncStarter> with SingleTickerProviderStat
               top: (!isThreshold ? _pullOffset.dy : syncThreshold) - 50,
               child: CircleAvatar(
                 radius: 25,
-                backgroundColor: !isThreshold ? Theme.of(context).colorScheme.background.withAlpha(alphaValue) : Theme.of(context).colorScheme.primary.withAlpha(alphaValue),
+                backgroundColor: !isThreshold ? Theme.of(context).colorScheme.surface.withAlpha(alphaValue) : Theme.of(context).colorScheme.primary.withAlpha(alphaValue),
                 child: Icon(
-                  !isThreshold ? Ionicons.cloud_outline : Ionicons.cloud_download_outline,
-                  color: !isThreshold ? Theme.of(context).colorScheme.primary.withAlpha(alphaValue) : Theme.of(context).colorScheme.background.withAlpha(alphaValue),
+                  isSyncing
+                      ? Ionicons.sync_outline
+                      : !isThreshold
+                          ? Ionicons.cloud_outline
+                          : Ionicons.cloud_download_outline,
+                  color: !isThreshold ? Theme.of(context).colorScheme.primary.withAlpha(alphaValue) : Theme.of(context).colorScheme.surface.withAlpha(alphaValue),
                   size: 40,
                 ),
               ),
