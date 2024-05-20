@@ -108,7 +108,7 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       bottomNavigationBar: AnimatedBottomNavigationBar.builder(
-        backgroundColor: Theme.of(context).colorScheme.background,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         height: 75,
         elevation: 10,
         splashRadius: 0,

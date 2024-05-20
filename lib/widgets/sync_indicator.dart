@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 import 'package:ionicons/ionicons.dart';
 
 class SyncIndicator extends StatefulWidget {
-  const SyncIndicator({super.key, required this.state, required this.hasData});
+  const SyncIndicator({super.key, required this.state, required this.hasData, this.error});
   final ConnectionState state;
   final bool hasData;
+  final Object? error;
 
   @override
   State<SyncIndicator> createState() => _SyncIndicatorState();
@@ -16,9 +18,9 @@ class _SyncIndicatorState extends State<SyncIndicator> with TickerProviderStateM
     vsync: this,
   );
   late final AnimationController _loadingController = AnimationController(
-          duration: const Duration(seconds: 1, milliseconds: 500),
-          vsync: this,
-        );
+    duration: const Duration(seconds: 1, milliseconds: 500),
+    vsync: this,
+  );
   late final Animation<Offset> _positionAnimation = Tween<Offset>(
     begin: Offset(1.5, 0),
     end: Offset.zero,
@@ -33,7 +35,7 @@ class _SyncIndicatorState extends State<SyncIndicator> with TickerProviderStateM
   @override
   void dispose() {
     _positionController.dispose();
-    _loadingController.dispose(); // TODO test if on logout still error occurs
+    _loadingController.dispose();
     super.dispose();
   }
 
@@ -58,12 +60,22 @@ class _SyncIndicatorState extends State<SyncIndicator> with TickerProviderStateM
         color,
       );
     }
-
-    if (widget.state == ConnectionState.done) {
+    if (widget.error != null && widget.error is ClientException && widget.error.toString().contains('Connection refused')) {
       return buildContainer(
         Colors.red,
         Icon(
           Ionicons.cloud_offline_outline,
+          color: color,
+        ),
+        " Kein Internet",
+        color,
+      );
+    }
+    if (widget.state == ConnectionState.done) {
+      return buildContainer(
+        Colors.red,
+        Icon(
+          Ionicons.close_outline,
           color: color,
         ),
         " Fehler",

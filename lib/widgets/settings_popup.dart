@@ -100,7 +100,7 @@ class SettingsPopupState extends State<SettingsPopup> with TickerProviderStateMi
           curve: Interval(0.0, 1.0 - index / widget.icons!.length / 2.0, curve: Curves.easeOut),
         ),
         child: FloatingActionButton(
-          backgroundColor: Theme.of(context).colorScheme.background,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           mini: true,
           child: Icon(widget.icons![index], color: Theme.of(context).colorScheme.primary),
           onPressed: () => _onTapped(index),
