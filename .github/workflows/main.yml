@@ -105,6 +105,7 @@ jobs:
       - name: Upload APK to release
         uses: ncipollo/release-action@v1
         with:
+          generateReleaseNotes: true
           artifacts: app-release.apk
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ steps.version.outputs.content }}
