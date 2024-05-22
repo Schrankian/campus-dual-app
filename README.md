@@ -12,6 +12,8 @@ The newest Release can be found in the releases section of this repository. Simp
 If you have all prerequisites, simply clone this repository and run `flutter build apk`. <br>
 This should output an apk at *./build/app/outputs/apk/release/*
 
+To sign this app, create the file *./android/key.properties* and enter the necessary information about you keystore into this file. If you don't know how to create one, look into [this](https://docs.flutter.dev/deployment/android#create-an-upload-keystore) Tutorial.
+
 # Development
 Make sure you have all Prerequisites, and in addition to that, either and Android device or an android emulator for development purposes.<br>
 The connect the device and run `flutter run`. This should start an development server and launch the application on the connected device
