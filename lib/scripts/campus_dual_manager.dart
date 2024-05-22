@@ -778,10 +778,10 @@ class CampusDualManager {
 
         final grade = double.tryParse(element.children[1].querySelector("#none")!.text.trim().replaceAll(",", ".")) ?? -1;
         final isPassed = element.children[2].querySelector("img")!.attributes["src"]! == "/images/green.png";
-        final credits = int.parse(element.children[3].text.trim());
+        final credits = int.tryParse(element.children[3].text.trim());
         final isPartlyGraded = false; //TODO: Implement
         final semester = element.children.last.text.trim();
-        evaluations.add(MasterEvaluation(module: module, title: title, grade: grade, isPassed: isPassed, isPartlyGraded: isPartlyGraded, semester: semester, credits: credits, subEvaluations: <Evaluation>[]));
+        evaluations.add(MasterEvaluation(module: module, title: title, grade: grade, isPassed: isPassed, isPartlyGraded: isPartlyGraded, semester: semester, credits: credits ?? 0, subEvaluations: <Evaluation>[]));
       } else if (!element.className.contains("head")) {
         final moduleTitleTypeString = element.children[0].text.trim().split(" ");
         final module = moduleTitleTypeString[moduleTitleTypeString.length - 1].replaceAll(r'\(|\)', "");
