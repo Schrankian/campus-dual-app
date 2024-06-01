@@ -36,6 +36,7 @@ class _LoginState extends State<Login> {
   }
 
   bool isLoading = true;
+  bool passwordVisible = false;
   List<Map<String, String>> lastErrors = [];
 
   ValidationState _validateInput(String username, String password) {
@@ -118,7 +119,7 @@ class _LoginState extends State<Login> {
                     ),
                     TextField(
                       onChanged: (value) => setState(() {}),
-                      obscureText: true,
+                      obscureText: !passwordVisible,
                       textInputAction: TextInputAction.done,
                       controller: _passwordController,
                       decoration: InputDecoration(
@@ -133,6 +134,14 @@ class _LoginState extends State<Login> {
                             : _state == ValidationState.lastWrong
                                 ? "Bereits falsch eingegeben"
                                 : null,
+                        suffixIcon: IconButton(
+                          icon: Icon(passwordVisible ? Ionicons.eye_off_outline : Ionicons.eye_outline),
+                          onPressed: () {
+                            setState(() {
+                              passwordVisible = !passwordVisible;
+                            });
+                          },
+                        ),
                       ),
                     ),
                     ElevatedButton(
