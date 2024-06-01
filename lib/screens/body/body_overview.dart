@@ -31,20 +31,24 @@ class _OverviewState extends State<Overview> with AutomaticKeepAliveClientMixin<
 
   Stream<BodyOverviewData?> loadData() async* {
     final storage = StorageManager();
-    final storedGeneralUserData = await storage.loadObject("generalUserData");
-    final storedCurrentSemester = await storage.loadInt("currentSemester");
-    final storedCreditPoints = await storage.loadInt("creditPoints");
-    final storedExamStats = await storage.loadObject("examStats");
+    try {
+      final storedGeneralUserData = await storage.loadObject("generalUserData");
+      final storedCurrentSemester = await storage.loadInt("currentSemester");
+      final storedCreditPoints = await storage.loadInt("creditPoints");
+      final storedExamStats = await storage.loadObject("examStats");
 
-    if (storedGeneralUserData != null && storedCurrentSemester != null && storedCreditPoints != null && storedExamStats != null) {
-      final data = BodyOverviewData(
-        generalUserData: GeneralUserData.fromJson(storedGeneralUserData),
-        currentSemester: storedCurrentSemester,
-        creditPoints: storedCreditPoints,
-        examStats: ExamStats.fromJson(storedExamStats),
-      );
-      dataCache = dataCache ?? data;
-      yield data;
+      if (storedGeneralUserData != null && storedCurrentSemester != null && storedCreditPoints != null && storedExamStats != null) {
+        final data = BodyOverviewData(
+          generalUserData: GeneralUserData.fromJson(storedGeneralUserData),
+          currentSemester: storedCurrentSemester,
+          creditPoints: storedCreditPoints,
+          examStats: ExamStats.fromJson(storedExamStats),
+        );
+        dataCache = dataCache ?? data;
+        yield data;
+      }
+    } catch (e) {
+      debugPrint(e.toString());
     }
 
     final cd = await CampusDualManager.withSharedSession();

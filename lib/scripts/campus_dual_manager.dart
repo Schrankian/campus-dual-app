@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:html/dom.dart';
@@ -65,17 +66,21 @@ class Evaluation {
   final String title;
   final String type;
   final double grade;
+  final List<int> gradeDistribution;
   final bool isPassed;
   final DateTime dateGraded;
   final DateTime dateAnnounced;
   final bool isPartlyGraded;
   final String semester;
 
-  const Evaluation({
+  bool isExpanded = false;
+
+  Evaluation({
     required this.module,
     required this.title,
     required this.type,
     required this.grade,
+    required this.gradeDistribution,
     required this.isPassed,
     required this.dateGraded,
     required this.dateAnnounced,
@@ -89,6 +94,7 @@ class Evaluation {
       'title': title,
       'type': type,
       'grade': grade,
+      'gradeDistribution': gradeDistribution,
       'isPassed': isPassed,
       'dateGraded': dateGraded.toIso8601String(),
       'dateAnnounced': dateAnnounced.toIso8601String(),
@@ -103,6 +109,7 @@ class Evaluation {
       title: json['title'] as String,
       type: json['type'] as String,
       grade: json['grade'] as double,
+      gradeDistribution: json['gradeDistribution'].cast<int>(),
       isPassed: json['isPassed'] as bool,
       dateGraded: DateTime.parse(json['dateGraded'] as String),
       dateAnnounced: DateTime.parse(json['dateAnnounced'] as String),
@@ -693,6 +700,13 @@ class CampusDualManager {
     return Notifications.fromData(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
+  Future<List<int>> fetchGradeDistribution(String module, String year, String id) async {
+    final response = await _fetch(addQueryParams("https://selfservice.campus-dual.de/acwork/mscoredist", {"module": module, "peryr": year, "perid": id.padLeft(3, "0")}));
+
+    final result = jsonDecode(response.body) as List<dynamic>;
+    return result.map((e) => e["COUNT"]! as int).toList();
+  }
+
   Future<GeneralUserData> scrapeGeneralUserData() async {
     final session = sharedSession ?? await _initAuthSession();
     final doc = await _scrape(session, "https://selfservice.campus-dual.de/index/login");
@@ -788,7 +802,10 @@ class CampusDualManager {
         final title = moduleTitleTypeString.sublist(0, moduleTitleTypeString.length - 2).join(" ");
         final type = moduleTitleTypeString[moduleTitleTypeString.length - 2].replaceAll(r'\(|\)', "");
 
-        final grade = double.tryParse(element.children[1].querySelector(".mscore")!.text.trim().replaceAll(",", ".")) ?? -1;
+        final gradeElement = element.children[1].querySelector(".mscore")!;
+        final grade = double.tryParse(gradeElement.text.trim().replaceAll(",", ".")) ?? -1;
+        final gradeDistribution = await fetchGradeDistribution(gradeElement.attributes["data-module"]!, gradeElement.attributes["data-peryr"]!, gradeElement.attributes["data-perid"]!);
+
         final isPassed = element.children[2].querySelector("img")!.attributes["src"]! == "/images/green.png";
 
         final splitDateGraded = element.children[4].text.split(".");
@@ -800,7 +817,8 @@ class CampusDualManager {
         final isPartlyGraded = false; // TODO: implement
         final semester = element.children.last.text.trim();
 
-        evaluations.last.subEvaluations.add(Evaluation(module: module, title: title, type: type, grade: grade, isPassed: isPassed, dateGraded: dateGraded, dateAnnounced: dateAnnounced, isPartlyGraded: isPartlyGraded, semester: semester));
+        evaluations.last.subEvaluations
+            .add(Evaluation(module: module, title: title, type: type, grade: grade, gradeDistribution: gradeDistribution, isPassed: isPassed, dateGraded: dateGraded, dateAnnounced: dateAnnounced, isPartlyGraded: isPartlyGraded, semester: semester));
       }
     }
 

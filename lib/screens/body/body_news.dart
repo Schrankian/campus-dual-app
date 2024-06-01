@@ -18,11 +18,15 @@ class _NewsState extends State<News> with AutomaticKeepAliveClientMixin<News> {
 
   Stream<Notifications> loadData() async* {
     final storage = StorageManager();
-    final storedData = await storage.loadObject("notifications");
-    if (storedData != null) {
-      final data = Notifications.fromJson(storedData);
-      dataCache = dataCache ?? data;
-      yield data;
+    try {
+      final storedData = await storage.loadObject("notifications");
+      if (storedData != null) {
+        final data = Notifications.fromJson(storedData);
+        dataCache = dataCache ?? data;
+        yield data;
+      }
+    } catch (e) {
+      debugPrint(e.toString());
     }
 
     final cd = CampusDualManager();

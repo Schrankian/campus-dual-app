@@ -1,6 +1,8 @@
 import 'package:campus_dual_android/scripts/campus_dual_manager.dart';
 import 'package:campus_dual_android/scripts/storage_manager.dart';
 import 'package:campus_dual_android/widgets/sync_indicator.dart';
+import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:ionicons/ionicons.dart';
@@ -17,11 +19,15 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
 
   Stream<List<MasterEvaluation>> loadData() async* {
     final storage = StorageManager();
-    final storedData = await storage.loadObjectList("evaluations");
-    if (storedData != null) {
-      final data = List<MasterEvaluation>.from(storedData.map((e) => MasterEvaluation.fromJson(e)));
-      dataCache = dataCache ?? data;
-      yield data;
+    try {
+      final storedData = await storage.loadObjectList("evaluations");
+      if (storedData != null) {
+        final data = List<MasterEvaluation>.from(storedData.map((e) => MasterEvaluation.fromJson(e)));
+        dataCache = dataCache ?? data;
+        yield data;
+      }
+    } catch (e) {
+      debugPrint(e.toString());
     }
 
     final cd = CampusDualManager();
@@ -64,7 +70,7 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
             ],
           ),
           body: SingleChildScrollView(
-            physics: ScrollPhysics(),
+            physics: const ScrollPhysics(),
             child: Column(
               children: [
                 Padding(
@@ -83,7 +89,7 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
+                        const Text(
                           "Durchschnitt",
                           style: TextStyle(
                             fontSize: 21,
@@ -91,7 +97,7 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
                         ),
                         Text(
                           average.toStringAsFixed(2).replaceAll(".", ","),
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 24,
                           ),
                         ),
@@ -110,22 +116,124 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
                           backgroundColor: evaluation.isPassed ? Colors.green : Colors.red,
                           textColor: Colors.white,
                           label: Text(evaluation.grade == -1 ? "Teilgenommen" : evaluation.grade.toString().replaceAll(".", ",")),
-                          textStyle: TextStyle(fontSize: 16),
+                          textStyle: const TextStyle(fontSize: 16),
                         ),
                         subtitle: Text(evaluation.semester),
                       ),
                       for (final subEvaluation in evaluation.subEvaluations)
-                        ListTile(
-                          dense: true,
-                          leading: Icon(Ionicons.chevron_forward_outline),
-                          title: Text(subEvaluation.title),
-                          trailing: Badge(
-                            largeSize: 32,
-                            padding: const EdgeInsets.only(left: 10, right: 10),
-                            backgroundColor: subEvaluation.isPassed ? Colors.green.withAlpha(200) : Colors.red.withAlpha(200),
-                            textColor: Colors.white,
-                            label: Text(subEvaluation.grade == -1 ? "Teilgenommen" : subEvaluation.grade.toString().replaceAll(".", ",")),
-                          ),
+                        StatefulBuilder(
+                          builder: (context, setState) {
+                            return Column(
+                              children: [
+                                ListTile(
+                                  dense: true,
+                                  leading: IconButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        subEvaluation.isExpanded = !subEvaluation.isExpanded;
+                                      });
+                                    },
+                                    icon: Icon(
+                                      subEvaluation.isExpanded ? Ionicons.chevron_down_outline : Ionicons.chevron_forward_outline,
+                                    ),
+                                  ),
+                                  title: Text(subEvaluation.title),
+                                  trailing: Badge(
+                                    largeSize: 32,
+                                    padding: const EdgeInsets.only(left: 10, right: 10),
+                                    backgroundColor: subEvaluation.isPassed ? Colors.green.withAlpha(200) : Colors.red.withAlpha(200),
+                                    textColor: Colors.white,
+                                    label: Text(subEvaluation.grade == -1 ? "Teilgenommen" : subEvaluation.grade.toString().replaceAll(".", ",")),
+                                  ),
+                                ),
+                                if (subEvaluation.isExpanded)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 15, bottom: 15, left: 25, right: 25),
+                                    child: Container(
+                                      padding: EdgeInsets.only(top: 50, bottom: 10),
+                                      height: 200,
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                          color: Theme.of(context).colorScheme.primary.withAlpha(220),
+                                          width: 1.5,
+                                        ),
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: BarChart(
+                                        BarChartData(
+                                          barTouchData: BarTouchData(
+                                            enabled: false,
+                                            touchTooltipData: BarTouchTooltipData(
+                                              getTooltipColor: (group) => Colors.transparent,
+                                              tooltipPadding: EdgeInsets.zero,
+                                              tooltipMargin: 8,
+                                              getTooltipItem: (
+                                                BarChartGroupData group,
+                                                int groupIndex,
+                                                BarChartRodData rod,
+                                                int rodIndex,
+                                              ) {
+                                                return BarTooltipItem(
+                                                  rod.toY.round().toString(),
+                                                  TextStyle(
+                                                    color: Theme.of(context).colorScheme.primary,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                          gridData: const FlGridData(show: false),
+                                          borderData: FlBorderData(show: false),
+                                          titlesData: FlTitlesData(
+                                            show: true,
+                                            bottomTitles: AxisTitles(
+                                              sideTitles: SideTitles(
+                                                showTitles: true,
+                                                reservedSize: 30,
+                                                getTitlesWidget: (double value, TitleMeta meta) {
+                                                  return SideTitleWidget(
+                                                    axisSide: meta.axisSide,
+                                                    space: 4,
+                                                    child: Text((value + 1).toInt().toString()),
+                                                  );
+                                                },
+                                              ),
+                                            ),
+                                            leftTitles: const AxisTitles(
+                                              sideTitles: SideTitles(showTitles: false),
+                                            ),
+                                            topTitles: const AxisTitles(
+                                              sideTitles: SideTitles(showTitles: false),
+                                            ),
+                                            rightTitles: const AxisTitles(
+                                              sideTitles: SideTitles(showTitles: false),
+                                            ),
+                                          ),
+                                          barGroups: subEvaluation.gradeDistribution
+                                              .asMap()
+                                              .entries
+                                              .map(
+                                                (e) => BarChartGroupData(
+                                                  x: e.key,
+                                                  barRods: [
+                                                    BarChartRodData(
+                                                      toY: e.value.toDouble(),
+                                                      color: Theme.of(context).colorScheme.primary,
+                                                    ),
+                                                  ],
+                                                  showingTooltipIndicators: [0],
+                                                ),
+                                              )
+                                              .toList(),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            );
+                          },
                         ),
                       const Divider(
                         height: 1,
