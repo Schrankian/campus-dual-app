@@ -40,6 +40,9 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
   @override
   bool get wantKeepAlive => true;
 
+  final _successColor = Colors.green;
+  final _failureColor = Colors.red;
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -106,7 +109,7 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
                               trailing: Badge(
                                 largeSize: 32,
                                 padding: const EdgeInsets.only(left: 20, right: 20),
-                                backgroundColor: evaluation.isPassed ? Colors.green : Colors.red,
+                                backgroundColor: evaluation.isPassed ? _successColor : _failureColor,
                                 textColor: Colors.white,
                                 label: Text(evaluation.grade == -1 ? "Teilgenommen" : evaluation.grade.toString().replaceAll(".", ",")),
                                 textStyle: const TextStyle(fontSize: 16),
@@ -134,7 +137,7 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
                                         trailing: Badge(
                                           largeSize: 32,
                                           padding: const EdgeInsets.only(left: 10, right: 10),
-                                          backgroundColor: subEvaluation.isPassed ? Colors.green.withAlpha(200) : Colors.red.withAlpha(200),
+                                          backgroundColor: subEvaluation.isPassed ? _successColor.withAlpha(200) : _failureColor.withAlpha(200),
                                           textColor: Colors.white,
                                           label: Text(subEvaluation.grade == -1 ? "Teilgenommen" : subEvaluation.grade.toString().replaceAll(".", ",")),
                                         ),
@@ -170,7 +173,11 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
                                                       return BarTooltipItem(
                                                         rod.toY.round().toString(),
                                                         TextStyle(
-                                                          color: Theme.of(context).colorScheme.primary,
+                                                          color: subEvaluation.grade.round() == groupIndex + 1
+                                                              ? subEvaluation.isPassed
+                                                                  ? _successColor
+                                                                  : _failureColor
+                                                              : Theme.of(context).colorScheme.primary,
                                                           fontWeight: FontWeight.bold,
                                                         ),
                                                       );
@@ -213,7 +220,11 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
                                                         barRods: [
                                                           BarChartRodData(
                                                             toY: e.value.toDouble(),
-                                                            color: Theme.of(context).colorScheme.primary,
+                                                            color: subEvaluation.grade.round() == e.key + 1
+                                                                ? subEvaluation.isPassed
+                                                                    ? _successColor
+                                                                    : _failureColor
+                                                                : Theme.of(context).colorScheme.primary,
                                                           ),
                                                         ],
                                                         showingTooltipIndicators: [0],
