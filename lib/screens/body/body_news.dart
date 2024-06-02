@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:campus_dual_android/extensions/date.dart';
 import 'package:campus_dual_android/scripts/campus_dual_manager.dart';
 import 'package:campus_dual_android/scripts/storage_manager.dart';
@@ -102,7 +100,7 @@ class _NewsState extends State<News> with AutomaticKeepAliveClientMixin<News> {
                             title: Text(latestItem.moduleTitle),
                             leading: Text(
                               latestItem.grade.toString().replaceAll(".", ","),
-                              style: TextStyle(fontSize: 20),
+                              style: const TextStyle(fontSize: 20),
                             ),
                             subtitle: Text(latestItem.status),
                           ),
@@ -121,7 +119,7 @@ class _NewsState extends State<News> with AutomaticKeepAliveClientMixin<News> {
                           width: double.infinity,
                           height: MediaQuery.of(context).size.height - 200,
                           child: Center(
-                            child: snapshot.hasError ? Text("Ein Fehler ist aufgetreten") : CircularProgressIndicator(),
+                            child: snapshot.hasError ? const Text("Ein Fehler ist aufgetreten") : const CircularProgressIndicator(),
                           ),
                         ),
                       ],

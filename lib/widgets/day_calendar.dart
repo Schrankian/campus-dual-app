@@ -1,5 +1,4 @@
 import 'package:campus_dual_android/extensions/color.dart';
-import 'package:campus_dual_android/extensions/date.dart';
 import 'package:campus_dual_android/scripts/campus_dual_manager.dart';
 import 'package:flutter/material.dart';
 

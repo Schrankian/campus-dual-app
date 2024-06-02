@@ -1,11 +1,9 @@
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 import 'package:campus_dual_android/screens/body/body_evaluations.dart';
 import 'package:campus_dual_android/screens/body/body_news.dart';
-import 'package:campus_dual_android/scripts/campus_dual_manager.dart';
 import 'package:campus_dual_android/widgets/sync_starter.dart';
 import 'package:preload_page_view/preload_page_view.dart';
 import '../widgets/settings_popup.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'body/body_overview.dart';
@@ -14,7 +12,7 @@ import 'settings.dart';
 import '../scripts/event_bus.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -147,7 +145,7 @@ class _HomePageState extends State<HomePage> {
                 (settingIcons.map((e) => e['function']).toList() + extraSettingIcons[_currentIndex].map((e) => e['function']).toList())[index](context);
               },
               child: Padding(
-                padding: EdgeInsets.only(bottom: 15),
+                padding: const EdgeInsets.only(bottom: 15),
                 child: Icon(
                   Ionicons.ellipsis_horizontal,
                   size: 27,
@@ -163,7 +161,7 @@ class _HomePageState extends State<HomePage> {
         onTap: (index) => setState(() {
           if (index < body.length) {
             _currentIndex = index;
-            _pageController.animateToPage(index, duration: Duration(milliseconds: 250), curve: Curves.easeOut);
+            _pageController.animateToPage(index, duration: const Duration(milliseconds: 250), curve: Curves.easeOut);
           }
         }),
       ),

@@ -2,9 +2,7 @@ import 'package:campus_dual_android/scripts/campus_dual_manager.dart';
 import 'package:campus_dual_android/scripts/storage_manager.dart';
 import 'package:campus_dual_android/widgets/sync_indicator.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:ionicons/ionicons.dart';
 
 class EvaluationsPage extends StatefulWidget {
@@ -119,6 +117,7 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
                             for (final subEvaluation in evaluation.subEvaluations)
                               StatefulBuilder(
                                 builder: (context, setState) {
+                                  final color = subEvaluation.isPassed ? _successColor : _failureColor;
                                   return Column(
                                     children: [
                                       ListTile(
@@ -137,7 +136,7 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
                                         trailing: Badge(
                                           largeSize: 32,
                                           padding: const EdgeInsets.only(left: 10, right: 10),
-                                          backgroundColor: subEvaluation.isPassed ? _successColor.withAlpha(200) : _failureColor.withAlpha(200),
+                                          backgroundColor: color.withAlpha(200),
                                           textColor: Colors.white,
                                           label: Text(subEvaluation.grade == -1 ? "Teilgenommen" : subEvaluation.grade.toString().replaceAll(".", ",")),
                                         ),
@@ -146,7 +145,7 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
                                         Padding(
                                           padding: const EdgeInsets.only(top: 15, bottom: 15, left: 25, right: 25),
                                           child: Container(
-                                            padding: EdgeInsets.only(top: 50, bottom: 10),
+                                            padding: const EdgeInsets.only(top: 50, bottom: 10),
                                             height: 200,
                                             width: double.infinity,
                                             decoration: BoxDecoration(
@@ -173,11 +172,7 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
                                                       return BarTooltipItem(
                                                         rod.toY.round().toString(),
                                                         TextStyle(
-                                                          color: subEvaluation.grade.round() == groupIndex + 1
-                                                              ? subEvaluation.isPassed
-                                                                  ? _successColor
-                                                                  : _failureColor
-                                                              : Theme.of(context).colorScheme.primary,
+                                                          color: subEvaluation.grade.round() == groupIndex + 1 ? color : Theme.of(context).colorScheme.primary,
                                                           fontWeight: FontWeight.bold,
                                                         ),
                                                       );
@@ -220,11 +215,7 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
                                                         barRods: [
                                                           BarChartRodData(
                                                             toY: e.value.toDouble(),
-                                                            color: subEvaluation.grade.round() == e.key + 1
-                                                                ? subEvaluation.isPassed
-                                                                    ? _successColor
-                                                                    : _failureColor
-                                                                : Theme.of(context).colorScheme.primary,
+                                                            color: subEvaluation.grade.round() == e.key + 1 ? color : Theme.of(context).colorScheme.primary,
                                                           ),
                                                         ],
                                                         showingTooltipIndicators: [0],
@@ -251,7 +242,7 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
                         width: double.infinity,
                         height: MediaQuery.of(context).size.height - 200,
                         child: Center(
-                          child: snapshot.hasError ? Text("Ein Fehler ist aufgetreten") : CircularProgressIndicator(),
+                          child: snapshot.hasError ? const Text("Ein Fehler ist aufgetreten") : const CircularProgressIndicator(),
                         ),
                       ),
                     ],

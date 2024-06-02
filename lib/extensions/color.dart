@@ -23,7 +23,7 @@ extension HexColor on Color {
 class FuzzyColor {
   static Color fromString(String input) {
     // Generate hash from the input string
-    var bytes = utf8.encode(input + "Salt");
+    var bytes = utf8.encode("${input}Salt");
     var digest = sha256.convert(bytes);
 
     // Convert hash to hexadecimal string

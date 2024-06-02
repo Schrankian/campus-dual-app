@@ -1,7 +1,7 @@
 extension DateExtension on DateTime {
   // Returns the date in the format 'dd.MM.yyyy'
   String toDateString() {
-    return '${day.toString().padLeft(2, '0')}.${month.toString().padLeft(2, '0')}.${year}';
+    return '${day.toString().padLeft(2, '0')}.${month.toString().padLeft(2, '0')}.$year';
   }
 
   // Returns the time in the format 'HH:mm'
