@@ -1,8 +1,8 @@
 import 'package:campus_dual_android/scripts/campus_dual_manager.dart';
 import 'package:campus_dual_android/scripts/storage_manager.dart';
 import 'package:campus_dual_android/widgets/sync_indicator.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:ionicons/ionicons.dart';
 
 class EvaluationsPage extends StatefulWidget {
@@ -17,11 +17,15 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
 
   Stream<List<MasterEvaluation>> loadData() async* {
     final storage = StorageManager();
-    final storedData = await storage.loadObjectList("evaluations");
-    if (storedData != null) {
-      final data = List<MasterEvaluation>.from(storedData.map((e) => MasterEvaluation.fromJson(e)));
-      dataCache = dataCache ?? data;
-      yield data;
+    try {
+      final storedData = await storage.loadObjectList("evaluations");
+      if (storedData != null) {
+        final data = List<MasterEvaluation>.from(storedData.map((e) => MasterEvaluation.fromJson(e)));
+        dataCache = dataCache ?? data;
+        yield data;
+      }
+    } catch (e) {
+      debugPrint(e.toString());
     }
 
     final cd = CampusDualManager();
@@ -34,6 +38,9 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
   @override
   bool get wantKeepAlive => true;
 
+  final _successColor = Colors.green;
+  final _failureColor = Colors.red;
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -43,14 +50,6 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
       builder: (context, snapshot) {
         final data = snapshot.hasError ? dataCache : snapshot.data;
         final dataHasArrived = data != null;
-        // TODO add better loading animation
-        if (!dataHasArrived) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-
-        final average = data.where((e) => e.grade != -1).map((e) => e.grade).reduce((a, b) => a + b) / data.where((e) => e.grade != -1).length;
 
         return Scaffold(
           appBar: AppBar(
@@ -64,76 +63,189 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
             ],
           ),
           body: SingleChildScrollView(
-            physics: ScrollPhysics(),
+            physics: const ScrollPhysics(),
             child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 10, bottom: 20),
-                  child: Container(
-                    alignment: Alignment.center,
-                    height: 80,
-                    width: 200,
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Theme.of(context).colorScheme.primary.withAlpha(220),
-                        width: 2,
+              children: dataHasArrived
+                  ? [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 10, bottom: 20),
+                        child: Container(
+                          alignment: Alignment.center,
+                          height: 80,
+                          width: 200,
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: Theme.of(context).colorScheme.primary.withAlpha(220),
+                              width: 2,
+                            ),
+                            borderRadius: BorderRadius.circular(50),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text(
+                                "Durchschnitt",
+                                style: TextStyle(
+                                  fontSize: 21,
+                                ),
+                              ),
+                              Text(
+                                (data.where((e) => e.grade != -1).map((e) => e.grade).reduce((a, b) => a + b) / data.where((e) => e.grade != -1).length).toStringAsFixed(2).replaceAll(".", ","),
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                      borderRadius: BorderRadius.circular(50),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Durchschnitt",
-                          style: TextStyle(
-                            fontSize: 21,
-                          ),
+                      for (final evaluation in data.reversed)
+                        Column(
+                          children: [
+                            ListTile(
+                              title: Text(evaluation.title),
+                              trailing: Badge(
+                                largeSize: 32,
+                                padding: const EdgeInsets.only(left: 20, right: 20),
+                                backgroundColor: evaluation.isPassed ? _successColor : _failureColor,
+                                textColor: Colors.white,
+                                label: Text(evaluation.grade == -1 ? "Teilgenommen" : evaluation.grade.toString().replaceAll(".", ",")),
+                                textStyle: const TextStyle(fontSize: 16),
+                              ),
+                              subtitle: Text(evaluation.semester),
+                            ),
+                            for (final subEvaluation in evaluation.subEvaluations)
+                              StatefulBuilder(
+                                builder: (context, setState) {
+                                  final color = subEvaluation.isPassed ? _successColor : _failureColor;
+                                  return Column(
+                                    children: [
+                                      ListTile(
+                                        dense: true,
+                                        leading: IconButton(
+                                          onPressed: () {
+                                            setState(() {
+                                              subEvaluation.isExpanded = !subEvaluation.isExpanded;
+                                            });
+                                          },
+                                          icon: Icon(
+                                            subEvaluation.isExpanded ? Ionicons.chevron_down_outline : Ionicons.chevron_forward_outline,
+                                          ),
+                                        ),
+                                        title: Text(subEvaluation.title),
+                                        trailing: Badge(
+                                          largeSize: 32,
+                                          padding: const EdgeInsets.only(left: 10, right: 10),
+                                          backgroundColor: color.withAlpha(200),
+                                          textColor: Colors.white,
+                                          label: Text(subEvaluation.grade == -1 ? "Teilgenommen" : subEvaluation.grade.toString().replaceAll(".", ",")),
+                                        ),
+                                      ),
+                                      if (subEvaluation.isExpanded)
+                                        Padding(
+                                          padding: const EdgeInsets.only(top: 15, bottom: 15, left: 25, right: 25),
+                                          child: Container(
+                                            padding: const EdgeInsets.only(top: 50, bottom: 10),
+                                            height: 200,
+                                            width: double.infinity,
+                                            decoration: BoxDecoration(
+                                              border: Border.all(
+                                                color: Theme.of(context).colorScheme.primary.withAlpha(220),
+                                                width: 1.5,
+                                              ),
+                                              borderRadius: BorderRadius.circular(10),
+                                            ),
+                                            child: BarChart(
+                                              BarChartData(
+                                                barTouchData: BarTouchData(
+                                                  enabled: false,
+                                                  touchTooltipData: BarTouchTooltipData(
+                                                    getTooltipColor: (group) => Colors.transparent,
+                                                    tooltipPadding: EdgeInsets.zero,
+                                                    tooltipMargin: 8,
+                                                    getTooltipItem: (
+                                                      BarChartGroupData group,
+                                                      int groupIndex,
+                                                      BarChartRodData rod,
+                                                      int rodIndex,
+                                                    ) {
+                                                      return BarTooltipItem(
+                                                        rod.toY.round().toString(),
+                                                        TextStyle(
+                                                          color: subEvaluation.grade.round() == groupIndex + 1 ? color : Theme.of(context).colorScheme.primary,
+                                                          fontWeight: FontWeight.bold,
+                                                        ),
+                                                      );
+                                                    },
+                                                  ),
+                                                ),
+                                                gridData: const FlGridData(show: false),
+                                                borderData: FlBorderData(show: false),
+                                                titlesData: FlTitlesData(
+                                                  show: true,
+                                                  bottomTitles: AxisTitles(
+                                                    sideTitles: SideTitles(
+                                                      showTitles: true,
+                                                      reservedSize: 30,
+                                                      getTitlesWidget: (double value, TitleMeta meta) {
+                                                        return SideTitleWidget(
+                                                          axisSide: meta.axisSide,
+                                                          space: 4,
+                                                          child: Text((value + 1).toInt().toString()),
+                                                        );
+                                                      },
+                                                    ),
+                                                  ),
+                                                  leftTitles: const AxisTitles(
+                                                    sideTitles: SideTitles(showTitles: false),
+                                                  ),
+                                                  topTitles: const AxisTitles(
+                                                    sideTitles: SideTitles(showTitles: false),
+                                                  ),
+                                                  rightTitles: const AxisTitles(
+                                                    sideTitles: SideTitles(showTitles: false),
+                                                  ),
+                                                ),
+                                                barGroups: subEvaluation.gradeDistribution
+                                                    .asMap()
+                                                    .entries
+                                                    .map(
+                                                      (e) => BarChartGroupData(
+                                                        x: e.key,
+                                                        barRods: [
+                                                          BarChartRodData(
+                                                            toY: e.value.toDouble(),
+                                                            color: subEvaluation.grade.round() == e.key + 1 ? color : Theme.of(context).colorScheme.primary,
+                                                          ),
+                                                        ],
+                                                        showingTooltipIndicators: [0],
+                                                      ),
+                                                    )
+                                                    .toList(),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  );
+                                },
+                              ),
+                            const Divider(
+                              height: 1,
+                              thickness: 1,
+                            ),
+                          ],
                         ),
-                        Text(
-                          average.toStringAsFixed(2).replaceAll(".", ","),
-                          style: TextStyle(
-                            fontSize: 24,
-                          ),
+                    ]
+                  : [
+                      SizedBox(
+                        width: double.infinity,
+                        height: MediaQuery.of(context).size.height - 200,
+                        child: Center(
+                          child: snapshot.hasError ? const Text("Ein Fehler ist aufgetreten") : const CircularProgressIndicator(),
                         ),
-                      ],
-                    ),
-                  ),
-                ),
-                for (final evaluation in data.reversed)
-                  Column(
-                    children: [
-                      ListTile(
-                        title: Text(evaluation.title),
-                        trailing: Badge(
-                          largeSize: 32,
-                          padding: const EdgeInsets.only(left: 20, right: 20),
-                          backgroundColor: evaluation.isPassed ? Colors.green : Colors.red,
-                          textColor: Colors.white,
-                          label: Text(evaluation.grade == -1 ? "Teilgenommen" : evaluation.grade.toString().replaceAll(".", ",")),
-                          textStyle: TextStyle(fontSize: 16),
-                        ),
-                        subtitle: Text(evaluation.semester),
-                      ),
-                      for (final subEvaluation in evaluation.subEvaluations)
-                        ListTile(
-                          dense: true,
-                          leading: Icon(Ionicons.chevron_forward_outline),
-                          title: Text(subEvaluation.title),
-                          trailing: Badge(
-                            largeSize: 32,
-                            padding: const EdgeInsets.only(left: 10, right: 10),
-                            backgroundColor: subEvaluation.isPassed ? Colors.green.withAlpha(200) : Colors.red.withAlpha(200),
-                            textColor: Colors.white,
-                            label: Text(subEvaluation.grade == -1 ? "Teilgenommen" : subEvaluation.grade.toString().replaceAll(".", ",")),
-                          ),
-                        ),
-                      const Divider(
-                        height: 1,
-                        thickness: 1,
                       ),
                     ],
-                  ),
-              ],
             ),
           ),
         );

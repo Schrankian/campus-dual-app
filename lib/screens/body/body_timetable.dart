@@ -1,9 +1,7 @@
 import 'package:campus_dual_android/scripts/campus_dual_manager.dart';
 import 'package:campus_dual_android/widgets/day_calendar.dart';
 import 'package:campus_dual_android/widgets/day_picker.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:ionicons/ionicons.dart';
 
 class TimeTable extends StatefulWidget {
@@ -30,7 +28,7 @@ class _TimeTableState extends State<TimeTable> with AutomaticKeepAliveClientMixi
   Future<Map<DateTime, List<Lesson>>> fetchData() async {
     final cd = CampusDualManager();
 
-    final lessons = await cd.fetchTimeTable(currentDate.subtract(Duration(days: bufferSize)), currentDate.add(Duration(days: bufferSize)));
+    final lessons = await cd.fetchTimeTable(currentDate.subtract(const Duration(days: bufferSize)), currentDate.add(const Duration(days: bufferSize)));
 
     dataCache = lessons;
     return lessons;
@@ -88,7 +86,6 @@ class _TimeTableState extends State<TimeTable> with AutomaticKeepAliveClientMixi
               Expanded(
                 child: GestureDetector(
                   onHorizontalDragEnd: (details) {
-                    print(details.primaryVelocity!);
                     if (details.primaryVelocity! > 10) {
                       setState(() {
                         currentDate = currentDate.subtract(const Duration(days: 1));

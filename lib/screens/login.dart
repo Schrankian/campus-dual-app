@@ -29,13 +29,14 @@ class _LoginState extends State<Login> {
     try {
       hash = await cd.scrapeHash(username: username, password: password);
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
       return null;
     }
     return UserCredentials(username, password, hash);
   }
 
   bool isLoading = true;
+  bool passwordVisible = false;
   List<Map<String, String>> lastErrors = [];
 
   ValidationState _validateInput(String username, String password) {
@@ -60,7 +61,7 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
-    ValidationState _state = _validateInput(_usernameController.text, _passwordController.text);
+    ValidationState state = _validateInput(_usernameController.text, _passwordController.text);
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.primary,
       body: SizedBox.expand(
@@ -99,7 +100,7 @@ class _LoginState extends State<Login> {
                   children: [
                     TextField(
                       onChanged: (value) => setState(() {}),
-                      keyboardType: TextInputType.numberWithOptions(decimal: false, signed: true),
+                      keyboardType: const TextInputType.numberWithOptions(decimal: false, signed: true),
                       textInputAction: TextInputAction.next,
                       controller: _usernameController,
                       decoration: InputDecoration(
@@ -107,18 +108,18 @@ class _LoginState extends State<Login> {
                           borderRadius: BorderRadius.circular(20),
                         ),
                         filled: true,
-                        prefixIcon: Icon(Ionicons.person_outline),
+                        prefixIcon: const Icon(Ionicons.person_outline),
                         labelText: "Matrikelnummer",
-                        errorText: _state == ValidationState.wrong
+                        errorText: state == ValidationState.wrong
                             ? "Falsche Anmeldeinformationen"
-                            : _state == ValidationState.lastWrong
+                            : state == ValidationState.lastWrong
                                 ? "Bereits falsch eingegeben"
                                 : null,
                       ),
                     ),
                     TextField(
                       onChanged: (value) => setState(() {}),
-                      obscureText: true,
+                      obscureText: !passwordVisible,
                       textInputAction: TextInputAction.done,
                       controller: _passwordController,
                       decoration: InputDecoration(
@@ -126,13 +127,21 @@ class _LoginState extends State<Login> {
                           borderRadius: BorderRadius.circular(20),
                         ),
                         filled: true,
-                        prefixIcon: Icon(Ionicons.key_outline),
+                        prefixIcon: const Icon(Ionicons.key_outline),
                         labelText: "Passwort",
-                        errorText: _state == ValidationState.wrong
+                        errorText: state == ValidationState.wrong
                             ? "Falsche Anmeldeinformationen"
-                            : _state == ValidationState.lastWrong
+                            : state == ValidationState.lastWrong
                                 ? "Bereits falsch eingegeben"
                                 : null,
+                        suffixIcon: IconButton(
+                          icon: Icon(passwordVisible ? Ionicons.eye_off_outline : Ionicons.eye_outline),
+                          onPressed: () {
+                            setState(() {
+                              passwordVisible = !passwordVisible;
+                            });
+                          },
+                        ),
                       ),
                     ),
                     ElevatedButton(
@@ -143,7 +152,7 @@ class _LoginState extends State<Login> {
                           borderRadius: BorderRadius.circular(20),
                         ),
                       ),
-                      onPressed: _state == ValidationState.valid
+                      onPressed: state == ValidationState.valid
                           ? () async {
                               setState(() {
                                 isLoading = false;
@@ -155,8 +164,8 @@ class _LoginState extends State<Login> {
                               final elapsed = stopwatch.elapsed;
 
                               // Make sure the loading spinner is shown for at least 2 second
-                              if (elapsed < Duration(seconds: 2)) {
-                                await Future.delayed(Duration(seconds: 2) - elapsed);
+                              if (elapsed < const Duration(seconds: 2)) {
+                                await Future.delayed(const Duration(seconds: 2) - elapsed);
                               }
 
                               setState(() {
@@ -177,10 +186,10 @@ class _LoginState extends State<Login> {
                             }
                           : null,
                       child: Padding(
-                        padding: EdgeInsets.only(left: 40, right: 40, top: 15, bottom: 15),
-                        child: _state == ValidationState.loading
-                            ? CircularProgressIndicator()
-                            : Text(
+                        padding: const EdgeInsets.only(left: 40, right: 40, top: 15, bottom: 15),
+                        child: state == ValidationState.loading
+                            ? const CircularProgressIndicator()
+                            : const Text(
                                 "Login",
                                 style: TextStyle(fontSize: 20),
                               ),

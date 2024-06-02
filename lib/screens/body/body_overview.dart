@@ -3,7 +3,6 @@ import 'package:campus_dual_android/scripts/storage_manager.dart';
 import 'package:campus_dual_android/widgets/sync_indicator.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:ionicons/ionicons.dart';
 
 class Overview extends StatefulWidget {
   const Overview({super.key});
@@ -31,20 +30,24 @@ class _OverviewState extends State<Overview> with AutomaticKeepAliveClientMixin<
 
   Stream<BodyOverviewData?> loadData() async* {
     final storage = StorageManager();
-    final storedGeneralUserData = await storage.loadObject("generalUserData");
-    final storedCurrentSemester = await storage.loadInt("currentSemester");
-    final storedCreditPoints = await storage.loadInt("creditPoints");
-    final storedExamStats = await storage.loadObject("examStats");
+    try {
+      final storedGeneralUserData = await storage.loadObject("generalUserData");
+      final storedCurrentSemester = await storage.loadInt("currentSemester");
+      final storedCreditPoints = await storage.loadInt("creditPoints");
+      final storedExamStats = await storage.loadObject("examStats");
 
-    if (storedGeneralUserData != null && storedCurrentSemester != null && storedCreditPoints != null && storedExamStats != null) {
-      final data = BodyOverviewData(
-        generalUserData: GeneralUserData.fromJson(storedGeneralUserData),
-        currentSemester: storedCurrentSemester,
-        creditPoints: storedCreditPoints,
-        examStats: ExamStats.fromJson(storedExamStats),
-      );
-      dataCache = dataCache ?? data;
-      yield data;
+      if (storedGeneralUserData != null && storedCurrentSemester != null && storedCreditPoints != null && storedExamStats != null) {
+        final data = BodyOverviewData(
+          generalUserData: GeneralUserData.fromJson(storedGeneralUserData),
+          currentSemester: storedCurrentSemester,
+          creditPoints: storedCreditPoints,
+          examStats: ExamStats.fromJson(storedExamStats),
+        );
+        dataCache = dataCache ?? data;
+        yield data;
+      }
+    } catch (e) {
+      debugPrint(e.toString());
     }
 
     final cd = await CampusDualManager.withSharedSession();

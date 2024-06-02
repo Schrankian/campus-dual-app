@@ -22,7 +22,7 @@ class _SyncIndicatorState extends State<SyncIndicator> with TickerProviderStateM
     vsync: this,
   );
   late final Animation<Offset> _positionAnimation = Tween<Offset>(
-    begin: Offset(1.5, 0),
+    begin: const Offset(1.5, 0),
     end: Offset.zero,
   ).animate(
     CurvedAnimation(
@@ -61,6 +61,12 @@ class _SyncIndicatorState extends State<SyncIndicator> with TickerProviderStateM
       );
     }
     if (widget.error != null && widget.error is ClientException && widget.error.toString().contains('Connection refused')) {
+      Future.delayed(const Duration(seconds: 3), () {
+        // Check again for condition, because the state could have been changed if the user reloaded too early
+        if (widget.error != null && widget.error is ClientException && widget.error.toString().contains('Connection refused')) {
+          _positionController.reverse();
+        }
+      });
       return buildContainer(
         Colors.red,
         Icon(
@@ -72,6 +78,12 @@ class _SyncIndicatorState extends State<SyncIndicator> with TickerProviderStateM
       );
     }
     if (widget.state == ConnectionState.done) {
+      Future.delayed(const Duration(seconds: 3), () {
+        // Check again for condition, because the state could have been changed if the user reloaded too early
+        if (widget.state == ConnectionState.done) {
+          _positionController.reverse();
+        }
+      });
       return buildContainer(
         Colors.red,
         Icon(
@@ -105,7 +117,7 @@ class _SyncIndicatorState extends State<SyncIndicator> with TickerProviderStateM
         width: 150,
         decoration: BoxDecoration(
             color: color,
-            borderRadius: BorderRadius.only(
+            borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(20),
               bottomLeft: Radius.circular(20),
             ),

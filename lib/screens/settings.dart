@@ -22,7 +22,7 @@ class _SettingsState extends State<Settings> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Row(mainAxisSize: MainAxisSize.max),
+              const Row(mainAxisSize: MainAxisSize.max),
               InkWell(
                 onTap: () {
                   mainBus.emit(event: "Logout");

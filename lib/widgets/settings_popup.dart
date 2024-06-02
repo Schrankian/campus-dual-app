@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:ionicons/ionicons.dart';
 
 class SettingsPopup extends StatefulWidget {
-  SettingsPopup({
+  const SettingsPopup({
+    super.key,
     required this.icons,
     required this.onIconTapped,
     required this.child,
   });
   final List<IconData>? icons;
-  ValueChanged<int>? onIconTapped;
+  final ValueChanged<int>? onIconTapped;
   final Widget child;
 
   @override
@@ -42,12 +42,6 @@ class SettingsPopupState extends State<SettingsPopup> with TickerProviderStateMi
           children: [
             AnimatedBuilder(
               animation: _controller,
-              child: ModalBarrier(
-                color: Theme.of(context).colorScheme.onBackground.withAlpha(130),
-                onDismiss: (() {
-                  _controller.reverse();
-                }),
-              ),
               builder: ((context, child) {
                 return ScaleTransition(
                   scale: CurvedAnimation(
@@ -57,12 +51,18 @@ class SettingsPopupState extends State<SettingsPopup> with TickerProviderStateMi
                   child: FadeTransition(
                     opacity: CurvedAnimation(
                       parent: _controller,
-                      curve: Interval(0.0, 1, curve: Curves.easeOut),
+                      curve: const Interval(0.0, 1, curve: Curves.easeOut),
                     ),
                     child: child,
                   ),
                 );
               }),
+              child: ModalBarrier(
+                color: Theme.of(context).colorScheme.onSurface.withAlpha(130),
+                onDismiss: (() {
+                  _controller.reverse();
+                }),
+              ),
             ),
             CenterAbout(
               position: Offset(offset.dx, offset.dy - widget.icons!.length * 35.0 - 25),
@@ -156,7 +156,7 @@ class OverlayBuilder extends StatefulWidget {
   });
 
   @override
-  _OverlayBuilderState createState() => _OverlayBuilderState();
+  State<OverlayBuilder> createState() => _OverlayBuilderState();
 }
 
 class _OverlayBuilderState extends State<OverlayBuilder> {
@@ -202,7 +202,7 @@ class _OverlayBuilderState extends State<OverlayBuilder> {
   }
 
   void addToOverlay(OverlayEntry entry) async {
-    Overlay.of(context)!.insert(entry);
+    Overlay.of(context).insert(entry);
   }
 
   void hideOverlay() {

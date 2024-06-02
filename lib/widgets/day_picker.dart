@@ -53,7 +53,7 @@ class _DayPickerState extends State<DayPicker> {
                 }
               },
               child: ListView.separated(
-                physics: NeverScrollableScrollPhysics(),
+                physics: const NeverScrollableScrollPhysics(),
                 scrollDirection: Axis.horizontal,
                 shrinkWrap: true,
                 itemCount: 7,

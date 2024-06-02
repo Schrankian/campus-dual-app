@@ -5,34 +5,34 @@ class Themes {
   late ThemeData _cleanDark;
 
   Themes() {
-    final ColorScheme _colorsLight = ColorScheme.fromSeed(
+    final ColorScheme colorsLight = ColorScheme.fromSeed(
       seedColor: const Color.fromARGB(255, 59, 81, 159),
       brightness: Brightness.light,
     );
-    final ColorScheme _colorsDark = ColorScheme.fromSeed(
-      seedColor: Color.fromARGB(255, 4, 17, 70),
+    final ColorScheme colorsDark = ColorScheme.fromSeed(
+      seedColor: const Color.fromARGB(255, 4, 17, 70),
       brightness: Brightness.dark,
     );
 
     _cleanLight = ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      colorScheme: _colorsLight,
-      scaffoldBackgroundColor: _colorsLight.background,
+      colorScheme: colorsLight,
+      scaffoldBackgroundColor: colorsLight.surface,
       fontFamily: 'Montserrat',
       appBarTheme: AppBarTheme(
-        backgroundColor: _colorsLight.background,
+        backgroundColor: colorsLight.surface,
         elevation: 0,
         centerTitle: true,
         titleTextStyle: TextStyle(
           fontSize: 33,
           overflow: TextOverflow.visible,
-          color: _colorsLight.onBackground,
+          color: colorsLight.onSurface,
         ),
       ),
-      switchTheme: SwitchThemeData(),
+      switchTheme: const SwitchThemeData(),
       checkboxTheme: CheckboxThemeData(
-        side: MaterialStateBorderSide.resolveWith((states) => BorderSide(
+        side: WidgetStateBorderSide.resolveWith((states) => BorderSide(
               width: 1.0,
               color: _cleanLight.colorScheme.primary,
             )),
@@ -44,22 +44,22 @@ class Themes {
     _cleanDark = ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      colorScheme: _colorsDark,
-      scaffoldBackgroundColor: _colorsDark.background,
+      colorScheme: colorsDark,
+      scaffoldBackgroundColor: colorsDark.surface,
       fontFamily: 'Montserrat',
       appBarTheme: AppBarTheme(
-        backgroundColor: _colorsDark.background,
+        backgroundColor: colorsDark.surface,
         elevation: 0,
         centerTitle: true,
         titleTextStyle: TextStyle(
           fontSize: 33,
           overflow: TextOverflow.visible,
-          color: _colorsDark.onBackground,
+          color: colorsDark.onSurface,
         ),
       ),
-      switchTheme: SwitchThemeData(),
+      switchTheme: const SwitchThemeData(),
       checkboxTheme: CheckboxThemeData(
-        side: MaterialStateBorderSide.resolveWith((states) => BorderSide(
+        side: WidgetStateBorderSide.resolveWith((states) => BorderSide(
               width: 1.0,
               color: _cleanDark.colorScheme.primary,
             )),
