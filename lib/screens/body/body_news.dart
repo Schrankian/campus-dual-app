@@ -48,12 +48,6 @@ class _NewsState extends State<News> with AutomaticKeepAliveClientMixin<News> {
         builder: (context, snapshot) {
           final data = snapshot.hasError ? dataCache : snapshot.data;
           final dataHasArrived = data != null;
-          // TODO add better loading animation
-          if (!dataHasArrived) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
 
           return Scaffold(
             appBar: AppBar(
@@ -70,57 +64,67 @@ class _NewsState extends State<News> with AutomaticKeepAliveClientMixin<News> {
               physics: const ScrollPhysics(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.only(left: 16, top: 16, bottom: 8),
-                    child: Text(
-                      "Anstehende Prüfungen:",
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  for (final upcomingItem in data.upcoming)
-                    ListTile(
-                      leading: Text(upcomingItem.date.toDateString()),
-                      title: Text(upcomingItem.moduleTitle),
-                      trailing: Text(upcomingItem.type),
-                      subtitle: Text("Raum: ${upcomingItem.room} | ${upcomingItem.begin.toTimeDiff(upcomingItem.end)} "),
-                    ),
-                  if (data.upcoming.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.only(top: 16, bottom: 16),
-                      child: Center(
-                        child: Text(
-                          "Keine Anstehenden Prüfungen",
+                children: dataHasArrived
+                    ? [
+                        const Padding(
+                          padding: EdgeInsets.only(left: 16, top: 16, bottom: 8),
+                          child: Text(
+                            "Anstehende Prüfungen:",
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
                         ),
-                      ),
-                    ),
-                  const Padding(
-                    padding: EdgeInsets.only(left: 16, top: 16, bottom: 8),
-                    child: Text(
-                      "Letzte Ergebnisse:",
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  for (final latestItem in data.latest)
-                    ListTile(
-                      trailing: Text(latestItem.dateGraded.toDateString()),
-                      title: Text(latestItem.moduleTitle),
-                      leading: Text(
-                        latestItem.grade.toString().replaceAll(".", ","),
-                        style: TextStyle(fontSize: 20),
-                      ),
-                      subtitle: Text(latestItem.status),
-                    ),
-                  if (data.latest.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.only(top: 16, bottom: 16),
-                      child: Center(
-                        child: Text(
-                          "Keine letzten Ergebnisse",
+                        for (final upcomingItem in data.upcoming)
+                          ListTile(
+                            leading: Text(upcomingItem.date.toDateString()),
+                            title: Text(upcomingItem.moduleTitle),
+                            trailing: Text(upcomingItem.type),
+                            subtitle: Text("Raum: ${upcomingItem.room} | ${upcomingItem.begin.toTimeDiff(upcomingItem.end)} "),
+                          ),
+                        if (data.upcoming.isEmpty)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 16, bottom: 16),
+                            child: Center(
+                              child: Text(
+                                "Keine Anstehenden Prüfungen",
+                              ),
+                            ),
+                          ),
+                        const Padding(
+                          padding: EdgeInsets.only(left: 16, top: 16, bottom: 8),
+                          child: Text(
+                            "Letzte Ergebnisse:",
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
                         ),
-                      ),
-                    ),
-                ],
+                        for (final latestItem in data.latest)
+                          ListTile(
+                            trailing: Text(latestItem.dateGraded.toDateString()),
+                            title: Text(latestItem.moduleTitle),
+                            leading: Text(
+                              latestItem.grade.toString().replaceAll(".", ","),
+                              style: TextStyle(fontSize: 20),
+                            ),
+                            subtitle: Text(latestItem.status),
+                          ),
+                        if (data.latest.isEmpty)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 16, bottom: 16),
+                            child: Center(
+                              child: Text(
+                                "Keine letzten Ergebnisse",
+                              ),
+                            ),
+                          ),
+                      ]
+                    : [
+                        SizedBox(
+                          width: double.infinity,
+                          height: MediaQuery.of(context).size.height - 200,
+                          child: Center(
+                            child: snapshot.hasError ? Text("Ein Fehler ist aufgetreten") : CircularProgressIndicator(),
+                          ),
+                        ),
+                      ],
               ),
             ),
           );

@@ -61,6 +61,12 @@ class _SyncIndicatorState extends State<SyncIndicator> with TickerProviderStateM
       );
     }
     if (widget.error != null && widget.error is ClientException && widget.error.toString().contains('Connection refused')) {
+      Future.delayed(const Duration(seconds: 3), () {
+        // Check again for condition, because the state could have been changed if the user reloaded too early
+        if (widget.error != null && widget.error is ClientException && widget.error.toString().contains('Connection refused')) {
+          _positionController.reverse();
+        }
+      });
       return buildContainer(
         Colors.red,
         Icon(
@@ -72,6 +78,12 @@ class _SyncIndicatorState extends State<SyncIndicator> with TickerProviderStateM
       );
     }
     if (widget.state == ConnectionState.done) {
+      Future.delayed(const Duration(seconds: 3), () {
+        // Check again for condition, because the state could have been changed if the user reloaded too early
+        if (widget.state == ConnectionState.done) {
+          _positionController.reverse();
+        }
+      });
       return buildContainer(
         Colors.red,
         Icon(
