@@ -24,7 +24,7 @@ class _LoginState extends State<Login> {
   final TextEditingController _passwordController = TextEditingController();
 
   Future<UserCredentials?> _testCredentials(String username, String password) async {
-    if (username == "1111" && password == "1111") {
+    if (username == "11111" && password == "11111") {
       return UserCredentials(username, password, "hashy", true);
     }
     final cd = CampusDualManager(allowNoCreds: true);
