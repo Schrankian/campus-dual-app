@@ -20,8 +20,9 @@ class UserCredentials {
   final String username;
   final String password;
   final String hash;
+  final bool isDummy;
 
-  UserCredentials(this.username, this.password, this.hash);
+  UserCredentials(this.username, this.password, this.hash, this.isDummy);
 
   String addAuthParams(String uri) {
     return addQueryParams(uri, {"user": username, "userid": username, "hash": hash});
@@ -56,6 +57,15 @@ class GeneralUserData {
       lastName: json['lastName'] as String,
       group: json['group'] as String,
       course: json['course'] as String,
+    );
+  }
+
+  static GeneralUserData dummy() {
+    return const GeneralUserData(
+      firstName: "Max",
+      lastName: "Mustermann",
+      group: "2IT20-2",
+      course: "Informationstechnologie/SR Informationstechnik",
     );
   }
 }
@@ -129,6 +139,21 @@ class Evaluation {
       semester: json['semester'] as String,
     );
   }
+
+  static Evaluation dummy() {
+    return Evaluation(
+      module: "AWP",
+      title: "Algorithmen und Datenstrukturen",
+      type: "K",
+      grade: 1.3,
+      gradeDistribution: [6, 2, 6, 2, 0],
+      isPassed: true,
+      dateGraded: DateTime.now(),
+      dateAnnounced: DateTime.now(),
+      isPartlyGraded: false,
+      semester: "WS 2021/22",
+    );
+  }
 }
 
 class MasterEvaluation {
@@ -175,6 +200,19 @@ class MasterEvaluation {
       semester: json['semester'] as String,
       credits: json['credits'] as int,
       subEvaluations: (json['subEvaluations'] as List<dynamic>).map((e) => Evaluation.fromJson(e as Map<String, dynamic>)).toList(),
+    );
+  }
+
+  static MasterEvaluation dummy() {
+    return MasterEvaluation(
+      module: "AWP",
+      title: "Algorithmen und Datenstrukturen",
+      grade: 1.3,
+      isPassed: true,
+      isPartlyGraded: false,
+      semester: "WS 2021/22",
+      credits: 5,
+      subEvaluations: [Evaluation.dummy(), Evaluation.dummy()],
     );
   }
 }
@@ -235,6 +273,18 @@ class ExamStats {
       modules: json['modules'] as int,
       booked: json['booked'] as int,
       mBooked: json['mBooked'] as int,
+    );
+  }
+
+  static ExamStats dummy() {
+    return const ExamStats(
+      exams: 10,
+      success: 8,
+      failure: 2,
+      wpCount: 1,
+      modules: 5,
+      booked: 3,
+      mBooked: 1,
     );
   }
 }
@@ -415,6 +465,20 @@ class UpcomingExam {
       room: json['room'] as String,
     );
   }
+
+  static UpcomingExam dummy() {
+    return UpcomingExam(
+      begin: DateTime(2022, 1, 1, 8, 0),
+      end: DateTime(2022, 1, 1, 10, 0),
+      date: DateTime(2022, 1, 1),
+      comment: "Keine Kommentare",
+      instructor: "Max Mustermann",
+      moduleShort: "AWP",
+      moduleTitle: "Algorithmen und Datenstrukturen",
+      type: "Klausur",
+      room: "A123",
+    );
+  }
 }
 
 class LatestExam {
@@ -496,6 +560,20 @@ class LatestExam {
       status: json['status'] as String,
     );
   }
+
+  static LatestExam dummy() {
+    return LatestExam(
+      moduleShort: "AWP",
+      moduleTitle: "Algorithmen und Datenstrukturen",
+      moduleType: "K",
+      grade: 1.3,
+      semester: "WS 2021/22",
+      dateGraded: DateTime.now(),
+      dateBooked: DateTime.now(),
+      examType: "K",
+      status: "Bestanden",
+    );
+  }
 }
 
 class Notifications {
@@ -551,6 +629,16 @@ class Notifications {
         upcoming: (json['upcoming'] as List<dynamic>).map((e) => UpcomingExam.fromJson(e as Map<String, dynamic>)).toList(),
         latest: (json['latest'] as List<dynamic>).map((e) => LatestExam.fromJson(e as Map<String, dynamic>)).toList());
   }
+
+  static Notifications dummy() {
+    return Notifications(
+      electives: 2,
+      exams: 3,
+      semester: 3,
+      upcoming: [UpcomingExam.dummy(), UpcomingExam.dummy()],
+      latest: [LatestExam.dummy(), LatestExam.dummy()],
+    );
+  }
 }
 
 class CampusDualManager {
@@ -583,6 +671,7 @@ class CampusDualManager {
 
   static Future<CampusDualManager> withSharedSession() async {
     final manager = CampusDualManager();
+    if (userCreds!.isDummy) return manager;
     manager.sharedSession = await manager._initAuthSession();
     return manager;
   }
@@ -658,24 +747,28 @@ class CampusDualManager {
   }
 
   Future<ExamStats> fetchExamStats() async {
+    if (userCreds!.isDummy) return ExamStats.dummy();
     final response = await _fetch(userCreds!.addAuthParams("https://selfservice.campus-dual.de/dash/getexamstats"));
 
     return ExamStats.fromData(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   Future<int> fetchCurrentSemester() async {
+    if (userCreds!.isDummy) return 3;
     final response = await _fetch(userCreds!.addAuthParams("https://selfservice.campus-dual.de/dash/getfs"));
 
     return int.parse(response.body.replaceAll(" ", "").replaceAll("\"", ""));
   }
 
   Future<int> fetchCreditPoints() async {
+    if (userCreds!.isDummy) return 40;
     final response = await _fetch(userCreds!.addAuthParams("https://selfservice.campus-dual.de/dash/getcp"));
 
     return int.parse(response.body);
   }
 
   Future<Map<DateTime, List<Lesson>>> fetchTimeTable(DateTime start, DateTime end) async {
+    if (userCreds!.isDummy) return {};
     final response = await _fetch(addQueryParams(userCreds!.addAuthParams("https://selfservice.campus-dual.de/room/json"), {
       "start": (start.millisecondsSinceEpoch / 1000).toString(),
       "end": (end.millisecondsSinceEpoch / 1000).toString(),
@@ -707,12 +800,14 @@ class CampusDualManager {
   }
 
   Future<Notifications> fetchNotifications() async {
+    if (userCreds!.isDummy) return Notifications.dummy();
     final response = await _fetch(userCreds!.addAuthParams("https://selfservice.campus-dual.de/dash/getreminders"));
 
     return Notifications.fromData(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   Future<List<int>> fetchGradeDistribution(String module, String year, String id) async {
+    if (userCreds!.isDummy) return [6, 2, 6, 2, 0];
     final response = await _fetch(addQueryParams("https://selfservice.campus-dual.de/acwork/mscoredist", {"module": module, "peryr": year, "perid": id.padLeft(3, "0")}));
 
     final result = jsonDecode(response.body) as List<dynamic>;
@@ -720,6 +815,7 @@ class CampusDualManager {
   }
 
   Future<GeneralUserData> scrapeGeneralUserData() async {
+    if (userCreds!.isDummy) return GeneralUserData.dummy();
     final session = sharedSession ?? await _initAuthSession();
     final doc = await _scrape(session, "https://selfservice.campus-dual.de/index/login");
 
@@ -789,6 +885,7 @@ class CampusDualManager {
   }
 
   Future<List<MasterEvaluation>> scrapeEvaluations() async {
+    if (userCreds!.isDummy) return [MasterEvaluation.dummy()];
     final session = sharedSession ?? await _initAuthSession();
     final doc = await _scrape(session, "https://selfservice.campus-dual.de/acwork/index");
 

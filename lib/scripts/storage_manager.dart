@@ -56,11 +56,12 @@ class StorageManager {
     final String username = _getData(disk, "username") ?? "";
     final String password = _getData(disk, "password") ?? "";
     final String hash = _getData(disk, "hash") ?? "";
+    final bool isDummy = _getData(disk, "isDummy") ?? false;
 
     if (username == "" || hash == "" || password == "") {
       return null;
     }
-    UserCredentials creds = UserCredentials(username, password, hash);
+    UserCredentials creds = UserCredentials(username, password, hash, isDummy);
     return creds;
   }
 
@@ -69,6 +70,7 @@ class StorageManager {
     _saveData(disk, "username", data.username);
     _saveData(disk, "password", data.password);
     _saveData(disk, "hash", data.hash);
+    _saveData(disk, "isDummy", data.isDummy);
   }
 
   Future<ThemeMode> loadTheme() async {
