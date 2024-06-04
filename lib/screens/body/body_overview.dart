@@ -50,28 +50,24 @@ class _OverviewState extends State<Overview> with AutomaticKeepAliveClientMixin<
       debugPrint(e.toString());
     }
 
-    try {
-      final cd = await CampusDualManager.withSharedSession();
-      final generalUserData = await cd.scrapeGeneralUserData();
-      storage.saveObject("generalUserData", generalUserData);
-      final currentSemester = await cd.fetchCurrentSemester();
-      storage.saveInt("currentSemester", currentSemester);
-      final creditPoints = await cd.fetchCreditPoints();
-      storage.saveInt("creditPoints", creditPoints);
-      final examStats = await cd.fetchExamStats();
-      storage.saveObject("examStats", examStats);
+    final cd = await CampusDualManager.withSharedSession();
+    final generalUserData = await cd.scrapeGeneralUserData();
+    storage.saveObject("generalUserData", generalUserData);
+    final currentSemester = await cd.fetchCurrentSemester();
+    storage.saveInt("currentSemester", currentSemester);
+    final creditPoints = await cd.fetchCreditPoints();
+    storage.saveInt("creditPoints", creditPoints);
+    final examStats = await cd.fetchExamStats();
+    storage.saveObject("examStats", examStats);
 
-      final data = BodyOverviewData(
-        generalUserData: generalUserData,
-        currentSemester: currentSemester,
-        creditPoints: creditPoints,
-        examStats: examStats,
-      );
-      dataCache = data;
-      yield data;
-    } catch (e) {
-      debugPrint(e.toString());
-    }
+    final data = BodyOverviewData(
+      generalUserData: generalUserData,
+      currentSemester: currentSemester,
+      creditPoints: creditPoints,
+      examStats: examStats,
+    );
+    dataCache = data;
+    yield data;
   }
 
   @override
