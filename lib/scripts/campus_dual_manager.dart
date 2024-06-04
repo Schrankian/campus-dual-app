@@ -74,6 +74,19 @@ class Evaluation {
 
   bool isExpanded = false;
 
+  String get typeWord {
+    return switch (type) {
+      "K" => "Klausur",
+      "PR" => "Präsentation",
+      "MF" => "Mündliches Fachgespräch",
+      "MP" => "Mündliche Prüfung",
+      "PA" => "Projektarbeit",
+      "PE" => "Programmentwurf",
+      "" => "Unbekannt",
+      _ => type,
+    };
+  }
+
   Evaluation({
     required this.module,
     required this.title,
@@ -796,10 +809,12 @@ class CampusDualManager {
         final semester = element.children.last.text.trim();
         evaluations.add(MasterEvaluation(module: module, title: title, grade: grade, isPassed: isPassed, isPartlyGraded: isPartlyGraded, semester: semester, credits: credits ?? 0, subEvaluations: <Evaluation>[]));
       } else if (!element.className.contains("head")) {
-        final moduleTitleTypeString = element.children[0].text.trim().split(" ");
-        final module = moduleTitleTypeString[moduleTitleTypeString.length - 1].replaceAll(r'\(|\)', "");
-        final title = moduleTitleTypeString.sublist(0, moduleTitleTypeString.length - 2).join(" ");
-        final type = moduleTitleTypeString[moduleTitleTypeString.length - 2].replaceAll(r'\(|\)', "");
+        final titleRegex = RegExp(r'^[^ ]+ (.*?)(?: ?\((.*?)\))? \((.*?)\)$');
+        final match = titleRegex.firstMatch(element.children[0].text.trim());
+
+        final title = match!.group(1)!.trim();
+        final type = match.group(2)?.trim() ?? '';
+        final module = match.group(3)!.trim();
 
         final gradeElement = element.children[1].querySelector(".mscore")!;
         final grade = double.tryParse(gradeElement.text.trim().replaceAll(",", ".")) ?? -1;
