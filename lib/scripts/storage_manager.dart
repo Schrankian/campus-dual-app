@@ -9,7 +9,6 @@ enum Type { int, double, string, bool, stringList }
 
 class StorageManager {
   dynamic _getData(SharedPreferences source, String key, {Type? type}) {
-    print(source.getKeys());
     if (type != null) {
       switch (type) {
         case Type.int:
