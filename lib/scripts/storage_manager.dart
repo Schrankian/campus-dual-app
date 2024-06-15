@@ -1,8 +1,9 @@
 import "dart:convert";
 
-import "package:campus_dual_android/scripts/campus_dual_manager.dart";
+import "package:campus_dual_android/scripts/campus_dual_manager.models.dart";
 import "package:flutter/material.dart";
 import "package:shared_preferences/shared_preferences.dart";
+import "package:flutter_secure_storage/flutter_secure_storage.dart";
 
 enum Type { int, double, string, bool, stringList }
 
@@ -49,26 +50,30 @@ class StorageManager {
   void clearAll() async {
     final disk = await SharedPreferences.getInstance();
     disk.clear();
+    const secureDisk = FlutterSecureStorage();
+    await secureDisk.deleteAll();
   }
 
   Future<UserCredentials?> loadUserAuthData() async {
-    final disk = await SharedPreferences.getInstance();
-    final String username = _getData(disk, "username") ?? "";
-    final String password = _getData(disk, "password") ?? "";
-    final String hash = _getData(disk, "hash") ?? "";
+    const secureDisk = FlutterSecureStorage();
+    final String username = await secureDisk.read(key: "username") ?? "";
+    final String password = await secureDisk.read(key: "password") ?? "";
+    final String hash = await secureDisk.read(key: "hash") ?? "";
+    final bool isDummy = bool.tryParse(await secureDisk.read(key: "isDummy") ?? "") ?? false;
 
     if (username == "" || hash == "" || password == "") {
       return null;
     }
-    UserCredentials creds = UserCredentials(username, password, hash);
+    UserCredentials creds = UserCredentials(username, password, hash, isDummy);
     return creds;
   }
 
   void saveUserAuthData(UserCredentials data) async {
-    final disk = await SharedPreferences.getInstance();
-    _saveData(disk, "username", data.username);
-    _saveData(disk, "password", data.password);
-    _saveData(disk, "hash", data.hash);
+    const secureDisk = FlutterSecureStorage();
+    secureDisk.write(key: "username", value: data.username);
+    secureDisk.write(key: "password", value: data.password);
+    secureDisk.write(key: "hash", value: data.hash);
+    secureDisk.write(key: "isDummy", value: data.isDummy.toString());
   }
 
   Future<ThemeMode> loadTheme() async {

@@ -53,7 +53,7 @@ class _SyncStarterState extends State<SyncStarter> with SingleTickerProviderStat
       onPointerUp: (details) {
         if (isThreshold) {
           widget.onSync();
-          Future.delayed(const Duration(milliseconds: 700), () {
+          Future.delayed(const Duration(milliseconds: 200), () {
             setState(() {
               isSyncing = false;
               _controller.reset();

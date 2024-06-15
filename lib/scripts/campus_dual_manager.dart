@@ -1,544 +1,9 @@
 import 'dart:convert';
-
-import 'package:flutter/material.dart';
 import 'package:html/dom.dart';
-import '../extensions/color.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_cookie_store/http_cookie_store.dart';
 import 'package:html/parser.dart';
-
-String addQueryParams(String uri, Map<String, String> params) {
-  // Check if the uri already has a query
-  if (uri.contains("?")) {
-    return "$uri&${params.entries.map((e) => "${e.key}=${e.value}").join("&")}";
-  } else {
-    return "$uri?${params.entries.map((e) => "${e.key}=${e.value}").join("&")}";
-  }
-}
-
-class UserCredentials {
-  final String username;
-  final String password;
-  final String hash;
-
-  UserCredentials(this.username, this.password, this.hash);
-
-  String addAuthParams(String uri) {
-    return addQueryParams(uri, {"user": username, "userid": username, "hash": hash});
-  }
-}
-
-class GeneralUserData {
-  final String firstName;
-  final String lastName;
-  final String group;
-  final String course;
-
-  const GeneralUserData({
-    required this.firstName,
-    required this.lastName,
-    required this.group,
-    required this.course,
-  });
-
-  Map<String, dynamic> toJson() {
-    return {
-      'firstName': firstName,
-      'lastName': lastName,
-      'group': group,
-      'course': course,
-    };
-  }
-
-  factory GeneralUserData.fromJson(Map<String, dynamic> json) {
-    return GeneralUserData(
-      firstName: json['firstName'] as String,
-      lastName: json['lastName'] as String,
-      group: json['group'] as String,
-      course: json['course'] as String,
-    );
-  }
-}
-
-class Evaluation {
-  final String module;
-  final String title;
-  final String type;
-  final double grade;
-  final List<int> gradeDistribution;
-  final bool isPassed;
-  final DateTime dateGraded;
-  final DateTime dateAnnounced;
-  final bool isPartlyGraded;
-  final String semester;
-
-  bool isExpanded = false;
-
-  Evaluation({
-    required this.module,
-    required this.title,
-    required this.type,
-    required this.grade,
-    required this.gradeDistribution,
-    required this.isPassed,
-    required this.dateGraded,
-    required this.dateAnnounced,
-    required this.isPartlyGraded,
-    required this.semester,
-  });
-
-  Map<String, dynamic> toJson() {
-    return {
-      'module': module,
-      'title': title,
-      'type': type,
-      'grade': grade,
-      'gradeDistribution': gradeDistribution,
-      'isPassed': isPassed,
-      'dateGraded': dateGraded.toIso8601String(),
-      'dateAnnounced': dateAnnounced.toIso8601String(),
-      'isPartlyGraded': isPartlyGraded,
-      'semester': semester,
-    };
-  }
-
-  factory Evaluation.fromJson(Map<String, dynamic> json) {
-    return Evaluation(
-      module: json['module'] as String,
-      title: json['title'] as String,
-      type: json['type'] as String,
-      grade: json['grade'] as double,
-      gradeDistribution: json['gradeDistribution'].cast<int>(),
-      isPassed: json['isPassed'] as bool,
-      dateGraded: DateTime.parse(json['dateGraded'] as String),
-      dateAnnounced: DateTime.parse(json['dateAnnounced'] as String),
-      isPartlyGraded: json['isPartlyGraded'] as bool,
-      semester: json['semester'] as String,
-    );
-  }
-}
-
-class MasterEvaluation {
-  final String module;
-  final String title;
-  final double grade;
-  final bool isPassed;
-  final bool isPartlyGraded;
-  final String semester;
-  final int credits;
-  final List<Evaluation> subEvaluations;
-
-  const MasterEvaluation({
-    required this.module,
-    required this.title,
-    required this.grade,
-    required this.isPassed,
-    required this.isPartlyGraded,
-    required this.semester,
-    required this.credits,
-    required this.subEvaluations,
-  });
-
-  Map<String, dynamic> toJson() {
-    return {
-      'module': module,
-      'title': title,
-      'grade': grade,
-      'isPassed': isPassed,
-      'isPartlyGraded': isPartlyGraded,
-      'semester': semester,
-      'credits': credits,
-      'subEvaluations': subEvaluations.map((e) => e.toJson()).toList(),
-    };
-  }
-
-  factory MasterEvaluation.fromJson(Map<String, dynamic> json) {
-    return MasterEvaluation(
-      module: json['module'] as String,
-      title: json['title'] as String,
-      grade: json['grade'] as double,
-      isPassed: json['isPassed'] as bool,
-      isPartlyGraded: json['isPartlyGraded'] as bool,
-      semester: json['semester'] as String,
-      credits: json['credits'] as int,
-      subEvaluations: (json['subEvaluations'] as List<dynamic>).map((e) => Evaluation.fromJson(e as Map<String, dynamic>)).toList(),
-    );
-  }
-}
-
-class ExamStats {
-  final int exams;
-  final int success;
-  final int failure;
-  final int wpCount;
-  final int modules;
-  final int booked;
-  final int mBooked;
-
-  const ExamStats({
-    required this.exams,
-    required this.success,
-    required this.failure,
-    required this.wpCount,
-    required this.modules,
-    required this.booked,
-    required this.mBooked,
-  });
-
-  factory ExamStats.fromData(Map<String, dynamic> json) {
-    return switch (json) {
-      {
-        'EXAMS': int exams,
-        'SUCCESS': int success,
-        'FAILURE': int failure,
-        'WPCOUNT': int wpCount,
-        'MODULES': int modules,
-        'BOOKED': int booked,
-        'MBOOKED': int mBooked,
-      } =>
-        ExamStats(exams: exams, success: success, failure: failure, wpCount: wpCount, modules: modules, booked: booked, mBooked: mBooked),
-      _ => throw const FormatException('Unexpected JSON type for ExamStats'),
-    };
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'exams': exams,
-      'success': success,
-      'failure': failure,
-      'wpCount': wpCount,
-      'modules': modules,
-      'booked': booked,
-      'mBooked': mBooked,
-    };
-  }
-
-  factory ExamStats.fromJson(Map<String, dynamic> json) {
-    return ExamStats(
-      exams: json['exams'] as int,
-      success: json['success'] as int,
-      failure: json['failure'] as int,
-      wpCount: json['wpCount'] as int,
-      modules: json['modules'] as int,
-      booked: json['booked'] as int,
-      mBooked: json['mBooked'] as int,
-    );
-  }
-}
-
-class Lesson {
-  final String title;
-  final DateTime start;
-  final DateTime end;
-  final bool allDay;
-  final String description;
-  final Color color;
-  final bool editable;
-  final String room;
-  final String sRoom;
-  final String instructor;
-  final String sInstructor;
-  final String remarks;
-  final String type = "Vorlesung";
-
-  const Lesson({
-    required this.title,
-    required this.start,
-    required this.end,
-    required this.allDay,
-    required this.description,
-    required this.color,
-    required this.editable,
-    required this.room,
-    required this.sRoom,
-    required this.instructor,
-    required this.sInstructor,
-    required this.remarks,
-  });
-
-  factory Lesson.fromData(Map<String, dynamic> json) {
-    return switch (json) {
-      {
-        'title': String title,
-        'start': int start,
-        'end': int end,
-        'allDay': bool allDay,
-        'description': String description,
-        'color': String color,
-        'editable': bool editable,
-        'room': String room,
-        'sroom': String sRoom,
-        'instructor': String instructor,
-        'sinstructor': String sInstructor,
-        'remarks': String remarks,
-      } =>
-        Lesson(
-          title: title,
-          start: DateTime.fromMillisecondsSinceEpoch(start * 1000),
-          end: DateTime.fromMillisecondsSinceEpoch(end * 1000),
-          allDay: allDay,
-          description: description,
-          color: HexColor.fromHex(color),
-          editable: editable,
-          room: room,
-          sRoom: sRoom,
-          instructor: instructor,
-          sInstructor: sInstructor,
-          remarks: remarks,
-        ),
-      _ => throw const FormatException('Unexpected JSON type for Lesson'),
-    };
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'title': title,
-      'start': start.toIso8601String(),
-      'end': end.toIso8601String(),
-      'allDay': allDay,
-      'description': description,
-      'color': color.toHex(),
-      'editable': editable,
-      'room': room,
-      'sRoom': sRoom,
-      'instructor': instructor,
-      'sInstructor': sInstructor,
-      'remarks': remarks,
-    };
-  }
-
-  factory Lesson.fromJson(Map<String, dynamic> json) {
-    return Lesson(
-      title: json['title'] as String,
-      start: DateTime.parse(json['start'] as String),
-      end: DateTime.parse(json['end'] as String),
-      allDay: json['allDay'] as bool,
-      description: json['description'] as String,
-      color: HexColor.fromHex(json['color'] as String),
-      editable: json['editable'] as bool,
-      room: json['room'] as String,
-      sRoom: json['sRoom'] as String,
-      instructor: json['instructor'] as String,
-      sInstructor: json['sInstructor'] as String,
-      remarks: json['remarks'] as String,
-    );
-  }
-}
-
-class UpcomingExam {
-  final DateTime begin;
-  final DateTime end;
-  final DateTime date;
-  final String comment;
-  final String instructor;
-  final String moduleShort;
-  final String moduleTitle;
-  final String type;
-  final String room;
-
-  const UpcomingExam({
-    required this.begin,
-    required this.end,
-    required this.date,
-    required this.comment,
-    required this.instructor,
-    required this.moduleShort,
-    required this.moduleTitle,
-    required this.type,
-    required this.room,
-  });
-
-  factory UpcomingExam.fromData(Map<String, dynamic> json) {
-    return switch (json) {
-      {
-        'BEGUZ': String begin,
-        'ENDUZ': String end,
-        'EVDAT': String date,
-        'COMMENT': String comment,
-        'INSTRUCTOR': String instructor,
-        'SM_SHORT': String moduleShort,
-        'SM_STEXT': String moduleTitle,
-        'SROOM': String room,
-      } =>
-        UpcomingExam(
-          begin: DateTime.parse('$date $begin'),
-          end: DateTime.parse('$date $end'),
-          date: DateTime.parse(date),
-          comment: comment,
-          instructor: instructor,
-          moduleShort: moduleShort,
-          moduleTitle: moduleTitle.endsWith(")") ? moduleTitle.split(" ").sublist(0, moduleTitle.split(" ").length - 1).join(" ") : moduleTitle,
-          type: moduleTitle.endsWith(")") ? moduleTitle.split(" ").last : "(?)",
-          room: room,
-        ),
-      _ => throw const FormatException('Unexpected JSON type for UpcomingExam'),
-    };
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'begin': begin.toIso8601String(),
-      'end': end.toIso8601String(),
-      'date': date.toIso8601String(),
-      'comment': comment,
-      'instructor': instructor,
-      'moduleShort': moduleShort,
-      'moduleTitle': moduleTitle,
-      'type': type,
-      'room': room,
-    };
-  }
-
-  factory UpcomingExam.fromJson(Map<String, dynamic> json) {
-    return UpcomingExam(
-      begin: DateTime.parse(json['begin'] as String),
-      end: DateTime.parse(json['end'] as String),
-      date: DateTime.parse(json['date'] as String),
-      comment: json['comment'] as String,
-      instructor: json['instructor'] as String,
-      moduleShort: json['moduleShort'] as String,
-      moduleTitle: json['moduleTitle'] as String,
-      type: json['type'] as String,
-      room: json['room'] as String,
-    );
-  }
-}
-
-class LatestExam {
-  final String moduleShort;
-  final String moduleTitle;
-  final String moduleType;
-  final double grade;
-  final String semester;
-  final DateTime dateGraded;
-  final DateTime dateBooked;
-  final String examType; // TODO: maybe just bool but isPartGraded
-  final String status; //TODO: maybe just bool but isPassed
-
-  const LatestExam({
-    required this.moduleShort,
-    required this.moduleTitle,
-    required this.moduleType,
-    required this.grade,
-    required this.semester,
-    required this.dateGraded,
-    required this.dateBooked,
-    required this.examType,
-    required this.status,
-  });
-
-  factory LatestExam.fromData(Map<String, dynamic> json) {
-    return switch (json) {
-      {
-        'AWOBJECT_SHORT': String moduleShort,
-        'AWOBJECT': String moduleTitle,
-        'AWOTYPE': String moduleType,
-        'GRADESYMBOL': String grade,
-        'ACAD_SESSION': String semesterPart1,
-        'ACAD_YEAR': String semesterPart2,
-        'AGRDATE': String dateGraded,
-        'BOOKDATE': String dateBooked,
-        'AGRTYPE': String examType,
-        'AWSTATUS': String status,
-      } =>
-        LatestExam(
-          moduleShort: moduleShort,
-          moduleTitle: moduleTitle,
-          moduleType: moduleType,
-          grade: double.parse(grade.replaceAll(",", ".")),
-          semester: "${semesterPart1[0]}S ${semesterPart2.split(" ").last}",
-          dateGraded: DateTime.parse(dateGraded),
-          dateBooked: DateTime.parse(dateBooked),
-          examType: examType,
-          status: status,
-        ),
-      _ => throw const FormatException('Unexpected JSON type for LatestExam'),
-    };
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'moduleShort': moduleShort,
-      'moduleTitle': moduleTitle,
-      'moduleType': moduleType,
-      'grade': grade,
-      'semester': semester,
-      'dateGraded': dateGraded.toIso8601String(),
-      'dateBooked': dateBooked.toIso8601String(),
-      'examType': examType,
-      'status': status,
-    };
-  }
-
-  factory LatestExam.fromJson(Map<String, dynamic> json) {
-    return LatestExam(
-      moduleShort: json['moduleShort'] as String,
-      moduleTitle: json['moduleTitle'] as String,
-      moduleType: json['moduleType'] as String,
-      grade: json['grade'] as double,
-      semester: json['semester'] as String,
-      dateGraded: DateTime.parse(json['dateGraded'] as String),
-      dateBooked: DateTime.parse(json['dateBooked'] as String),
-      examType: json['examType'] as String,
-      status: json['status'] as String,
-    );
-  }
-}
-
-class Notifications {
-  final int electives;
-  final int exams;
-  final int semester;
-  final List<UpcomingExam> upcoming;
-  final List<LatestExam> latest;
-
-  const Notifications({
-    required this.electives,
-    required this.exams,
-    required this.semester,
-    required this.upcoming,
-    required this.latest,
-  });
-
-  factory Notifications.fromData(Map<String, dynamic> json) {
-    return switch (json) {
-      {
-        'ELECTIVES': int electives,
-        'EXAMS': int exams,
-        'SEMESTER': int semester,
-        'UPCOMING': List<dynamic> upcoming,
-        'LATEST': List<dynamic> latest,
-      } =>
-        Notifications(
-          electives: electives,
-          exams: exams,
-          semester: semester,
-          upcoming: upcoming.map((e) => UpcomingExam.fromData(e as Map<String, dynamic>)).toList(),
-          latest: latest.map((e) => LatestExam.fromData(e as Map<String, dynamic>)).toList(),
-        ),
-      _ => throw const FormatException('Unexpected JSON type for Notifications'),
-    };
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'electives': electives,
-      'exams': exams,
-      'semester': semester,
-      'upcoming': upcoming.map((e) => e.toJson()).toList(),
-      'latest': latest.map((e) => e.toJson()).toList(),
-    };
-  }
-
-  factory Notifications.fromJson(Map<String, dynamic> json) {
-    return Notifications(
-        electives: json['electives'] as int,
-        exams: json['exams'] as int,
-        semester: json['semester'] as int,
-        upcoming: (json['upcoming'] as List<dynamic>).map((e) => UpcomingExam.fromJson(e as Map<String, dynamic>)).toList(),
-        latest: (json['latest'] as List<dynamic>).map((e) => LatestExam.fromJson(e as Map<String, dynamic>)).toList());
-  }
-}
+import './campus_dual_manager.models.dart';
 
 class CampusDualManager {
   static UserCredentials? userCreds;
@@ -570,6 +35,7 @@ class CampusDualManager {
 
   static Future<CampusDualManager> withSharedSession() async {
     final manager = CampusDualManager();
+    if (userCreds!.isDummy) return manager;
     manager.sharedSession = await manager._initAuthSession();
     return manager;
   }
@@ -645,24 +111,28 @@ class CampusDualManager {
   }
 
   Future<ExamStats> fetchExamStats() async {
+    if (userCreds!.isDummy) return ExamStats.dummy();
     final response = await _fetch(userCreds!.addAuthParams("https://selfservice.campus-dual.de/dash/getexamstats"));
 
     return ExamStats.fromData(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   Future<int> fetchCurrentSemester() async {
+    if (userCreds!.isDummy) return 3;
     final response = await _fetch(userCreds!.addAuthParams("https://selfservice.campus-dual.de/dash/getfs"));
 
     return int.parse(response.body.replaceAll(" ", "").replaceAll("\"", ""));
   }
 
   Future<int> fetchCreditPoints() async {
+    if (userCreds!.isDummy) return 40;
     final response = await _fetch(userCreds!.addAuthParams("https://selfservice.campus-dual.de/dash/getcp"));
 
     return int.parse(response.body);
   }
 
   Future<Map<DateTime, List<Lesson>>> fetchTimeTable(DateTime start, DateTime end) async {
+    if (userCreds!.isDummy) return {};
     final response = await _fetch(addQueryParams(userCreds!.addAuthParams("https://selfservice.campus-dual.de/room/json"), {
       "start": (start.millisecondsSinceEpoch / 1000).toString(),
       "end": (end.millisecondsSinceEpoch / 1000).toString(),
@@ -694,12 +164,14 @@ class CampusDualManager {
   }
 
   Future<Notifications> fetchNotifications() async {
+    if (userCreds!.isDummy) return Notifications.dummy();
     final response = await _fetch(userCreds!.addAuthParams("https://selfservice.campus-dual.de/dash/getreminders"));
 
     return Notifications.fromData(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   Future<List<int>> fetchGradeDistribution(String module, String year, String id) async {
+    if (userCreds!.isDummy) return [6, 2, 6, 2, 0];
     final response = await _fetch(addQueryParams("https://selfservice.campus-dual.de/acwork/mscoredist", {"module": module, "peryr": year, "perid": id.padLeft(3, "0")}));
 
     final result = jsonDecode(response.body) as List<dynamic>;
@@ -707,6 +179,7 @@ class CampusDualManager {
   }
 
   Future<GeneralUserData> scrapeGeneralUserData() async {
+    if (userCreds!.isDummy) return GeneralUserData.dummy();
     final session = sharedSession ?? await _initAuthSession();
     final doc = await _scrape(session, "https://selfservice.campus-dual.de/index/login");
 
@@ -776,6 +249,7 @@ class CampusDualManager {
   }
 
   Future<List<MasterEvaluation>> scrapeEvaluations() async {
+    if (userCreds!.isDummy) return [MasterEvaluation.dummy()];
     final session = sharedSession ?? await _initAuthSession();
     final doc = await _scrape(session, "https://selfservice.campus-dual.de/acwork/index");
 
@@ -796,10 +270,12 @@ class CampusDualManager {
         final semester = element.children.last.text.trim();
         evaluations.add(MasterEvaluation(module: module, title: title, grade: grade, isPassed: isPassed, isPartlyGraded: isPartlyGraded, semester: semester, credits: credits ?? 0, subEvaluations: <Evaluation>[]));
       } else if (!element.className.contains("head")) {
-        final moduleTitleTypeString = element.children[0].text.trim().split(" ");
-        final module = moduleTitleTypeString[moduleTitleTypeString.length - 1].replaceAll(r'\(|\)', "");
-        final title = moduleTitleTypeString.sublist(0, moduleTitleTypeString.length - 2).join(" ");
-        final type = moduleTitleTypeString[moduleTitleTypeString.length - 2].replaceAll(r'\(|\)', "");
+        final titleRegex = RegExp(r'^[^ ]+ (.*?)(?: ?\((.*?)\))? \((.*?)\)$');
+        final match = titleRegex.firstMatch(element.children[0].text.trim());
+
+        final title = match!.group(1)!.trim();
+        final type = match.group(2)?.trim() ?? '';
+        final module = match.group(3)!.trim();
 
         final gradeElement = element.children[1].querySelector(".mscore")!;
         final grade = double.tryParse(gradeElement.text.trim().replaceAll(",", ".")) ?? -1;

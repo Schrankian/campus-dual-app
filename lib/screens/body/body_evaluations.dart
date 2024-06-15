@@ -4,6 +4,7 @@ import 'package:campus_dual_android/widgets/sync_indicator.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
+import "package:campus_dual_android/scripts/campus_dual_manager.models.dart";
 
 class EvaluationsPage extends StatefulWidget {
   const EvaluationsPage({super.key});
@@ -121,14 +122,16 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
                                   return Column(
                                     children: [
                                       ListTile(
+                                        onTap: () {
+                                          setState(() {
+                                            subEvaluation.isExpanded = !subEvaluation.isExpanded;
+                                          });
+                                        },
                                         dense: true,
-                                        leading: IconButton(
-                                          onPressed: () {
-                                            setState(() {
-                                              subEvaluation.isExpanded = !subEvaluation.isExpanded;
-                                            });
-                                          },
-                                          icon: Icon(
+                                        visualDensity: const VisualDensity(horizontal: 0, vertical: -1),
+                                        leading: Padding(
+                                          padding: const EdgeInsets.only(left: 10, right: 10),
+                                          child: Icon(
                                             subEvaluation.isExpanded ? Ionicons.chevron_down_outline : Ionicons.chevron_forward_outline,
                                           ),
                                         ),
@@ -140,6 +143,7 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
                                           textColor: Colors.white,
                                           label: Text(subEvaluation.grade == -1 ? "Teilgenommen" : subEvaluation.grade.toString().replaceAll(".", ",")),
                                         ),
+                                        subtitle: Text(subEvaluation.typeWord),
                                       ),
                                       if (subEvaluation.isExpanded)
                                         Padding(

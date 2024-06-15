@@ -2,6 +2,7 @@ import 'package:campus_dual_android/scripts/campus_dual_manager.dart';
 import 'package:campus_dual_android/scripts/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
+import "package:campus_dual_android/scripts/campus_dual_manager.models.dart";
 
 enum ValidationState {
   valid,
@@ -24,6 +25,9 @@ class _LoginState extends State<Login> {
   final TextEditingController _passwordController = TextEditingController();
 
   Future<UserCredentials?> _testCredentials(String username, String password) async {
+    if (username == "11111" && password == "11111") {
+      return UserCredentials(username, password, "hashy", true);
+    }
     final cd = CampusDualManager(allowNoCreds: true);
     final String hash;
     try {
@@ -32,7 +36,7 @@ class _LoginState extends State<Login> {
       debugPrint(e.toString());
       return null;
     }
-    return UserCredentials(username, password, hash);
+    return UserCredentials(username, password, hash, false);
   }
 
   bool isLoading = true;

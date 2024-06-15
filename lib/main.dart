@@ -8,6 +8,7 @@ import 'package:campus_dual_android/scripts/storage_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'theme/themes.dart';
+import "package:campus_dual_android/scripts/campus_dual_manager.models.dart";
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
