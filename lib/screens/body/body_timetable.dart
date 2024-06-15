@@ -3,6 +3,7 @@ import 'package:campus_dual_android/widgets/day_calendar.dart';
 import 'package:campus_dual_android/widgets/day_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
+import "package:campus_dual_android/scripts/campus_dual_manager.models.dart";
 
 class TimeTable extends StatefulWidget {
   const TimeTable({super.key});

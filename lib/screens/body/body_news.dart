@@ -3,6 +3,7 @@ import 'package:campus_dual_android/scripts/campus_dual_manager.dart';
 import 'package:campus_dual_android/scripts/storage_manager.dart';
 import 'package:campus_dual_android/widgets/sync_indicator.dart';
 import 'package:flutter/material.dart';
+import "package:campus_dual_android/scripts/campus_dual_manager.models.dart";
 
 class News extends StatefulWidget {
   const News({super.key});

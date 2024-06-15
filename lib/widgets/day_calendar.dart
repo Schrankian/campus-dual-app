@@ -1,6 +1,6 @@
 import 'package:campus_dual_android/extensions/color.dart';
-import 'package:campus_dual_android/scripts/campus_dual_manager.dart';
 import 'package:flutter/material.dart';
+import "package:campus_dual_android/scripts/campus_dual_manager.models.dart";
 
 class DayCalendar extends StatelessWidget {
   const DayCalendar({super.key, this.items, this.startHour = 7, this.endHour = 19, this.stepSize = 50, this.useFuzzyColor = true});

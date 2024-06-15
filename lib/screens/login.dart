@@ -2,6 +2,7 @@ import 'package:campus_dual_android/scripts/campus_dual_manager.dart';
 import 'package:campus_dual_android/scripts/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
+import "package:campus_dual_android/scripts/campus_dual_manager.models.dart";
 
 enum ValidationState {
   valid,

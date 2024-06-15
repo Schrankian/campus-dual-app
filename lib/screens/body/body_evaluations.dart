@@ -4,6 +4,7 @@ import 'package:campus_dual_android/widgets/sync_indicator.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
+import "package:campus_dual_android/scripts/campus_dual_manager.models.dart";
 
 class EvaluationsPage extends StatefulWidget {
   const EvaluationsPage({super.key});
