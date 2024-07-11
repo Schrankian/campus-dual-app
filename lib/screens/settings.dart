@@ -1,4 +1,5 @@
 import 'package:campus_dual_android/scripts/event_bus.dart';
+import 'package:campus_dual_android/scripts/notification_manager.dart';
 import 'package:flutter/material.dart';
 
 class Settings extends StatefulWidget {
@@ -23,6 +24,25 @@ class _SettingsState extends State<Settings> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const Row(mainAxisSize: MainAxisSize.max),
+              InkWell(
+                onTap: () {
+                  NotificationManager().showNotification("Prüfungsergebnis", "Die Ergebnisse für Meha sind angekommen.");
+                },
+                child: Container(
+                  padding: const EdgeInsets.only(top: 15, bottom: 15, left: 30, right: 30),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    color: Theme.of(context).colorScheme.tertiary,
+                  ),
+                  child: Text(
+                    "Benachrichtigen",
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onTertiary,
+                      fontSize: 20,
+                    ),
+                  ),
+                ),
+              ),
               InkWell(
                 onTap: () {
                   mainBus.emit(event: "Logout");

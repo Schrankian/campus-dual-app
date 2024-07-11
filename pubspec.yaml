@@ -47,6 +47,8 @@ dependencies:
   tuple: ^2.0.2
   flutter_launcher_icons: ^0.13.1
   flutter_secure_storage: ^4.2.1
+  flutter_local_notifications: ^17.1.2
+  flutter_background_service: ^5.0.6
 
 dev_dependencies:
   flutter_test:

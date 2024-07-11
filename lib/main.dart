@@ -2,8 +2,10 @@ import 'dart:io';
 
 import 'package:campus_dual_android/screens/homepage.dart';
 import 'package:campus_dual_android/screens/login.dart';
+import 'package:campus_dual_android/scripts/background_service_manager.dart';
 import 'package:campus_dual_android/scripts/campus_dual_manager.dart';
 import 'package:campus_dual_android/scripts/event_bus.dart';
+import 'package:campus_dual_android/scripts/notification_manager.dart';
 import 'package:campus_dual_android/scripts/storage_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,6 +14,9 @@ import "package:campus_dual_android/scripts/campus_dual_manager.models.dart";
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await NotificationManager().init();
+  await BackgroundServiceManager().init();
 
   // Load campus dual certificate
   ByteData data = await PlatformAssetBundle().load('assets/ca/selfservice.campus-dual.de.crt');
