@@ -9,6 +9,11 @@ extension DateExtension on DateTime {
     return '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
   }
 
+  // Returns only the year date and month
+  DateTime trim() {
+    return DateTime(year, month, day);
+  }
+
   String toTimeDiff(DateTime end, {bool showDifference = true}) {
     if (hour == 0 && minute == 0 || end.hour == 0 && end.minute == 0) return 'Keine Zeitangabe';
     final diff = end.difference(this);
