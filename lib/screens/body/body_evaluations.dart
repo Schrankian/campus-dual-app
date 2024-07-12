@@ -1,3 +1,4 @@
+import 'package:campus_dual_android/extensions/double.dart';
 import 'package:campus_dual_android/scripts/campus_dual_manager.dart';
 import 'package:campus_dual_android/scripts/storage_manager.dart';
 import 'package:campus_dual_android/widgets/sync_indicator.dart';
@@ -176,7 +177,7 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
                                                       return BarTooltipItem(
                                                         rod.toY.round().toString(),
                                                         TextStyle(
-                                                          color: subEvaluation.grade.round() == groupIndex + 1 ? color : Theme.of(context).colorScheme.primary,
+                                                          color: subEvaluation.grade.roundBa() == groupIndex + 1 ? color : Theme.of(context).colorScheme.primary,
                                                           fontWeight: FontWeight.bold,
                                                         ),
                                                       );
@@ -219,7 +220,7 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
                                                         barRods: [
                                                           BarChartRodData(
                                                             toY: e.value.toDouble(),
-                                                            color: subEvaluation.grade.round() == e.key + 1 ? color : Theme.of(context).colorScheme.primary,
+                                                            color: subEvaluation.grade.roundBa() == e.key + 1 ? color : Theme.of(context).colorScheme.primary,
                                                           ),
                                                         ],
                                                         showingTooltipIndicators: [0],
