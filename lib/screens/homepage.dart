@@ -78,7 +78,14 @@ class _HomePageState extends State<HomePage> {
     [],
     [],
     [],
-    [],
+    [
+      {
+        'icon': Ionicons.calendar_outline,
+        'function': (context) {
+          mainBus.emit(event: 'OpenCalendar', args: context);
+        },
+      },
+    ],
   ];
 
   @override

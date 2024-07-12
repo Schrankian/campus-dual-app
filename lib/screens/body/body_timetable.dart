@@ -1,8 +1,10 @@
 import 'package:campus_dual_android/extensions/date.dart';
 import 'package:campus_dual_android/scripts/campus_dual_manager.dart';
+import 'package:campus_dual_android/scripts/event_bus.dart';
 import 'package:campus_dual_android/scripts/storage_manager.dart';
 import 'package:campus_dual_android/widgets/day_calendar.dart';
 import 'package:campus_dual_android/widgets/day_picker.dart';
+import 'package:campus_dual_android/widgets/month_calendar.dart';
 import 'package:campus_dual_android/widgets/sync_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
@@ -19,6 +21,8 @@ class _TimeTableState extends State<TimeTable> with AutomaticKeepAliveClientMixi
   static const bufferSize = 365;
   static const includePast = true; // TODO implement
 
+  final GlobalKey _dateSectionKey = GlobalKey();
+
   Map<DateTime, List<Lesson>>? dataCache;
 
   late DateTime currentDate;
@@ -30,6 +34,14 @@ class _TimeTableState extends State<TimeTable> with AutomaticKeepAliveClientMixi
     DateTime now = DateTime.now();
     nowDay = now.trim();
     currentDate = nowDay;
+
+    mainBus.onBus(event: "OpenCalendar", onEvent: _openCalendar);
+  }
+
+  @override
+  void dispose() {
+    mainBus.offBus(event: "OpenCalendar", callBack: _openCalendar);
+    super.dispose();
   }
 
   Stream<Map<DateTime, List<Lesson>>> loadData() async* {
@@ -50,6 +62,23 @@ class _TimeTableState extends State<TimeTable> with AutomaticKeepAliveClientMixi
     storage.saveObject("timetable", lessons.map((key, value) => MapEntry(key.toIso8601String(), value.map((e) => e.toJson()).toList())));
     dataCache = lessons;
     yield lessons;
+  }
+
+  void _openCalendar(dynamic args) {
+    Navigator.push(
+      args,
+      MaterialPageRoute(
+        builder: (context) => MonthCalendar(
+          startTime: currentDate,
+          items: dataCache,
+          onDateClicked: (date) => {
+            _dateSectionKey.currentState?.setState(() {
+              currentDate = date;
+            })
+          },
+        ),
+      ),
+    );
   }
 
   @override
@@ -80,6 +109,7 @@ class _TimeTableState extends State<TimeTable> with AutomaticKeepAliveClientMixi
             ],
           ),
           body: StatefulBuilder(
+            key: _dateSectionKey,
             // TODO test if once parent rebuilds, this also rebuilds
             builder: (context, setState) {
               return Column(
