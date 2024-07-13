@@ -24,6 +24,8 @@ class _TimeTableState extends State<TimeTable> with AutomaticKeepAliveClientMixi
   final GlobalKey _dateSectionKey = GlobalKey();
 
   Map<DateTime, List<Lesson>>? dataCache;
+  List<EvaluationRule>? rules;
+  bool useFuzzyColor = false;
 
   late DateTime currentDate;
   late DateTime nowDay;
@@ -36,17 +38,32 @@ class _TimeTableState extends State<TimeTable> with AutomaticKeepAliveClientMixi
     currentDate = nowDay;
 
     mainBus.onBus(event: "OpenCalendar", onEvent: _openCalendar);
+    mainBus.onBus(event: "UpdateRules", onEvent: _changeRules);
+    mainBus.onBus(event: "UpdateUseFuzzyColor", onEvent: _changeUseFuzzyColor);
   }
 
   @override
   void dispose() {
     mainBus.offBus(event: "OpenCalendar", callBack: _openCalendar);
+    mainBus.offBus(event: "UpdateRules", callBack: _changeRules);
+    mainBus.offBus(event: "UpdateUseFuzzyColor", callBack: _changeUseFuzzyColor);
     super.dispose();
   }
 
   Stream<Map<DateTime, List<Lesson>>> loadData() async* {
     final storage = StorageManager();
     try {
+      // Load override rules
+      final storedRules = await storage.loadObjectList("evaluationRules");
+      if (storedRules != null) {
+        rules = storedRules.map((e) => EvaluationRule.fromJson(e)).toList();
+      }
+      // Load useFuzzyColor
+      final storedUseFuzzyColor = await storage.loadBool("useFuzzyColor");
+      if (storedUseFuzzyColor != null) {
+        useFuzzyColor = storedUseFuzzyColor;
+      }
+
       final storedData = await storage.loadObject("timetable");
       if (storedData != null) {
         final data = storedData.map((key, value) => MapEntry(DateTime.parse(key), (value as List).map((e) => Lesson.fromJson(e)).toList())).cast<DateTime, List<Lesson>>();
@@ -71,6 +88,8 @@ class _TimeTableState extends State<TimeTable> with AutomaticKeepAliveClientMixi
         builder: (context) => MonthCalendar(
           startTime: currentDate,
           items: dataCache,
+          rules: rules,
+          useFuzzyColor: useFuzzyColor,
           onDateClicked: (date) => {
             _dateSectionKey.currentState?.setState(() {
               currentDate = date;
@@ -79,6 +98,22 @@ class _TimeTableState extends State<TimeTable> with AutomaticKeepAliveClientMixi
         ),
       ),
     );
+  }
+
+  void _changeRules(dynamic args) {
+    StorageManager().saveObjectList("evaluationRules", args);
+
+    _dateSectionKey.currentState!.setState(() {
+      rules = args;
+    });
+  }
+
+  void _changeUseFuzzyColor(dynamic args) {
+    StorageManager().saveBool("useFuzzyColor", args);
+
+    _dateSectionKey.currentState!.setState(() {
+      useFuzzyColor = args;
+    });
   }
 
   @override
@@ -137,10 +172,11 @@ class _TimeTableState extends State<TimeTable> with AutomaticKeepAliveClientMixi
                       },
                       child: DayCalendar(
                         items: dataHasArrived ? data[currentDate] : [],
+                        rules: rules,
                         startHour: 7,
                         endHour: 20,
                         stepSize: 65,
-                        useFuzzyColor: true,
+                        useFuzzyColor: useFuzzyColor,
                       ),
                     ),
                   ),

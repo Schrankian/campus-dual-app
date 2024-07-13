@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:campus_dual_android/scripts/campus_dual_manager.models.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 
@@ -18,6 +19,27 @@ extension HexColor on Color {
       '${red.toRadixString(16).padLeft(2, '0')}'
       '${green.toRadixString(16).padLeft(2, '0')}'
       '${blue.toRadixString(16).padLeft(2, '0')}';
+}
+
+extension BaColor on Color {
+  static Color fromRule(List<EvaluationRule> rules, String title, bool useFuzzyColor, BuildContext context) {
+    final match = EvaluationRule.getMatch(rules, title);
+    if (match != null) {
+      return match.color;
+    }
+
+    if (useFuzzyColor) {
+      return FuzzyColor.fromString(title);
+    }
+
+    return Theme.of(context).colorScheme.primary;
+  }
+
+  static Color fromSurface(Color surfaceColor) {
+    final luminance = 1 - (0.299 * surfaceColor.red + 0.587 * surfaceColor.green + 0.114 * surfaceColor.blue) / 255;
+
+    return luminance < 0.5 ? Colors.black : Colors.white;
+  }
 }
 
 class FuzzyColor {

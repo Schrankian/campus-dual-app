@@ -127,4 +127,14 @@ class StorageManager {
     final disk = await SharedPreferences.getInstance();
     _saveData(disk, key, value);
   }
+
+  Future<bool?> loadBool(String key) async {
+    final disk = await SharedPreferences.getInstance();
+    return _getData(disk, key, type: Type.bool);
+  }
+
+  void saveBool(String key, bool value) async {
+    final disk = await SharedPreferences.getInstance();
+    _saveData(disk, key, value);
+  }
 }

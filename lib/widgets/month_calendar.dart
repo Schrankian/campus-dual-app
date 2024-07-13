@@ -1,11 +1,14 @@
+import 'package:campus_dual_android/extensions/color.dart';
 import 'package:campus_dual_android/scripts/campus_dual_manager.models.dart';
 import 'package:flutter/material.dart';
 
 class MonthCalendar extends StatefulWidget {
-  const MonthCalendar({super.key, this.items, required this.startTime, this.onDateClicked});
+  const MonthCalendar({super.key, this.items, this.rules, required this.startTime, this.onDateClicked, this.useFuzzyColor = true});
 
   final Map<DateTime, List<Lesson>>? items;
+  final List<EvaluationRule>? rules;
   final DateTime startTime;
+  final bool useFuzzyColor;
   final void Function(DateTime)? onDateClicked;
 
   @override
@@ -110,32 +113,34 @@ class _MonthCalendarState extends State<MonthCalendar> {
                           child: Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(10),
-                              color: Theme.of(context).colorScheme.primary.withAlpha(100),
+                              color: Theme.of(context).colorScheme.primary.withAlpha(80),
                             ),
                             child: Column(
                               children: [
                                 Text("${index + 1}"),
                                 if (items != null)
                                   for (final item in items.take(6))
-                                    Padding(
-                                      padding: const EdgeInsets.only(left: 2, bottom: 1, top: 1, right: 2),
-                                      child: Container(
-                                        padding: const EdgeInsets.only(left: 3, top: 1, bottom: 1, right: 3),
-                                        width: double.infinity,
-                                        decoration: BoxDecoration(
-                                          color: Theme.of(context).colorScheme.primary.withAlpha(230),
-                                          borderRadius: BorderRadius.circular(3),
-                                        ),
-                                        child: Text(
-                                          item.title,
-                                          style: TextStyle(
-                                            color: Theme.of(context).colorScheme.onPrimary,
-                                            fontSize: 8,
-                                            overflow: TextOverflow.ellipsis,
+                                    EvaluationRule.shouldHide(widget.rules ?? [], item.title)
+                                        ? const SizedBox.shrink()
+                                        : Padding(
+                                            padding: const EdgeInsets.only(left: 2, bottom: 1, top: 1, right: 2),
+                                            child: Container(
+                                              padding: const EdgeInsets.only(left: 3, top: 1, bottom: 1, right: 3),
+                                              width: double.infinity,
+                                              decoration: BoxDecoration(
+                                                color: BaColor.fromRule(widget.rules ?? [], item.title, widget.useFuzzyColor, context),
+                                                borderRadius: BorderRadius.circular(3),
+                                              ),
+                                              child: Text(
+                                                item.title,
+                                                style: TextStyle(
+                                                  color: BaColor.fromSurface(BaColor.fromRule(widget.rules ?? [], item.title, widget.useFuzzyColor, context)),
+                                                  fontSize: 8,
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                            ),
                                           ),
-                                        ),
-                                      ),
-                                    ),
                               ],
                             ),
                           ),
