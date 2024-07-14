@@ -1,4 +1,5 @@
 import 'package:campus_dual_android/extensions/color.dart';
+import 'package:campus_dual_android/extensions/date.dart';
 import 'package:campus_dual_android/scripts/campus_dual_manager.models.dart';
 import 'package:flutter/material.dart';
 
@@ -18,6 +19,8 @@ class MonthCalendar extends StatefulWidget {
 class _MonthCalendarState extends State<MonthCalendar> {
   static const weekDays = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
   static const month = ['_Err_', 'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+
+  final dateNow = DateTime.now().trim();
 
   late DateTime selectedDate = DateTime(widget.startTime.year, widget.startTime.month, 1);
 
@@ -113,7 +116,11 @@ class _MonthCalendarState extends State<MonthCalendar> {
                           child: Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(10),
-                              color: Theme.of(context).colorScheme.primary.withAlpha(80),
+                              border: Border.all(
+                                color: date == widget.startTime ? Theme.of(context).colorScheme.error.withAlpha(200) : Colors.transparent,
+                                width: 2,
+                              ),
+                              color: Theme.of(context).colorScheme.primary.withAlpha(date == dateNow ? 150 : 50),
                             ),
                             child: Column(
                               children: [
