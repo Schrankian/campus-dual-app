@@ -31,7 +31,7 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
     }
 
     final cd = CampusDualManager();
-    final evaluations = await cd.scrapeEvaluations();
+    final evaluations = await cd.scrapeEvaluations(); // TODO lazy load the evaluations. E.g. load as Stream (maybe only if its the first time)
     storage.saveObjectList("evaluations", evaluations);
     dataCache = evaluations;
     yield evaluations;
@@ -53,6 +53,7 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
         final data = snapshot.hasError ? dataCache : snapshot.data;
         final dataHasArrived = data != null;
 
+        data?.sort((a, b) => b.subEvaluations[0].dateAnnounced.compareTo(a.subEvaluations[0].dateAnnounced));
         return Scaffold(
           appBar: AppBar(
             title: const Text('Noten'),
@@ -101,7 +102,7 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
                           ),
                         ),
                       ),
-                      for (final evaluation in data.reversed)
+                      for (final evaluation in data)
                         Column(
                           children: [
                             ListTile(

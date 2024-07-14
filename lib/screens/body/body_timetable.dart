@@ -145,7 +145,6 @@ class _TimeTableState extends State<TimeTable> with AutomaticKeepAliveClientMixi
           ),
           body: StatefulBuilder(
             key: _dateSectionKey,
-            // TODO test if once parent rebuilds, this also rebuilds
             builder: (context, setState) {
               return Column(
                 children: [
