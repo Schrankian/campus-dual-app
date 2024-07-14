@@ -78,13 +78,19 @@ class _HomePageState extends State<HomePage> {
     [],
     [],
     [],
-    [],
+    [
+      {
+        'icon': Ionicons.calendar_outline,
+        'function': (context) {
+          mainBus.emit(event: 'OpenCalendar', args: context);
+        },
+      },
+    ],
   ];
 
   @override
   Widget build(BuildContext context) {
     settingIcons[0]['icon'] = Theme.of(context).brightness == Brightness.dark ? Ionicons.sunny_outline : Ionicons.moon_outline;
-    // TODO add sync indicator to all pages
     return Scaffold(
       body: SyncStarter(
         onSync: () {

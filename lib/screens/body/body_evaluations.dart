@@ -1,3 +1,4 @@
+import 'package:campus_dual_android/extensions/double.dart';
 import 'package:campus_dual_android/scripts/campus_dual_manager.dart';
 import 'package:campus_dual_android/scripts/storage_manager.dart';
 import 'package:campus_dual_android/widgets/sync_indicator.dart';
@@ -30,7 +31,7 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
     }
 
     final cd = CampusDualManager();
-    final evaluations = await cd.scrapeEvaluations();
+    final evaluations = await cd.scrapeEvaluations(); // TODO lazy load the evaluations. E.g. load as Stream (maybe only if its the first time)
     storage.saveObjectList("evaluations", evaluations);
     dataCache = evaluations;
     yield evaluations;
@@ -52,6 +53,7 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
         final data = snapshot.hasError ? dataCache : snapshot.data;
         final dataHasArrived = data != null;
 
+        data?.sort((a, b) => b.subEvaluations[0].dateAnnounced.compareTo(a.subEvaluations[0].dateAnnounced));
         return Scaffold(
           appBar: AppBar(
             title: const Text('Noten'),
@@ -100,7 +102,7 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
                           ),
                         ),
                       ),
-                      for (final evaluation in data.reversed)
+                      for (final evaluation in data)
                         Column(
                           children: [
                             ListTile(
@@ -176,7 +178,7 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
                                                       return BarTooltipItem(
                                                         rod.toY.round().toString(),
                                                         TextStyle(
-                                                          color: subEvaluation.grade.round() == groupIndex + 1 ? color : Theme.of(context).colorScheme.primary,
+                                                          color: subEvaluation.grade.roundBa() == groupIndex + 1 ? color : Theme.of(context).colorScheme.primary,
                                                           fontWeight: FontWeight.bold,
                                                         ),
                                                       );
@@ -219,7 +221,7 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
                                                         barRods: [
                                                           BarChartRodData(
                                                             toY: e.value.toDouble(),
-                                                            color: subEvaluation.grade.round() == e.key + 1 ? color : Theme.of(context).colorScheme.primary,
+                                                            color: subEvaluation.grade.roundBa() == e.key + 1 ? color : Theme.of(context).colorScheme.primary,
                                                           ),
                                                         ],
                                                         showingTooltipIndicators: [0],

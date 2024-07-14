@@ -634,3 +634,58 @@ class Notifications {
     );
   }
 }
+
+class EvaluationRule {
+  String pattern;
+  Color color;
+  bool hide;
+
+  EvaluationRule({
+    required this.pattern,
+    required this.color,
+    required this.hide,
+  });
+
+  static EvaluationRule? getMatch(List<EvaluationRule> rules, String title) {
+    for (final rule in rules) {
+      if (title.toLowerCase().contains(rule.pattern.toLowerCase())) {
+        return rule;
+      }
+    }
+    return null;
+  }
+
+  static bool shouldHide(List<EvaluationRule> rules, String title) {
+    final match = getMatch(rules, title);
+
+    if (match != null) {
+      return match.hide;
+    }
+
+    return false;
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'pattern': pattern,
+      'color': color.toHex(),
+      'hide': hide,
+    };
+  }
+
+  factory EvaluationRule.fromJson(Map<String, dynamic> json) {
+    return EvaluationRule(
+      pattern: json['pattern'] as String,
+      color: HexColor.fromHex(json['color'] as String),
+      hide: json['hide'] as bool,
+    );
+  }
+
+  static EvaluationRule dummy() {
+    return EvaluationRule(
+      pattern: "AWP",
+      color: Color(0xFF00FF00),
+      hide: false,
+    );
+  }
+}

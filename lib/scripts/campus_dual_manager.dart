@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:campus_dual_android/extensions/date.dart';
 import 'package:html/dom.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_cookie_store/http_cookie_store.dart';
@@ -151,7 +152,7 @@ class CampusDualManager {
     final Map<DateTime, List<Lesson>> lessons = {};
     for (final element in json) {
       final lesson = Lesson.fromData(element as Map<String, dynamic>);
-      final date = DateTime(lesson.start.year, lesson.start.month, lesson.start.day);
+      final date = lesson.start.trim();
 
       if (lessons.containsKey(date)) {
         lessons[date]!.add(lesson);
