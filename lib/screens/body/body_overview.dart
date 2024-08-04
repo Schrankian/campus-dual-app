@@ -77,6 +77,9 @@ class _OverviewState extends State<Overview> with AutomaticKeepAliveClientMixin<
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    Color primaryOverride = Theme.of(context).brightness == Brightness.dark ? Theme.of(context).colorScheme.inverseSurface : Theme.of(context).colorScheme.primary;
+    Color onPrimaryOverride = Theme.of(context).brightness == Brightness.dark ? Theme.of(context).colorScheme.onInverseSurface : Theme.of(context).colorScheme.onPrimary;
+
     return StreamBuilder(
       initialData: dataCache,
       stream: loadData(),
@@ -91,7 +94,7 @@ class _OverviewState extends State<Overview> with AutomaticKeepAliveClientMixin<
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Theme.of(context).colorScheme.primary,
+                primaryOverride,
                 Theme.of(context).colorScheme.surface,
               ],
             ),
@@ -114,7 +117,7 @@ class _OverviewState extends State<Overview> with AutomaticKeepAliveClientMixin<
                             Text(
                               'Hey,',
                               style: TextStyle(
-                                color: Theme.of(context).colorScheme.onPrimary,
+                                color: onPrimaryOverride,
                                 fontSize: 22,
                               ),
                             ),
@@ -124,7 +127,7 @@ class _OverviewState extends State<Overview> with AutomaticKeepAliveClientMixin<
                             Text(
                               dataHasArrived ? "${data.generalUserData.firstName} (${CampusDualManager.userCreds!.username})" : '... (${CampusDualManager.userCreds!.username})',
                               style: TextStyle(
-                                color: Theme.of(context).colorScheme.onPrimary,
+                                color: onPrimaryOverride,
                                 fontSize: 22,
                               ),
                             ),
@@ -175,10 +178,9 @@ class _OverviewState extends State<Overview> with AutomaticKeepAliveClientMixin<
                                   width: 150,
                                   child: LinearProgressIndicator(
                                     minHeight: 15,
-                                    borderRadius: BorderRadius.circular(10),
+                                    borderRadius: BorderRadius.circular(6),
                                     value: dataHasArrived ? data.currentSemester / 6 : 0,
-                                    backgroundColor: Theme.of(context).colorScheme.secondary.withAlpha(80),
-                                    valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
+                                    valueColor: AlwaysStoppedAnimation<Color>(primaryOverride),
                                   ),
                                 ),
                               ],
@@ -195,10 +197,9 @@ class _OverviewState extends State<Overview> with AutomaticKeepAliveClientMixin<
                                   width: 150,
                                   child: LinearProgressIndicator(
                                     minHeight: 15,
-                                    borderRadius: BorderRadius.circular(10),
+                                    borderRadius: BorderRadius.circular(6),
                                     value: dataHasArrived ? data.creditPoints / 180 : 0,
-                                    backgroundColor: Theme.of(context).colorScheme.secondary.withAlpha(80),
-                                    valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
+                                    valueColor: AlwaysStoppedAnimation<Color>(primaryOverride),
                                   ),
                                 ),
                               ],
@@ -215,17 +216,17 @@ class _OverviewState extends State<Overview> with AutomaticKeepAliveClientMixin<
                               PieChartData(
                                 sections: [
                                   PieChartSectionData(
-                                    color: Theme.of(context).colorScheme.secondary,
+                                    color: primaryOverride,
                                     value: dataHasArrived ? 0 : 1,
                                     title: "Lädt...",
-                                    titleStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
+                                    titleStyle: TextStyle(color: onPrimaryOverride),
                                     radius: 125,
                                   ),
                                   PieChartSectionData(
-                                    color: Theme.of(context).colorScheme.primary,
+                                    color: primaryOverride,
                                     value: dataHasArrived ? data.examStats.success / data.examStats.exams : 0,
                                     title: dataHasArrived ? "${(data.examStats.success / data.examStats.exams * 100).toStringAsFixed(0)}%" : "Lädt...",
-                                    titleStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+                                    titleStyle: TextStyle(color: onPrimaryOverride),
                                     radius: 125,
                                   ),
                                   PieChartSectionData(
@@ -268,7 +269,7 @@ class _OverviewState extends State<Overview> with AutomaticKeepAliveClientMixin<
                                     Container(
                                       height: 12,
                                       width: 12,
-                                      color: Theme.of(context).colorScheme.primary,
+                                      color: primaryOverride,
                                     ),
                                     const Text('mit Erfolg abgeschlossen:'),
                                     Text('${dataHasArrived ? data.examStats.success : "..."}'),
