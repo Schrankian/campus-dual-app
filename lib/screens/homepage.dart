@@ -146,9 +146,9 @@ class _HomePageState extends State<HomePage> {
             );
           } else {
             return SettingsPopup(
-              icons: (settingIcons.map((e) => e['icon'] as IconData).toList()) + (extraSettingIcons[_currentIndex].map((e) => e['icon'] as IconData).toList()),
+              icons: (extraSettingIcons[_currentIndex].map((e) => e['icon'] as IconData).toList()) + (settingIcons.map((e) => e['icon'] as IconData).toList()),
               onIconTapped: (index) {
-                (settingIcons.map((e) => e['function']).toList() + extraSettingIcons[_currentIndex].map((e) => e['function']).toList())[index](context);
+                (extraSettingIcons[_currentIndex].map((e) => e['function']).toList() + settingIcons.map((e) => e['function']).toList())[index](context);
               },
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 15),
