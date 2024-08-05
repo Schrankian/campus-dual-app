@@ -24,7 +24,7 @@ jobs:
       - name: Create version.txt with nuGetVersion
         run: echo ${{ steps.gitversion.outputs.nuGetVersion  }} > version.txt
       - name: Upload version.txt
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: gitversion
           path: version.txt
@@ -36,7 +36,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Get version.txt
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: gitversion
       - name: Create new file without newline char from version.txt
@@ -76,23 +76,33 @@ jobs:
 
       - name: Start Android Release Build
         run: flutter build apk
+        
+      - name: Start Android Publish Build
+        run: flutter build appbundle
 
       - name: Upload Android Release
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: android-release
           path: build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Upload Android Publish
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-publish
+          path: build/app/outputs/bundle/release/app-release.aab
+          
   release:
     name: Create Release
     needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Get version.txt
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: gitversion
       - name: Get apk
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: android-release
       - name: Create new file without newline char from version.txt
@@ -113,3 +123,22 @@ jobs:
           name: Release ${{ steps.version.outputs.content }}
           body: |
             This is an automated release by GitHub Actions.
+
+  publish:
+    name: Upload to PlayStore
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get appbundle
+        uses: actions/download-artifact@v4
+        with:
+          name: android-publish
+      - name: Upload
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ SERVICE_ACCOUNT_JSON }}
+          track: beta
+          releaseFiles: app-release.aab
+          packageName: net.fabianschuster.campus_dual_android
+          
+      
