@@ -258,6 +258,15 @@ class CampusDualManager {
 
     final evaluations = <MasterEvaluation>[];
 
+    String formatSemester(String semester) {
+      if (semester.contains("SS")) {
+        return "SS ${semester.split("/")[1]}";
+      } else {
+        final split = semester.split("/");
+        return "${split[0]}/${split[1].substring(2)}";
+      }
+    }
+
     for (final element in table.children) {
       if (element.className.contains("child-of-node-0")) {
         final moduleTitleString = element.children[0].querySelector("strong")!.text.trim().split(" ");
@@ -268,7 +277,7 @@ class CampusDualManager {
         final isPassed = element.children[2].querySelector("img")!.attributes["src"]! == "/images/green.png";
         final credits = int.tryParse(element.children[3].text.trim());
         final isPartlyGraded = false; //TODO: Implement
-        final semester = element.children.last.text.trim();
+        final semester = formatSemester(element.children.last.text.trim());
         evaluations.add(MasterEvaluation(module: module, title: title, grade: grade, isPassed: isPassed, isPartlyGraded: isPartlyGraded, semester: semester, credits: credits ?? 0, subEvaluations: <Evaluation>[]));
       } else if (!element.className.contains("head")) {
         final titleRegex = RegExp(r'^[^ ]+ (.*?)(?: ?\((.*?)\))? \((.*?)\)$');
@@ -291,7 +300,7 @@ class CampusDualManager {
         final dateAnnounced = DateTime.parse(splitDateAnnounced[2] + splitDateAnnounced[1] + splitDateAnnounced[0]);
 
         final isPartlyGraded = false; // TODO: implement
-        final semester = element.children.last.text.trim();
+        final semester = formatSemester(element.children.last.text.trim());
 
         evaluations.last.subEvaluations
             .add(Evaluation(module: module, title: title, type: type, grade: grade, gradeDistribution: gradeDistribution, isPassed: isPassed, dateGraded: dateGraded, dateAnnounced: dateAnnounced, isPartlyGraded: isPartlyGraded, semester: semester));

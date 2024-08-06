@@ -76,7 +76,14 @@ class _HomePageState extends State<HomePage> {
   //These are extra actions which only popup on the specific size (index in list correspond to the slide it pops up)
   List<List<Map<String, dynamic>>> extraSettingIcons = [
     [],
-    [],
+    [
+      {
+        'icon': Ionicons.albums_outline,
+        'function': (context) {
+          mainBus.emit(event: 'OpenSemesterEvaluations', args: context);
+        },
+      }
+    ],
     [],
     [
       {
