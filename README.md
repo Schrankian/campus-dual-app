@@ -1,6 +1,11 @@
 # Campus Dual Helper
 Campus Dual Helper is an App designed to provide an alternative Interface to the Campus Dual web application. To achieve this, it uses Api Endpoints or just scrapes the website and parses it to get the necessary data.
 
+# Important
+This application gets the informations by impersonating the user and scraping the data from the official websites. Due to the nature of scraping, there could be (and probably are) a lot of edge case I haven't considered while writing this scraper. So keep in mind that bugs could occure, and if they do so, please write and github issue for it.
+
+> Maintainer wanted: As i am currently in my 5th Semester i cannot maintain this scraper indefinetely, because my access to campus-dual may be cut off. So if you are interested please reach out to me.
+
 # Prerequisites
 - Flutter
 - Some Android tools (Check flutter documentation)

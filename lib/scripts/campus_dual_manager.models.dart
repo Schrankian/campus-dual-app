@@ -67,6 +67,7 @@ class GeneralUserData {
 }
 
 class Evaluation {
+  final int pIndex;
   final String module;
   final String title;
   final String type;
@@ -94,6 +95,7 @@ class Evaluation {
   }
 
   Evaluation({
+    required this.pIndex,
     required this.module,
     required this.title,
     required this.type,
@@ -108,6 +110,7 @@ class Evaluation {
 
   Map<String, dynamic> toJson() {
     return {
+      'pIndex': pIndex,
       'module': module,
       'title': title,
       'type': type,
@@ -123,6 +126,7 @@ class Evaluation {
 
   factory Evaluation.fromJson(Map<String, dynamic> json) {
     return Evaluation(
+      pIndex: json['pIndex'] as int,
       module: json['module'] as String,
       title: json['title'] as String,
       type: json['type'] as String,
@@ -138,6 +142,7 @@ class Evaluation {
 
   static Evaluation dummy() {
     return Evaluation(
+      pIndex: 0,
       module: "AWP",
       title: "Algorithmen und Datenstrukturen",
       type: "K",
@@ -210,6 +215,16 @@ class MasterEvaluation {
       credits: 5,
       subEvaluations: [Evaluation.dummy(), Evaluation.dummy()],
     );
+  }
+
+  bool isFirstTry(Evaluation evaluation) {
+    for (final subEval in subEvaluations) {
+      if (subEval != evaluation && subEval.pIndex == evaluation.pIndex && subEval.dateAnnounced.isBefore(evaluation.dateAnnounced)) {
+        return false;
+      }
+    }
+
+    return true;
   }
 }
 

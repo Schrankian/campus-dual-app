@@ -175,7 +175,7 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
                                           textColor: Colors.white,
                                           label: Text(subEvaluation.grade == -1 ? "Teilgenommen" : subEvaluation.grade.toString().replaceAll(".", ",")),
                                         ),
-                                        subtitle: Text(subEvaluation.typeWord),
+                                        subtitle: Text("${subEvaluation.typeWord} ${evaluation.isFirstTry(subEvaluation) ? '' : " (Nachprüfung)"}"),
                                       ),
                                       if (subEvaluation.isExpanded)
                                         Padding(

@@ -179,6 +179,18 @@ class CampusDualManager {
     return result.map((e) => e["COUNT"]! as int).toList();
   }
 
+  Future<String> getAuthToken() async {
+    final session = sharedSession ?? await _initAuthSession();
+
+    final token = session.store.cookies.firstWhere(
+      (cookie) => cookie.name == "MYSAPSSO2",
+      orElse: () => Cookie("MYSAPSSO2", ""),
+    );
+
+    print(token.value);
+    return token.value;
+  }
+
   Future<GeneralUserData> scrapeGeneralUserData() async {
     if (userCreds!.isDummy) return GeneralUserData.dummy();
     final session = sharedSession ?? await _initAuthSession();
@@ -280,12 +292,15 @@ class CampusDualManager {
         final semester = formatSemester(element.children.last.text.trim());
         evaluations.add(MasterEvaluation(module: module, title: title, grade: grade, isPassed: isPassed, isPartlyGraded: isPartlyGraded, semester: semester, credits: credits ?? 0, subEvaluations: <Evaluation>[]));
       } else if (!element.className.contains("head")) {
-        final titleRegex = RegExp(r'^[^ ]+ (.*?)(?: ?\((.*?)\))? \((.*?)\)$');
+        final titleRegex = RegExp(r'^([^ ]+) *([^ ]+.*?)?(?: *\((.*?)\))? *\((.*?)\)$');
         final match = titleRegex.firstMatch(element.children[0].text.trim());
 
-        final title = match!.group(1)!.trim();
-        final type = match.group(2)?.trim() ?? '';
-        final module = match.group(3)!.trim();
+        final pIndexString = match!.group(1)!.trim();
+        final pIndex = int.tryParse(pIndexString.replaceAll("P", "").replaceAll("p", "")) ?? 0;
+
+        final title = match.group(2)!.trim();
+        final type = match.group(3)?.trim() ?? '';
+        final module = match.group(4)!.trim();
 
         final gradeElement = element.children[1].querySelector(".mscore")!;
         final grade = double.tryParse(gradeElement.text.trim().replaceAll(",", ".")) ?? -1;
@@ -302,8 +317,8 @@ class CampusDualManager {
         final isPartlyGraded = false; // TODO: implement
         final semester = formatSemester(element.children.last.text.trim());
 
-        evaluations.last.subEvaluations
-            .add(Evaluation(module: module, title: title, type: type, grade: grade, gradeDistribution: gradeDistribution, isPassed: isPassed, dateGraded: dateGraded, dateAnnounced: dateAnnounced, isPartlyGraded: isPartlyGraded, semester: semester));
+        evaluations.last.subEvaluations.add(Evaluation(
+            pIndex: pIndex, module: module, title: title, type: type, grade: grade, gradeDistribution: gradeDistribution, isPassed: isPassed, dateGraded: dateGraded, dateAnnounced: dateAnnounced, isPartlyGraded: isPartlyGraded, semester: semester));
       }
     }
 
