@@ -1,6 +1,8 @@
 import 'package:campus_dual_android/extensions/double.dart';
 import 'package:campus_dual_android/scripts/campus_dual_manager.dart';
+import 'package:campus_dual_android/scripts/event_bus.dart';
 import 'package:campus_dual_android/scripts/storage_manager.dart';
+import 'package:campus_dual_android/widgets/semester_evaluations.dart';
 import 'package:campus_dual_android/widgets/sync_indicator.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -17,12 +19,29 @@ class EvaluationsPage extends StatefulWidget {
 class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAliveClientMixin<EvaluationsPage> {
   List<MasterEvaluation>? dataCache;
 
+  @override
+  void initState() {
+    super.initState();
+    mainBus.onBus(event: "OpenSemesterEvaluations", onEvent: _openSemesterEvaluations);
+  }
+
+  @override
+  void dispose() {
+    mainBus.offBus(event: "OpenSemesterEvaluations", callBack: _openSemesterEvaluations);
+    super.dispose();
+  }
+
+  void _sortData(List<MasterEvaluation> data) {
+    data.sort((a, b) => b.subEvaluations[0].dateAnnounced.compareTo(a.subEvaluations[0].dateAnnounced));
+  }
+
   Stream<List<MasterEvaluation>> loadData() async* {
     final storage = StorageManager();
     try {
       final storedData = await storage.loadObjectList("evaluations");
       if (storedData != null) {
         final data = List<MasterEvaluation>.from(storedData.map((e) => MasterEvaluation.fromJson(e)));
+        _sortData(data);
         dataCache = dataCache ?? data;
         yield data;
       }
@@ -33,8 +52,20 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
     final cd = CampusDualManager();
     final evaluations = await cd.scrapeEvaluations(); // TODO lazy load the evaluations. E.g. load as Stream (maybe only if its the first time)
     storage.saveObjectList("evaluations", evaluations);
+    _sortData(evaluations);
     dataCache = evaluations;
     yield evaluations;
+  }
+
+  void _openSemesterEvaluations(dynamic args) {
+    Navigator.push(
+      args,
+      MaterialPageRoute(
+        builder: (context) => SemesterEvaluations(
+          items: dataCache,
+        ),
+      ),
+    );
   }
 
   @override
@@ -53,7 +84,6 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
         final data = snapshot.hasError ? dataCache : snapshot.data;
         final dataHasArrived = data != null;
 
-        data?.sort((a, b) => b.subEvaluations[0].dateAnnounced.compareTo(a.subEvaluations[0].dateAnnounced));
         return Scaffold(
           appBar: AppBar(
             title: const Text('Noten'),
@@ -145,7 +175,7 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
                                           textColor: Colors.white,
                                           label: Text(subEvaluation.grade == -1 ? "Teilgenommen" : subEvaluation.grade.toString().replaceAll(".", ",")),
                                         ),
-                                        subtitle: Text(subEvaluation.typeWord),
+                                        subtitle: Text("${subEvaluation.typeWord} ${evaluation.getRepNumber(subEvaluation) == 0 ? '' : " (${evaluation.getRepNumber(subEvaluation)}. Nachprüfung)"}"),
                                       ),
                                       if (subEvaluation.isExpanded)
                                         Padding(

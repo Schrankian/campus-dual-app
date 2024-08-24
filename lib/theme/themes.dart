@@ -10,8 +10,13 @@ class Themes {
       brightness: Brightness.light,
     );
     final ColorScheme colorsDark = ColorScheme.fromSeed(
-      seedColor: const Color.fromARGB(255, 4, 17, 70),
+      seedColor: const Color.fromARGB(255, 59, 81, 159),
       brightness: Brightness.dark,
+      // missuse inverseSurface for inversePrimary because inverseprimary has not onInversePrimary property
+      inverseSurface: colorsLight.primary,
+      onInverseSurface: colorsLight.onPrimary,
+      error: Colors.red.withAlpha(200),
+      onError: Colors.white,
     );
 
     _cleanLight = ThemeData(

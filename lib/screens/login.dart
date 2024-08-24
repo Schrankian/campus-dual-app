@@ -67,7 +67,7 @@ class _LoginState extends State<Login> {
   Widget build(BuildContext context) {
     ValidationState state = _validateInput(_usernameController.text, _passwordController.text);
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.primary,
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).colorScheme.inverseSurface : Theme.of(context).colorScheme.primary,
       body: SizedBox.expand(
         child: SafeArea(
           child: Column(
@@ -79,7 +79,7 @@ class _LoginState extends State<Login> {
                 style: TextStyle(
                   fontSize: 40,
                   fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.surface,
+                  color: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).colorScheme.onInverseSurface : Theme.of(context).colorScheme.onPrimary,
                 ),
               ),
               Container(

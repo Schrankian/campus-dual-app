@@ -1,3 +1,5 @@
+import 'package:campus_dual_android/extensions/date.dart';
+
 import '../extensions/color.dart';
 import 'package:flutter/material.dart';
 
@@ -65,6 +67,7 @@ class GeneralUserData {
 }
 
 class Evaluation {
+  final int pIndex;
   final String module;
   final String title;
   final String type;
@@ -92,6 +95,7 @@ class Evaluation {
   }
 
   Evaluation({
+    required this.pIndex,
     required this.module,
     required this.title,
     required this.type,
@@ -106,6 +110,7 @@ class Evaluation {
 
   Map<String, dynamic> toJson() {
     return {
+      'pIndex': pIndex,
       'module': module,
       'title': title,
       'type': type,
@@ -121,6 +126,7 @@ class Evaluation {
 
   factory Evaluation.fromJson(Map<String, dynamic> json) {
     return Evaluation(
+      pIndex: json['pIndex'] as int,
       module: json['module'] as String,
       title: json['title'] as String,
       type: json['type'] as String,
@@ -136,6 +142,7 @@ class Evaluation {
 
   static Evaluation dummy() {
     return Evaluation(
+      pIndex: 0,
       module: "AWP",
       title: "Algorithmen und Datenstrukturen",
       type: "K",
@@ -208,6 +215,29 @@ class MasterEvaluation {
       credits: 5,
       subEvaluations: [Evaluation.dummy(), Evaluation.dummy()],
     );
+  }
+
+  int getRepNumber(Evaluation evaluation) {
+    final List<Evaluation> sameEvals = [];
+
+    for (final subEval in subEvaluations) {
+      if (subEval.pIndex == evaluation.pIndex) {
+        sameEvals.add(subEval);
+      }
+    }
+
+    sameEvals.sort((a, b) => a.dateGraded.compareTo(b.dateGraded));
+
+    return sameEvals.indexOf(evaluation);
+  }
+
+  bool hasNewerSubEval(Evaluation evaluation) {
+    for (final subEval in subEvaluations) {
+      if (subEval != evaluation && subEval.pIndex == evaluation.pIndex && subEval.dateGraded.isAfter(evaluation.dateGraded)) {
+        return true;
+      }
+    }
+    return false;
   }
 }
 
@@ -331,8 +361,8 @@ class Lesson {
       } =>
         Lesson(
           title: title,
-          start: DateTime.fromMillisecondsSinceEpoch(start * 1000),
-          end: DateTime.fromMillisecondsSinceEpoch(end * 1000),
+          start: DateTime.fromMillisecondsSinceEpoch(start * 1000).toCet(),
+          end: DateTime.fromMillisecondsSinceEpoch(end * 1000).toCet(),
           allDay: allDay,
           description: description,
           color: HexColor.fromHex(color),
@@ -424,8 +454,8 @@ class UpcomingExam {
           comment: comment,
           instructor: instructor,
           moduleShort: moduleShort,
-          moduleTitle: moduleTitle.endsWith(")") ? moduleTitle.split(" ").sublist(0, moduleTitle.split(" ").length - 1).join(" ") : moduleTitle,
-          type: moduleTitle.endsWith(")") ? moduleTitle.split(" ").last : "(?)",
+          moduleTitle: moduleTitle.replaceAll(RegExp(r'\([^()]*\)(?!.*\([^()]*\))'), "").trim(), // Delete the last bracket of the title, which contains the type
+          type: moduleTitle.endsWith(")") ? "(${moduleTitle.split("(").last}" : "(?)",
           room: room,
         ),
       _ => throw const FormatException('Unexpected JSON type for UpcomingExam'),

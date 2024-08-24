@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:http/http.dart';
 import 'package:ionicons/ionicons.dart';
 
@@ -39,11 +40,15 @@ class _SyncIndicatorState extends State<SyncIndicator> with TickerProviderStateM
     super.dispose();
   }
 
+  bool _errorShown = false;
+
   @override
   Widget build(BuildContext context) {
     final color = Theme.of(context).brightness == Brightness.light ? Colors.black : Colors.white;
 
     if (widget.state == ConnectionState.done && widget.hasData) {
+      _errorShown = false; // Reset error shown flag
+
       Future.delayed(const Duration(seconds: 2), () {
         // Check again for condition, because the state could have been changed if the user reloaded too early
         if (widget.state == ConnectionState.done && widget.hasData) {
@@ -60,10 +65,12 @@ class _SyncIndicatorState extends State<SyncIndicator> with TickerProviderStateM
         color,
       );
     }
-    if (widget.error != null && widget.error is ClientException && widget.error.toString().contains('Connection refused')) {
+    if (widget.error != null && widget.error is ClientException) {
+      _errorShown = false; // Reset error shown flag
+
       Future.delayed(const Duration(seconds: 3), () {
         // Check again for condition, because the state could have been changed if the user reloaded too early
-        if (widget.error != null && widget.error is ClientException && widget.error.toString().contains('Connection refused')) {
+        if (widget.error != null && widget.error is ClientException) {
           _positionController.reverse();
         }
       });
@@ -84,6 +91,19 @@ class _SyncIndicatorState extends State<SyncIndicator> with TickerProviderStateM
           _positionController.reverse();
         }
       });
+
+      if (!_errorShown) {
+        _errorShown = true;
+        SchedulerBinding.instance.addPostFrameCallback((_) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(widget.error.toString()),
+              backgroundColor: Colors.red,
+            ),
+          );
+        });
+      }
+
       return buildContainer(
         Colors.red,
         Icon(
@@ -94,6 +114,9 @@ class _SyncIndicatorState extends State<SyncIndicator> with TickerProviderStateM
         color,
       );
     }
+
+    _errorShown = false; // Reset error shown flag
+
     _positionController.forward();
     return buildContainer(
       Colors.orange,
