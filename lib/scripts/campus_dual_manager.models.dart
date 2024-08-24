@@ -1,3 +1,5 @@
+import 'package:campus_dual_android/extensions/date.dart';
+
 import '../extensions/color.dart';
 import 'package:flutter/material.dart';
 
@@ -331,8 +333,8 @@ class Lesson {
       } =>
         Lesson(
           title: title,
-          start: DateTime.fromMillisecondsSinceEpoch(start * 1000),
-          end: DateTime.fromMillisecondsSinceEpoch(end * 1000),
+          start: DateTime.fromMillisecondsSinceEpoch(start * 1000).toCet(),
+          end: DateTime.fromMillisecondsSinceEpoch(end * 1000).toCet(),
           allDay: allDay,
           description: description,
           color: HexColor.fromHex(color),

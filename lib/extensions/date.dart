@@ -14,6 +14,32 @@ extension DateExtension on DateTime {
     return DateTime(year, month, day);
   }
 
+  DateTime toCet() {
+    final utc = toUtc();
+    final year = utc.year;
+
+    // Calculate the last Sunday in March (start of Sommerzeit)
+    DateTime lastSundayInMarch = DateTime(year, 3, 31);
+    while (lastSundayInMarch.weekday != DateTime.sunday) {
+      lastSundayInMarch = lastSundayInMarch.subtract(Duration(days: 1));
+    }
+
+    // Calculate the last Sunday in October (end of Sommerzeit)
+    DateTime lastSundayInOctober = DateTime(year, 10, 31);
+    while (lastSundayInOctober.weekday != DateTime.sunday) {
+      lastSundayInOctober = lastSundayInOctober.subtract(Duration(days: 1));
+    }
+
+    // Determine if the current date is within the Sommerzeit period
+    if (utc.isAfter(lastSundayInMarch.add(Duration(hours: 1))) && utc.isBefore(lastSundayInOctober.add(Duration(hours: 1)))) {
+      // Sommerzeit (CEST)
+      return utc.add(Duration(hours: 2));
+    } else {
+      // Winterzeit (CET)
+      return utc.add(Duration(hours: 1));
+    }
+  }
+
   String toTimeDiff(DateTime end, {bool showDifference = true}) {
     if (hour == 0 && minute == 0 || end.hour == 0 && end.minute == 0) return 'Keine Zeitangabe';
     final diff = end.difference(this);
