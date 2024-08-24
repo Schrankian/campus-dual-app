@@ -122,33 +122,36 @@ class _MonthCalendarState extends State<MonthCalendar> {
                               ),
                               color: Theme.of(context).colorScheme.primary.withAlpha(date == dateNow ? 150 : 50),
                             ),
-                            child: Column(
-                              children: [
-                                Text("${index + 1}"),
-                                if (items != null)
-                                  for (final item in items.take(6))
-                                    EvaluationRule.shouldHide(widget.rules ?? [], item.title)
-                                        ? const SizedBox.shrink()
-                                        : Padding(
-                                            padding: const EdgeInsets.only(left: 2, bottom: 1, top: 1, right: 2),
-                                            child: Container(
-                                              padding: const EdgeInsets.only(left: 3, top: 1, bottom: 1, right: 3),
-                                              width: double.infinity,
-                                              decoration: BoxDecoration(
-                                                color: BaColor.fromRule(widget.rules ?? [], item.title, widget.useFuzzyColor, context),
-                                                borderRadius: BorderRadius.circular(3),
-                                              ),
-                                              child: Text(
-                                                item.title,
-                                                style: TextStyle(
-                                                  color: BaColor.fromSurface(BaColor.fromRule(widget.rules ?? [], item.title, widget.useFuzzyColor, context)),
-                                                  fontSize: 8,
-                                                  overflow: TextOverflow.ellipsis,
+                            child: SingleChildScrollView(
+                              physics: const NeverScrollableScrollPhysics(),
+                              child: Column(
+                                children: [
+                                  Text("${index + 1}"),
+                                  if (items != null)
+                                    for (final item in items.take(7))
+                                      EvaluationRule.shouldHide(widget.rules ?? [], item.title)
+                                          ? const SizedBox.shrink()
+                                          : Padding(
+                                              padding: const EdgeInsets.only(left: 2, bottom: 1, top: 1, right: 2),
+                                              child: Container(
+                                                padding: const EdgeInsets.only(left: 3, top: 1, bottom: 1, right: 3),
+                                                width: double.infinity,
+                                                decoration: BoxDecoration(
+                                                  color: BaColor.fromRule(widget.rules ?? [], item.title, widget.useFuzzyColor, context),
+                                                  borderRadius: BorderRadius.circular(3),
+                                                ),
+                                                child: Text(
+                                                  item.title,
+                                                  style: TextStyle(
+                                                    color: BaColor.fromSurface(BaColor.fromRule(widget.rules ?? [], item.title, widget.useFuzzyColor, context)),
+                                                    fontSize: 8,
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
                                                 ),
                                               ),
                                             ),
-                                          ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         );
