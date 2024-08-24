@@ -424,8 +424,8 @@ class UpcomingExam {
           comment: comment,
           instructor: instructor,
           moduleShort: moduleShort,
-          moduleTitle: moduleTitle.endsWith(")") ? moduleTitle.split(" ").sublist(0, moduleTitle.split(" ").length - 1).join(" ") : moduleTitle,
-          type: moduleTitle.endsWith(")") ? moduleTitle.split(" ").last : "(?)",
+          moduleTitle: moduleTitle.replaceAll(RegExp(r'\([^()]*\)(?!.*\([^()]*\))'), "").trim(), // Delete the last bracket of the title, which contains the type
+          type: moduleTitle.endsWith(")") ? "(${moduleTitle.split("(").last}" : "(?)",
           room: room,
         ),
       _ => throw const FormatException('Unexpected JSON type for UpcomingExam'),
