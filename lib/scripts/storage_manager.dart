@@ -48,10 +48,24 @@ class StorageManager {
   }
 
   void clearAll() async {
+    // Things to persist
+    final theme = await loadTheme();
+    final evaluationRules = await loadObjectList("evaluationRules");
+    final useFuzzyColors = await loadBool("useFuzzyColor");
+
     final disk = await SharedPreferences.getInstance();
     disk.clear();
     const secureDisk = FlutterSecureStorage();
     await secureDisk.deleteAll();
+
+    // Persist
+    saveTheme(theme);
+    if (evaluationRules != null) {
+      saveObjectList("evaluationRules", evaluationRules);
+    }
+    if (useFuzzyColors != null) {
+      saveBool("useFuzzyColor", useFuzzyColors);
+    }
   }
 
   Future<UserCredentials?> loadUserAuthData() async {
