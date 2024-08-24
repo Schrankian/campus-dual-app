@@ -217,14 +217,27 @@ class MasterEvaluation {
     );
   }
 
-  bool isFirstTry(Evaluation evaluation) {
+  int getRepNumber(Evaluation evaluation) {
+    final List<Evaluation> sameEvals = [];
+
     for (final subEval in subEvaluations) {
-      if (subEval != evaluation && subEval.pIndex == evaluation.pIndex && subEval.dateAnnounced.isBefore(evaluation.dateAnnounced)) {
-        return false;
+      if (subEval.pIndex == evaluation.pIndex) {
+        sameEvals.add(subEval);
       }
     }
 
-    return true;
+    sameEvals.sort((a, b) => a.dateGraded.compareTo(b.dateGraded));
+
+    return sameEvals.indexOf(evaluation);
+  }
+
+  bool hasNewerSubEval(Evaluation evaluation) {
+    for (final subEval in subEvaluations) {
+      if (subEval != evaluation && subEval.pIndex == evaluation.pIndex && subEval.dateGraded.isAfter(evaluation.dateGraded)) {
+        return true;
+      }
+    }
+    return false;
   }
 }
 

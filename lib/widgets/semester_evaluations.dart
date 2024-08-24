@@ -30,6 +30,9 @@ class _SemesterEvaluationsState extends State<SemesterEvaluations> {
   void initState() {
     for (final MasterEvaluation master in widget.items ?? []) {
       for (final Evaluation item in master.subEvaluations) {
+        if (master.hasNewerSubEval(item)) {
+          continue;
+        }
         if (!_groupedItems.containsKey(item.semester)) {
           _groupedItems[item.semester] = [];
         }
