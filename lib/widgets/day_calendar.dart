@@ -2,8 +2,8 @@ import 'package:campus_dual_android/extensions/color.dart';
 import 'package:flutter/material.dart';
 import "package:campus_dual_android/scripts/campus_dual_manager.models.dart";
 
-class DayCalendar extends StatelessWidget {
-  const DayCalendar({super.key, this.items, this.rules, this.startHour = 7, this.endHour = 19, this.stepSize = 50, this.useFuzzyColor = true});
+class DayCalendar extends StatefulWidget {
+  const DayCalendar({super.key, this.items, this.rules, this.startHour = 7, this.endHour = 19, this.stepSize = 50, this.useFuzzyColor = true, this.showTimeIndicator = false});
 
   final List<Lesson>? items;
   final List<EvaluationRule>? rules;
@@ -11,6 +11,39 @@ class DayCalendar extends StatelessWidget {
   final int endHour;
   final double stepSize;
   final bool useFuzzyColor;
+  final bool showTimeIndicator;
+
+  @override
+  State<DayCalendar> createState() => _DayCalendarState();
+}
+
+class _DayCalendarState extends State<DayCalendar> {
+  DateTime currentTime = DateTime.now();
+  late bool isMounted;
+
+  Future<void> updateTime() async {
+    while (isMounted) {
+      await Future.delayed(const Duration(seconds: 30));
+      setState(() {
+        currentTime = DateTime.now();
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    isMounted = true;
+    if (widget.showTimeIndicator) {
+      updateTime();
+    }
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    isMounted = false;
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,14 +54,14 @@ class DayCalendar extends StatelessWidget {
         children: [
           Column(
             children: [
-              for (final hour in List<int>.generate(endHour - startHour + 1, (i) => i + startHour))
+              for (final hour in List<int>.generate(widget.endHour - widget.startHour + 1, (i) => i + widget.startHour))
                 Row(
                   mainAxisSize: MainAxisSize.max,
                   children: [
                     Text("${hour.toString().padLeft(2, '0')}:00 "),
                     Expanded(
                       child: Divider(
-                        height: stepSize,
+                        height: widget.stepSize,
                         thickness: 1,
                       ),
                     )
@@ -36,20 +69,20 @@ class DayCalendar extends StatelessWidget {
                 ),
             ],
           ),
-          if (items != null)
-            for (final item in items!)
-              EvaluationRule.shouldHide(rules ?? [], item.title)
+          if (widget.items != null)
+            for (final item in widget.items!)
+              EvaluationRule.shouldHide(widget.rules ?? [], item.title)
                   ? const SizedBox.shrink()
                   : Positioned(
-                      top: (item.start.hour - startHour) * stepSize + item.start.minute / 60 * stepSize + stepSize / 2,
+                      top: (item.start.hour - widget.startHour) * widget.stepSize + item.start.minute / 60 * widget.stepSize + widget.stepSize / 2,
                       left: 50,
                       right: 10,
                       child: Container(
-                        height: item.end.difference(item.start).inMinutes / 60 * stepSize,
+                        height: item.end.difference(item.start).inMinutes / 60 * widget.stepSize,
                         decoration: BoxDecoration(
                           color: Theme.of(context).colorScheme.surface,
                           border: Border.all(
-                            color: BaColor.fromRule(rules ?? [], item.title, useFuzzyColor, context),
+                            color: BaColor.fromRule(widget.rules ?? [], item.title, widget.useFuzzyColor, context),
                           ),
                           borderRadius: BorderRadius.circular(3),
                         ),
@@ -57,7 +90,7 @@ class DayCalendar extends StatelessWidget {
                           children: [
                             Container(
                               width: 10,
-                              color: BaColor.fromRule(rules ?? [], item.title, useFuzzyColor, context),
+                              color: BaColor.fromRule(widget.rules ?? [], item.title, widget.useFuzzyColor, context),
                             ),
                             Expanded(
                               child: ListTile(
@@ -72,6 +105,23 @@ class DayCalendar extends StatelessWidget {
                         ),
                       ),
                     ),
+          widget.showTimeIndicator
+              ? Positioned(
+                  top: (currentTime.hour - widget.startHour) * widget.stepSize + currentTime.minute / 60 * widget.stepSize + widget.stepSize / 2,
+                  left: 40,
+                  right: 0,
+                  child: Container(
+                    height: 3,
+                    decoration: BoxDecoration(
+                      color: Colors.transparent,
+                      border: Border.all(
+                        color: Colors.red,
+                      ),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                )
+              : const SizedBox.shrink(),
         ],
       ),
     );

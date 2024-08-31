@@ -176,6 +176,7 @@ class _TimeTableState extends State<TimeTable> with AutomaticKeepAliveClientMixi
                         endHour: 20,
                         stepSize: 65,
                         useFuzzyColor: useFuzzyColor,
+                        showTimeIndicator: DateTime.now().trim() == currentDate,
                       ),
                     ),
                   ),
