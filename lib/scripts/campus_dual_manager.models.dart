@@ -79,7 +79,10 @@ class Evaluation {
   final bool isPartlyGraded;
   final String semester;
 
-  bool isExpanded = false;
+  String get uniqueId {
+    // create a hash out of pIndex, title, type, semeseter, module
+    return "$pIndex$title$type$semester$module".hashCode.toRadixString(16);
+  }
 
   String get typeWord {
     return switch (type) {

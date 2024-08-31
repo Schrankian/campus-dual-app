@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:campus_dual_android/extensions/double.dart';
 import 'package:campus_dual_android/scripts/campus_dual_manager.dart';
 import 'package:campus_dual_android/scripts/event_bus.dart';
@@ -18,6 +20,7 @@ class EvaluationsPage extends StatefulWidget {
 
 class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAliveClientMixin<EvaluationsPage> {
   List<MasterEvaluation>? dataCache;
+  final expandedItems = HashSet<String>();
 
   @override
   void initState() {
@@ -156,7 +159,10 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
                                       ListTile(
                                         onTap: () {
                                           setState(() {
-                                            subEvaluation.isExpanded = !subEvaluation.isExpanded;
+                                            final isExpanded = expandedItems.remove(subEvaluation.uniqueId);
+                                            if (!isExpanded) {
+                                              expandedItems.add(subEvaluation.uniqueId);
+                                            }
                                           });
                                         },
                                         dense: true,
@@ -164,7 +170,7 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
                                         leading: Padding(
                                           padding: const EdgeInsets.only(left: 10, right: 10),
                                           child: Icon(
-                                            subEvaluation.isExpanded ? Ionicons.chevron_down_outline : Ionicons.chevron_forward_outline,
+                                            expandedItems.contains(subEvaluation.uniqueId) ? Ionicons.chevron_down_outline : Ionicons.chevron_forward_outline,
                                           ),
                                         ),
                                         title: Text(subEvaluation.title),
@@ -177,7 +183,7 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
                                         ),
                                         subtitle: Text("${subEvaluation.typeWord} ${evaluation.getRepNumber(subEvaluation) == 0 ? '' : " (${evaluation.getRepNumber(subEvaluation)}. Nachprüfung)"}"),
                                       ),
-                                      if (subEvaluation.isExpanded)
+                                      if (expandedItems.contains(subEvaluation.uniqueId))
                                         Padding(
                                           padding: const EdgeInsets.only(top: 15, bottom: 15, left: 25, right: 25),
                                           child: Container(
