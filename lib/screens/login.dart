@@ -39,7 +39,7 @@ class _LoginState extends State<Login> {
     return UserCredentials(username, password, hash, false);
   }
 
-  bool isLoading = true;
+  bool isLoading = false;
   bool passwordVisible = false;
   List<Map<String, String>> lastErrors = [];
 
@@ -54,7 +54,7 @@ class _LoginState extends State<Login> {
       }
     }
 
-    if (!isLoading) {
+    if (isLoading) {
       return ValidationState.loading;
     }
     if (username.isNotEmpty && password.isNotEmpty) {
@@ -159,7 +159,7 @@ class _LoginState extends State<Login> {
                       onPressed: state == ValidationState.valid
                           ? () async {
                               setState(() {
-                                isLoading = false;
+                                isLoading = true;
                               });
 
                               FocusManager.instance.primaryFocus?.unfocus();
@@ -167,13 +167,13 @@ class _LoginState extends State<Login> {
                               final userCreds = await _testCredentials(_usernameController.text, _passwordController.text);
                               final elapsed = stopwatch.elapsed;
 
-                              // Make sure the loading spinner is shown for at least 2 second
-                              if (elapsed < const Duration(seconds: 2)) {
-                                await Future.delayed(const Duration(seconds: 2) - elapsed);
+                              // Make sure the loading spinner is shown for at least 1 second
+                              if (elapsed < const Duration(seconds: 1)) {
+                                await Future.delayed(const Duration(seconds: 1) - elapsed);
                               }
 
                               setState(() {
-                                isLoading = true;
+                                isLoading = false;
                               });
 
                               if (userCreds != null) {
