@@ -95,7 +95,7 @@ class _DayCalendarState extends State<DayCalendar> {
                             Expanded(
                               child: ListTile(
                                 isThreeLine: true,
-                                title: Text(item.title),
+                                title: Text(item.title, style: const TextStyle(overflow: TextOverflow.ellipsis)),
                                 subtitle: Text('${item.room}\n${item.instructor}'),
                                 trailing: Text(item.type),
                                 // trailing : Text(item.start.toTimeDiff(item.end, showDifference: false)),
