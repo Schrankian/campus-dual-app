@@ -681,7 +681,7 @@ class EvaluationRule {
 
   static EvaluationRule? getMatch(List<EvaluationRule> rules, String title) {
     for (final rule in rules) {
-      if (title.toLowerCase().contains(rule.pattern.toLowerCase())) {
+      if (RegExp(rule.pattern, caseSensitive: false).hasMatch(title)) {
         return rule;
       }
     }
