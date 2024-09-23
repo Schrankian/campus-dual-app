@@ -74,19 +74,19 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
-      - name: Start Android Release Build
+      - name: Start Android Apk Build
         run: flutter build apk
         
-      - name: Start Android Publish Build
+      - name: Start Android Appbundle Build
         run: flutter build appbundle
 
-      - name: Upload Android Release
+      - name: Upload Android Apk
         uses: actions/upload-artifact@v4
         with:
           name: android-release
           path: build/app/outputs/flutter-apk/app-release.apk
 
-      - name: Upload Android Publish
+      - name: Upload Android Appbundle
         uses: actions/upload-artifact@v4
         with:
           name: android-publish
@@ -112,7 +112,7 @@ jobs:
         uses: juliangruber/read-file-action@v1
         with:
           path: version1.txt
-      - name: Upload APK to release
+      - name: Upload Apk to release
         uses: ncipollo/release-action@v1
         with:
           allowUpdates: true
@@ -129,7 +129,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Get appbundle
+      - name: Get Appbundle
         uses: actions/download-artifact@v4
         with:
           name: android-publish
