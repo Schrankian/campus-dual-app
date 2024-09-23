@@ -21,6 +21,7 @@ class DayCalendar extends StatefulWidget {
 class _DayCalendarState extends State<DayCalendar> {
   DateTime currentTime = DateTime.now();
   late bool isMounted;
+  List<List<Lesson>> itemsStacked = [[]];
 
   Future<void> updateTime() async {
     while (isMounted) {
@@ -37,7 +38,29 @@ class _DayCalendarState extends State<DayCalendar> {
     if (widget.showTimeIndicator) {
       updateTime();
     }
+
     super.initState();
+  }
+
+  @override
+  void didUpdateWidget(covariant DayCalendar oldWidget) {
+    // On external change
+    itemsStacked = [[]];
+    if (widget.items != null) {
+      for (final item in widget.items!) {
+        if (EvaluationRule.shouldHide(widget.rules ?? [], item.title)) {
+          continue;
+        }
+        if (itemsStacked.last.isEmpty) {
+          itemsStacked.last.add(item);
+        } else if (itemsStacked.last.last.end.isBefore(item.start)) {
+          itemsStacked.add([item]);
+        } else {
+          itemsStacked.last.add(item);
+        }
+      }
+    }
+    super.didUpdateWidget(oldWidget);
   }
 
   @override
@@ -70,42 +93,53 @@ class _DayCalendarState extends State<DayCalendar> {
                 ),
             ],
           ),
-          if (widget.items != null)
-            for (final item in widget.items!)
-              EvaluationRule.shouldHide(widget.rules ?? [], item.title)
-                  ? const SizedBox.shrink()
-                  : Positioned(
-                      top: (item.start.hour - widget.startHour) * widget.stepSize + item.start.minute / 60 * widget.stepSize + widget.stepSize / 2,
-                      left: 50,
-                      right: 10,
-                      child: Container(
-                        height: item.end.difference(item.start).inMinutes / 60 * widget.stepSize,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surface,
-                          border: Border.all(
-                            color: BaColor.fromRule(widget.rules ?? [], item.title, widget.useFuzzyColor, context),
-                          ),
-                          borderRadius: BorderRadius.circular(3),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 10,
-                              color: BaColor.fromRule(widget.rules ?? [], item.title, widget.useFuzzyColor, context),
-                            ),
-                            Expanded(
-                              child: ListTile(
-                                isThreeLine: true,
-                                title: Text(item.title, style: const TextStyle(overflow: TextOverflow.ellipsis)),
-                                subtitle: Text('${item.room} \n${item.instructor}'),
-                                // trailing: Text(item.type), // TODO maybe add later but there is no clear type given, so it will be a bit more complex to derive it from context
-                                trailing: Text(item.start.toTimeDiff(item.end, showDifference: false)),
-                              ),
-                            ),
-                          ],
-                        ),
+          for (final items in itemsStacked)
+            for (final item in items)
+              Positioned(
+                top: (item.start.hour - widget.startHour) * widget.stepSize + item.start.minute / 60 * widget.stepSize + widget.stepSize / 2,
+                left: 50 + items.indexOf(item) * 15,
+                right: 10 + items.indexOf(item) * -5,
+                child: InkWell(
+                  onTap: () {
+                    setState(() {
+                      itemsStacked = itemsStacked.map((items) {
+                        if (items.isNotEmpty) {
+                          final lastItem = items.removeLast();
+                          items.insert(0, lastItem);
+                        }
+                        return items;
+                      }).toList();
+                    });
+                  },
+                  child: Container(
+                    height: item.end.difference(item.start).inMinutes / 60 * widget.stepSize,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      border: Border.all(
+                        color: BaColor.fromRule(widget.rules ?? [], item.title, widget.useFuzzyColor, context),
                       ),
+                      borderRadius: BorderRadius.circular(3),
                     ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 10,
+                          color: BaColor.fromRule(widget.rules ?? [], item.title, widget.useFuzzyColor, context),
+                        ),
+                        Expanded(
+                          child: ListTile(
+                            isThreeLine: true,
+                            title: Text(item.title, style: const TextStyle(overflow: TextOverflow.ellipsis)),
+                            subtitle: Text('${item.room} \n${item.instructor}'),
+                            // trailing: Text(item.type), // TODO maybe add later but there is no clear type given, so it will be a bit more complex to derive it from context
+                            trailing: Text(item.start.toTimeDiff(item.end, showDifference: false)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
           widget.showTimeIndicator
               ? Positioned(
                   top: (currentTime.hour - widget.startHour) * widget.stepSize + currentTime.minute / 60 * widget.stepSize + widget.stepSize / 2,
@@ -120,7 +154,6 @@ class _DayCalendarState extends State<DayCalendar> {
                       ),
                       borderRadius: BorderRadius.circular(2),
                     ),
-                    child: Text("hfe"),
                   ),
                 )
               : const SizedBox.shrink(),
