@@ -1,8 +1,10 @@
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 import 'package:campus_dual_android/screens/body/body_evaluations.dart';
 import 'package:campus_dual_android/screens/body/body_news.dart';
+import 'package:campus_dual_android/scripts/campus_dual_manager.dart';
 import 'package:campus_dual_android/widgets/sync_starter.dart';
 import 'package:preload_page_view/preload_page_view.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../widgets/settings_popup.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
@@ -84,7 +86,23 @@ class _HomePageState extends State<HomePage> {
         },
       }
     ],
-    [],
+    [
+      {
+        'icon': Ionicons.globe_outline,
+        'function': (context) async {
+          if (!await launchUrl(
+            Uri.parse("https://selfservice.campus-dual.de/index/login"),
+            webViewConfiguration: WebViewConfiguration(
+              headers: {
+                // 'Set-Cookie': await CampusDualManager().getAuthToken(),
+              },
+            ),
+          )) {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Fehler beim Öffnen der Webseite')));
+          }
+        },
+      },
+    ],
     [
       {
         'icon': Ionicons.calendar_outline,
