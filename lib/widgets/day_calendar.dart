@@ -1,4 +1,5 @@
 import 'package:campus_dual_android/extensions/color.dart';
+import 'package:campus_dual_android/extensions/date.dart';
 import 'package:flutter/material.dart';
 import "package:campus_dual_android/scripts/campus_dual_manager.models.dart";
 
@@ -96,9 +97,9 @@ class _DayCalendarState extends State<DayCalendar> {
                               child: ListTile(
                                 isThreeLine: true,
                                 title: Text(item.title, style: const TextStyle(overflow: TextOverflow.ellipsis)),
-                                subtitle: Text('${item.room}\n${item.instructor}'),
-                                trailing: Text(item.type),
-                                // trailing : Text(item.start.toTimeDiff(item.end, showDifference: false)),
+                                subtitle: Text('${item.room} \n${item.instructor}'),
+                                // trailing: Text(item.type), // TODO maybe add later but there is no clear type given, so it will be a bit more complex to derive it from context
+                                trailing: Text(item.start.toTimeDiff(item.end, showDifference: false)),
                               ),
                             ),
                           ],
@@ -119,6 +120,7 @@ class _DayCalendarState extends State<DayCalendar> {
                       ),
                       borderRadius: BorderRadius.circular(2),
                     ),
+                    child: Text("hfe"),
                   ),
                 )
               : const SizedBox.shrink(),
