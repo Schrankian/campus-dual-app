@@ -123,6 +123,7 @@ jobs:
         with:
           allowUpdates: true
           generateReleaseNotes: false
+          prerelease: true
           artifacts: app-release.apk
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ steps.version.outputs.content }}-dev
