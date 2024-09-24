@@ -61,6 +61,8 @@ class _DayPickerState extends State<DayPicker> {
                   final diff = index + 1 - currentDateState.weekday;
                   final date = currentDateState.add(Duration(days: diff));
 
+                  double screenWidth = MediaQuery.sizeOf(context).width;
+
                   return GestureDetector(
                     onTap: () {
                       if (widget.onDateChanged != null) {
@@ -70,12 +72,12 @@ class _DayPickerState extends State<DayPicker> {
                         currentDateState = date;
                       });
                     },
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 10, right: 10),
+                    child: SizedBox(
+                      width: screenWidth / 7,
                       child: Container(
-                        padding: const EdgeInsets.only(left: 10, right: 10),
+                        margin: EdgeInsets.only(left: screenWidth / 56, right: screenWidth / 56),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(15),
                           color: date.compareTo(widget.currentDate) == 0 ? Theme.of(context).colorScheme.primary.withAlpha(80) : Colors.transparent,
                         ),
                         child: Column(
