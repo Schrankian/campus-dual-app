@@ -79,7 +79,10 @@ class Evaluation {
   final bool isPartlyGraded;
   final String semester;
 
-  bool isExpanded = false;
+  String get uniqueId {
+    // create a hash out of pIndex, title, type, semeseter, module
+    return "$pIndex$title$type$semester$module".hashCode.toRadixString(16);
+  }
 
   String get typeWord {
     return switch (type) {
@@ -678,7 +681,7 @@ class EvaluationRule {
 
   static EvaluationRule? getMatch(List<EvaluationRule> rules, String title) {
     for (final rule in rules) {
-      if (title.toLowerCase().contains(rule.pattern.toLowerCase())) {
+      if (RegExp(rule.pattern, caseSensitive: false).hasMatch(title)) {
         return rule;
       }
     }

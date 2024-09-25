@@ -14,14 +14,17 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Load campus dual certificate
-  ByteData data = await PlatformAssetBundle().load('assets/ca/selfservice.campus-dual.de.crt');
-  SecurityContext.defaultContext.setTrustedCertificatesBytes(data.buffer.asUint8List());
+  Future<ByteData> data = PlatformAssetBundle().load('assets/ca/selfservice.campus-dual.de.crt');
+  Future<ThemeMode> initTheme = StorageManager().loadTheme();
+  Future<UserCredentials?> creds = StorageManager().loadUserAuthData();
 
-  CampusDualManager.userCreds = await StorageManager().loadUserAuthData();
+  var result = await Future.wait([data, initTheme, creds]);
 
-  final ThemeMode initTheme = await StorageManager().loadTheme();
+  SecurityContext.defaultContext.setTrustedCertificatesBytes((result[0] as ByteData).buffer.asUint8List());
+  CampusDualManager.userCreds = result[2] as UserCredentials;  
+
   runApp(
-    MyApp(initTheme: initTheme),
+    MyApp(initTheme: result[1] as ThemeMode),
   );
 }
 

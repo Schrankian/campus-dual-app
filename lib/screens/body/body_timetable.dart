@@ -146,40 +146,53 @@ class _TimeTableState extends State<TimeTable> with AutomaticKeepAliveClientMixi
           body: StatefulBuilder(
             key: _dateSectionKey,
             builder: (context, setState) {
-              return Column(
-                children: [
-                  DayPicker(
-                    currentDate: currentDate,
-                    onDateChanged: (date) {
-                      setState(() {
-                        currentDate = date.trim();
-                      });
-                    },
-                  ),
-                  Expanded(
-                    child: GestureDetector(
-                      onHorizontalDragEnd: (details) {
-                        if (details.primaryVelocity! > 10) {
+              return Scaffold(
+                floatingActionButton: nowDay == currentDate
+                    ? null
+                    : FloatingActionButton(
+                        onPressed: () {
                           setState(() {
-                            currentDate = currentDate.subtract(const Duration(days: 1)).trim();
+                            currentDate = nowDay;
                           });
-                        } else if (details.primaryVelocity! < -10) {
-                          setState(() {
-                            currentDate = currentDate.add(const Duration(days: 1)).trim();
-                          });
-                        }
+                        },
+                        child: const Icon(Ionicons.return_down_back),
+                      ),
+                body: Column(
+                  children: [
+                    DayPicker(
+                      currentDate: currentDate,
+                      onDateChanged: (date) {
+                        setState(() {
+                          currentDate = date.trim();
+                        });
                       },
-                      child: DayCalendar(
-                        items: dataHasArrived ? data[currentDate] : [],
-                        rules: rules,
-                        startHour: 7,
-                        endHour: 20,
-                        stepSize: 65,
-                        useFuzzyColor: useFuzzyColor,
+                    ),
+                    Expanded(
+                      child: GestureDetector(
+                        onHorizontalDragEnd: (details) {
+                          if (details.primaryVelocity! > 10) {
+                            setState(() {
+                              currentDate = currentDate.subtract(const Duration(days: 1)).trim();
+                            });
+                          } else if (details.primaryVelocity! < -10) {
+                            setState(() {
+                              currentDate = currentDate.add(const Duration(days: 1)).trim();
+                            });
+                          }
+                        },
+                        child: DayCalendar(
+                          items: dataHasArrived ? data[currentDate] : [],
+                          rules: rules,
+                          startHour: 7,
+                          endHour: 20,
+                          stepSize: 65,
+                          useFuzzyColor: useFuzzyColor,
+                          showTimeIndicator: DateTime.now().trim() == currentDate,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               );
             },
           ),
