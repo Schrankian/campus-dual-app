@@ -1,6 +1,8 @@
 # Campus Dual Helper
 Campus Dual Helper is an App designed to provide an alternative Interface to the Campus Dual web application. To achieve this, it uses Api Endpoints or just scrapes the website and parses it to get the necessary data.
 
+<a href='https://play.google.com/store/apps/details?id=net.fabianschuster.campus_dual_android&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png' width="300"/></a>
+
 # Important
 This application gets the informations by impersonating the user and scraping the data from the official websites. Due to the nature of scraping, there could be (and probably are) a lot of edge case I haven't considered while writing this scraper. So keep in mind that bugs could occure, and if they do so, please write and github issue for it.
 
