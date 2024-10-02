@@ -2,6 +2,8 @@
     style="@style/Widget.Android.AppWidget.Container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:alpha="100"
+    android:background="@drawable/widget_bg"
     android:theme="@style/Theme.Android.AppWidgetContainer">
 
     <TextView
@@ -10,10 +12,31 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:layout_margin="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="#59FFFFFF"
+        android:contentDescription="@string/appwidget_text"
+        android:text="Timetable"
+        android:textColor="#191CDC"
+        android:textSize="24sp"
+        android:textStyle="bold|italic" />
+
+    <TextView
+        android:id="@+id/appwidget_text2"
+        style="@style/Widget.Android.AppWidget.InnerView"
+        android:layout_width="307dp"
+        android:layout_height="196dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="312dp"
+        android:background="#59FFFFFF"
         android:contentDescription="@string/appwidget_text"
         android:text="@string/appwidget_text"
+        android:textColor="#191CDC"
         android:textSize="24sp"
         android:textStyle="bold|italic" />
 </RelativeLayout>
