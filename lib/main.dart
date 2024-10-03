@@ -21,7 +21,7 @@ void main() async {
   var result = await Future.wait([data, initTheme, creds]);
 
   SecurityContext.defaultContext.setTrustedCertificatesBytes((result[0] as ByteData).buffer.asUint8List());
-  CampusDualManager.userCreds = result[2] as UserCredentials;  
+  CampusDualManager.userCreds = result[2] as UserCredentials?;
 
   runApp(
     MyApp(initTheme: result[1] as ThemeMode),
