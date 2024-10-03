@@ -1,15 +1,16 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     style="@style/Widget.Android.AppWidget.Container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:alpha="100"
     android:background="@drawable/widget_bg"
+    android:orientation="vertical"
     android:theme="@style/Theme.Android.AppWidgetContainer">
 
     <TextView
         android:id="@+id/appwidget_text"
         style="@style/Widget.Android.AppWidget.InnerView"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_marginStart="8dp"
@@ -22,21 +23,22 @@
         android:textSize="24sp"
         android:textStyle="bold|italic" />
 
-    <TextView
-        android:id="@+id/appwidget_text2"
-        style="@style/Widget.Android.AppWidget.InnerView"
-        android:layout_width="307dp"
-        android:layout_height="196dp"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="312dp"
-        android:background="#59FFFFFF"
-        android:contentDescription="@string/appwidget_text"
-        android:text="@string/appwidget_text"
-        android:textColor="#191CDC"
-        android:textSize="24sp"
-        android:textStyle="bold|italic" />
-</RelativeLayout>
+    <!-- Use a ListView or StackView for the list of lessons -->
+    <ListView
+        android:id="@+id/lessons_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="0dp" />
+    
+    <!-- Add this empty view to show when the list is empty -->
+    <TextView 
+    android:id="@+id/empty_view" 
+    android:layout_width="match_parent" 
+    android:layout_height="wrap_content" 
+    android:gravity="center" 
+    android:text="No lessons today" 
+    android:textColor="#FF0000" 
+    android:visibility="gone" />
+
+</LinearLayout>
