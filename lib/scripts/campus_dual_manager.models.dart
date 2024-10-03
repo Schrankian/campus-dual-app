@@ -72,7 +72,7 @@ class Evaluation {
   final String title;
   final String type;
   final double grade;
-  final List<int> gradeDistribution;
+  final List<String> gradeDistributionArguments;
   final bool isPassed;
   final DateTime dateGraded;
   final DateTime dateAnnounced;
@@ -103,7 +103,7 @@ class Evaluation {
     required this.title,
     required this.type,
     required this.grade,
-    required this.gradeDistribution,
+    required this.gradeDistributionArguments,
     required this.isPassed,
     required this.dateGraded,
     required this.dateAnnounced,
@@ -118,7 +118,7 @@ class Evaluation {
       'title': title,
       'type': type,
       'grade': grade,
-      'gradeDistribution': gradeDistribution,
+      'gradeDistributionArguments': gradeDistributionArguments,
       'isPassed': isPassed,
       'dateGraded': dateGraded.toIso8601String(),
       'dateAnnounced': dateAnnounced.toIso8601String(),
@@ -134,7 +134,7 @@ class Evaluation {
       title: json['title'] as String,
       type: json['type'] as String,
       grade: json['grade'] as double,
-      gradeDistribution: json['gradeDistribution'].cast<int>(),
+      gradeDistributionArguments: json['gradeDistributionArguments'].cast<String>(),
       isPassed: json['isPassed'] as bool,
       dateGraded: DateTime.parse(json['dateGraded'] as String),
       dateAnnounced: DateTime.parse(json['dateAnnounced'] as String),
@@ -150,7 +150,7 @@ class Evaluation {
       title: "Algorithmen und Datenstrukturen",
       type: "K",
       grade: 1.3,
-      gradeDistribution: [6, 2, 6, 2, 0],
+      gradeDistributionArguments: ["", "", ""],
       isPassed: true,
       dateGraded: DateTime.now(),
       dateAnnounced: DateTime.now(),
