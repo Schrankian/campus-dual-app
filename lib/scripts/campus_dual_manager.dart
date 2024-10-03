@@ -212,8 +212,8 @@ class CampusDualManager {
     for (int i = 0; i < studInfo.nodes.length; i++) {
       final child = studInfo.nodes[i].text!.trim();
 
-      if (child.contains("Studiengang")) {
-        course = child.replaceAll("Studiengang ", "");
+      if (child.contains("SG")) {
+        course = child.replaceAll("SG ", "").replaceAll("SR", "");
         continue;
       }
       switch (child) {
