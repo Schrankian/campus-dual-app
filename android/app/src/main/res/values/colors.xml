@@ -1,6 +1,9 @@
 <resources>
-    <color name="light_blue_50">#FFE1F5FE</color>
-    <color name="light_blue_200">#FF81D4FA</color>
-    <color name="light_blue_600">#FF039BE5</color>
-    <color name="light_blue_900">#FF01579B</color>
+    <color name="primary_light">#FF4D5C92</color> <!-- The Main Primary color-->
+    <color name="primary_dark">#FFB7C4FF</color> <!-- The lighter Primary color used in dark mode-->
+    <color name="background_dark">#FF121318</color>
+    <color name="on_background_dark">#FFE3E1E9</color>
+    <color name="background_dark_transparent">#A1121318</color>
+    <color name="background_light">#FFFAF8FF</color>
+    <color name="on_background_light">#FF1A1B21</color>
 </resources>

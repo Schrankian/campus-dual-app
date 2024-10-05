@@ -6,39 +6,67 @@
     android:background="@drawable/widget_bg"
     android:orientation="vertical"
     android:theme="@style/Theme.Android.AppWidgetContainer">
+<!-- 
+    <TextView 
+        android:layout_width="match_parent" 
+        android:layout_height="wrap_content" 
+        android:gravity="end"
+        android:text="Sync: Just now" 
+        android:textColor="@color/on_background_dark" 
+        android:textSize="12sp"
+        android:paddingEnd="8dp"/> -->
 
-    <TextView
-        android:id="@+id/appwidget_text"
-        style="@style/Widget.Android.AppWidget.InnerView"
+
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:background="#59FFFFFF"
-        android:contentDescription="@string/appwidget_text"
-        android:text="Timetable"
-        android:textColor="#191CDC"
-        android:textSize="24sp"
-        android:textStyle="bold|italic" />
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/appwidget_text"
+            style="@style/Widget.Android.AppWidget.InnerView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:contentDescription="@string/appwidget_text"
+            android:gravity="center"
+            android:background="@android:color/transparent"
+            android:text="Stundenplan"
+            android:textColor="@color/on_background_dark"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/reload_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_reload"
+            android:padding="8dp"
+            android:clickable="true"
+            android:focusable="true" />
+    </RelativeLayout>
 
     <!-- Use a ListView or StackView for the list of lessons -->
     <ListView
         android:id="@+id/lessons_list"
+        android:clickable="true"
+        android:focusable="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:divider="@android:color/transparent"
+        android:padding="8dp"
         android:dividerHeight="0dp" />
     
     <!-- Add this empty view to show when the list is empty -->
     <TextView 
-    android:id="@+id/empty_view" 
-    android:layout_width="match_parent" 
-    android:layout_height="wrap_content" 
-    android:gravity="center" 
-    android:text="No lessons today" 
-    android:textColor="#FF0000" 
-    android:visibility="gone" />
+        android:id="@+id/empty_view" 
+        android:layout_width="match_parent" 
+        android:layout_height="match_parent" 
+        android:gravity="center" 
+        android:text="Lädt..." 
+        android:textSize="24sp"
+        android:textColor="@color/primary_dark" 
+        android:visibility="gone" />
 
 </LinearLayout>

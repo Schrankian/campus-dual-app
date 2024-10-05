@@ -82,6 +82,15 @@ class StorageManager {
     return creds;
   }
 
+  // TODO listen for changes
+  /// Get the data stored by the widget and set it to null
+  Future<String> extractWidgetExchangeData() async {
+    final disk = await SharedPreferences.getInstance();
+    final data = disk.getString("widgetExchangeData") ?? "";
+    await disk.remove("widgetExchangeData");
+    return data;
+  }
+
   void saveUserAuthData(UserCredentials data) async {
     const secureDisk = FlutterSecureStorage();
     secureDisk.write(key: "username", value: data.username);

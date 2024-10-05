@@ -5,10 +5,12 @@
     android:orientation="horizontal" 
     android:padding="8dp" 
     android:background="@android:color/transparent" 
-    android:gravity="center_vertical">
+    android:gravity="center_vertical"
+    android:id="@+id/lesson_list_item">
 
     <!-- Time section on the left -->
     <LinearLayout 
+        android:id="@+id/lesson_time"
         android:layout_width="0dp" 
         android:layout_height="wrap_content" 
         android:layout_weight="1" 
@@ -19,31 +21,34 @@
             android:id="@+id/lesson_start_time" 
             android:layout_width="wrap_content" 
             android:layout_height="wrap_content" 
-            android:textColor="#191CDC" 
+            android:textColor="@color/primary_dark" 
             android:textSize="15sp" />
 
         <LinearLayout
+            android:id="@+id/lesson_time_divider"
             android:layout_width= "2dp"
             android:layout_height= "15dp"
-            android:background="#191CDC"
+            android:background="@color/primary_dark"
             />
 
         <TextView 
             android:id="@+id/lesson_end_time" 
             android:layout_width="wrap_content" 
             android:layout_height="wrap_content" 
-            android:textColor="#191CDC" 
+            android:textColor="@color/primary_dark" 
             android:textSize="15sp" />
 
     </LinearLayout>
 
     <LinearLayout 
+        android:id="@+id/lesson_divider"
         android:layout_width="2dp" 
         android:layout_height="match_parent" 
-        android:background="#191CDC" 
+        android:background="@color/primary_dark" 
         android:layout_marginEnd="8dp" />
 
     <LinearLayout 
+        android:id="@+id/lesson_info"
         android:layout_width="0dp" 
         android:layout_height="wrap_content" 
         android:layout_weight="4" 
@@ -54,14 +59,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="16sp"
-            android:textColor="#191CDC" />
+            android:textColor="@color/primary_dark" />
         
         <!-- Professor name -->
         <TextView 
             android:id="@+id/lesson_instructor" 
             android:layout_width="wrap_content" 
             android:layout_height="wrap_content" 
-            android:textColor="#5A5A5A" 
+            android:textColor="@color/primary_light" 
             android:textSize="14sp" />
 
         <!-- Room -->
@@ -69,7 +74,7 @@
             android:id="@+id/lesson_room" 
             android:layout_width="wrap_content" 
             android:layout_height="wrap_content" 
-            android:textColor="#191CDC" 
+            android:textColor="@color/primary_dark" 
             android:textStyle="italic" 
             android:textSize="12sp" />
 
