@@ -159,7 +159,11 @@ class TimetableRemoteViewsFactory(private val context: Context, intent: Intent) 
         val rulesJson = decodeStringList(rulesJsonBase64)
         val rules = parseEvaluationRulesJson(rulesJson)
 
-        val timeTableJson = mPrefs.getString("flutter.timetable", "") ?: ""
+        val timeTableJson = mPrefs.getString("flutter.timetable", "")
+        if (timeTableJson == null || timeTableJson.isEmpty()) {
+            lessons = listOf(LessonItem.Empty("Keine Daten vorhanden"))
+            return
+        }
         val timeTable = parseTimeTableJson(timeTableJson, useFuzzyColor, rules)
 
 

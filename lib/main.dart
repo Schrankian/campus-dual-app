@@ -53,7 +53,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _onLogout(dynamic args) {
-    StorageManager().clearAll();
+    StorageManager().clearAll().then((_) => updateWidget());
     setState(() {
       CampusDualManager.userCreds = null;
     });
