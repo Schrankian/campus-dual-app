@@ -18,33 +18,26 @@
         android:gravity="center">
 
         <TextView 
-            android:id="@+id/lesson_start_time" 
-            android:layout_width="wrap_content" 
-            android:layout_height="wrap_content" 
-            android:textColor="@color/primary_dark" 
-            android:textSize="15sp" />
+            style="@style/TimetableWidget.TextView.Primary"
+            android:id="@+id/lesson_start_time"/>
 
         <LinearLayout
+            style="@style/TimetableWidget.Divider.Primary"
             android:id="@+id/lesson_time_divider"
             android:layout_width= "2dp"
-            android:layout_height= "15dp"
-            android:background="@color/primary_dark"
-            />
+            android:layout_height= "15dp"/>
 
         <TextView 
-            android:id="@+id/lesson_end_time" 
-            android:layout_width="wrap_content" 
-            android:layout_height="wrap_content" 
-            android:textColor="@color/primary_dark" 
-            android:textSize="15sp" />
+            style="@style/TimetableWidget.TextView.Primary"        
+            android:id="@+id/lesson_end_time" />
 
     </LinearLayout>
 
     <LinearLayout 
+        style="@style/TimetableWidget.Divider.Primary"
         android:id="@+id/lesson_divider"
         android:layout_width="2dp" 
         android:layout_height="match_parent" 
-        android:background="@color/primary_dark" 
         android:layout_marginEnd="8dp" />
 
     <LinearLayout 
@@ -55,26 +48,20 @@
         android:orientation="vertical">
 
         <TextView
+            style="@style/TimetableWidget.TextView.Primary"
             android:id="@+id/lesson_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textColor="@color/primary_dark" />
+            android:textSize="16sp"/>
         
         <!-- Professor name -->
         <TextView 
+            style="@style/TimetableWidget.TextView.Primary"
             android:id="@+id/lesson_instructor" 
-            android:layout_width="wrap_content" 
-            android:layout_height="wrap_content" 
-            android:textColor="@color/primary_light" 
             android:textSize="14sp" />
 
         <!-- Room -->
         <TextView 
+            style="@style/TimetableWidget.TextView.Primary"
             android:id="@+id/lesson_room" 
-            android:layout_width="wrap_content" 
-            android:layout_height="wrap_content" 
-            android:textColor="@color/primary_dark" 
             android:textStyle="italic" 
             android:textSize="12sp" />
 

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:campus_dual_android/background/widget.dart';
 import 'package:campus_dual_android/screens/homepage.dart';
 import 'package:campus_dual_android/screens/login.dart';
 import 'package:campus_dual_android/scripts/campus_dual_manager.dart';
@@ -7,6 +8,7 @@ import 'package:campus_dual_android/scripts/event_bus.dart';
 import 'package:campus_dual_android/scripts/storage_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:home_widget/home_widget.dart';
 import 'theme/themes.dart';
 import "package:campus_dual_android/scripts/campus_dual_manager.models.dart";
 
@@ -22,8 +24,6 @@ void main() async {
 
   SecurityContext.defaultContext.setTrustedCertificatesBytes((result[0] as ByteData).buffer.asUint8List());
   CampusDualManager.userCreds = result[2] as UserCredentials;
-
-  final widgetData = await StorageManager().extractWidgetExchangeData(); // TODO do something with it
 
   runApp(
     MyApp(initTheme: result[1] as ThemeMode),
@@ -73,6 +73,10 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
+
+    HomeWidget.registerInteractivityCallback(backgroundCallback);
+    listenWidgetLaunchStream(HomeWidget.widgetClicked, HomeWidget.initiallyLaunchedFromHomeWidget());
+
     themeMode = widget.initTheme;
     mainBus.onBus(event: "ToggleTheme", onEvent: _onThemeChange);
     mainBus.onBus(event: "Logout", onEvent: _onLogout);

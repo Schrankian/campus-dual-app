@@ -9,6 +9,9 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.content.ComponentName
 import org.w3c.dom.Text
+import android.net.Uri
+import es.antonborri.home_widget.HomeWidgetBackgroundIntent
+import es.antonborri.home_widget.HomeWidgetLaunchIntent
 
 /**
  * Implementation of App Widget functionality.
@@ -31,6 +34,13 @@ class TimetableWidget : AppWidgetProvider() {
 }
 
 internal fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int) {
+    // Notify the AppWidgetManager to update the list view
+    // This is necessary for the actual lesson data to be reloaded because it is independed from the widget
+    val ids = AppWidgetManager.getInstance(context).getAppWidgetIds(
+        ComponentName(context, TimetableWidget::class.java)
+    )
+    AppWidgetManager.getInstance(context).notifyAppWidgetViewDataChanged(ids, R.id.lessons_list)
+
     val views = RemoteViews(context.packageName, R.layout.timetable_widget)
 
     // Set the RemoteViewsService as the adapter for the ListView
@@ -41,28 +51,18 @@ internal fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManage
     views.setEmptyView(R.id.lessons_list, R.id.empty_view)
 
     // Create an Intent to update the widget (refresh on click)
-    val refreshIntent = Intent(context, TimetableWidget::class.java).apply {
-        action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-        val ids = AppWidgetManager.getInstance(context).getAppWidgetIds(
-            ComponentName(context, TimetableWidget::class.java)
-        )
-        putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+    val reloadIntent = HomeWidgetBackgroundIntent.getBroadcast(
+        context,
+        Uri.parse("timetableWidget://reload")
+    )
+    views.setOnClickPendingIntent(R.id.reload_icon, reloadIntent)
 
-        // Notify the AppWidgetManager to update the list view
-        AppWidgetManager.getInstance(context).notifyAppWidgetViewDataChanged(ids, R.id.lessons_list)
-    }
-
-    // Create a PendingIntent to broadcast the refresh Intent
-    val pendingIntent = PendingIntent.getBroadcast(context, 0, refreshIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-
-    // Assign the PendingIntent to a widget view (button, text, etc.)
-    views.setOnClickPendingIntent(R.id.reload_icon, pendingIntent)
-
-    // Create an Intent to send a broadcast to my BroadcastReceiver which opens the app after saving some exchange data
-    val openAppIntent = Intent(context, WidgetClickReceiver::class.java)
-    val openAppPendingIntent = PendingIntent.getBroadcast(context, 0, openAppIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-    views.setOnClickPendingIntent(R.id.appwidget_text, openAppPendingIntent)
-
+    val pendingIntentWithData = HomeWidgetLaunchIntent.getActivity(
+        context,
+        MainActivity::class.java,
+        Uri.parse("timetableWidget://openTimetable?date=1")
+    )
+    views.setOnClickPendingIntent(R.id.appwidget_text, pendingIntentWithData)
 
     // Update the widget
     appWidgetManager.updateAppWidget(appWidgetId, views)

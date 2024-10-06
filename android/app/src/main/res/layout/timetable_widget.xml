@@ -1,11 +1,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    style="@style/Widget.Android.AppWidget.Container"
+    style="@style/Widget.Android.AppWidgetContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:alpha="100"
-    android:background="@drawable/widget_bg"
-    android:orientation="vertical"
-    android:theme="@style/Theme.Android.AppWidgetContainer">
+    android:orientation="vertical">
 <!-- 
     <TextView 
         android:layout_width="match_parent" 
@@ -22,29 +20,20 @@
         android:layout_height="wrap_content">
 
         <TextView
+            style="@style/TimetableWidget.TextView"
             android:id="@+id/appwidget_text"
-            style="@style/Widget.Android.AppWidget.InnerView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:contentDescription="@string/appwidget_text"
             android:gravity="center"
-            android:background="@android:color/transparent"
             android:text="Stundenplan"
-            android:textColor="@color/on_background_dark"
             android:textSize="24sp"
             android:textStyle="bold" />
 
         <ImageView
+            style="@style/TimetableWidget.ReloadIcon"
             android:id="@+id/reload_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:src="@drawable/ic_reload"
-            android:padding="8dp"
-            android:clickable="true"
-            android:focusable="true" />
+            android:padding="8dp"/>
     </RelativeLayout>
 
     <!-- Use a ListView or StackView for the list of lessons -->
@@ -60,13 +49,13 @@
     
     <!-- Add this empty view to show when the list is empty -->
     <TextView 
+        style="@style/TimetableWidget.TextView"
         android:id="@+id/empty_view" 
         android:layout_width="match_parent" 
         android:layout_height="match_parent" 
         android:gravity="center" 
         android:text="Lädt..." 
         android:textSize="24sp"
-        android:textColor="@color/primary_dark" 
         android:visibility="gone" />
 
 </LinearLayout>

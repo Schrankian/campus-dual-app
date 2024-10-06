@@ -69,19 +69,19 @@ data class Lesson(
     val sInstructor: String,
     val remarks: String,
     val type: String,
-    val widgetDisplayColor: Int,
+    val widgetDisplayColor: Int?,
     val widgetHideDisplay: Boolean
 ) {
     companion object {
         fun fromJson(json: Map<String, Any?>, useFuzzyColor: Boolean, rules: List<EvaluationRule>): Lesson? {
             val formatter = DateTimeFormatter.ISO_DATE_TIME
             val ruleMatch = EvaluationRule.getMatch(rules, json["title"] as? String ?: "")
-            var widgetDisplayColor = parseColor("#FFB7C4FF")
+            var widgetDisplayColor: Int? = null
             if (ruleMatch != null){
                 if (ruleMatch.hide) {
                     return null
                 }
-                widgetDisplayColor = parseColor("${ruleMatch.color}")
+                widgetDisplayColor = parseColor(ruleMatch.color)
             } else if (useFuzzyColor) {
                 widgetDisplayColor = generateColorFromString(json["title"] as? String ?: "")
             }
@@ -225,14 +225,19 @@ class TimetableRemoteViewsFactory(private val context: Context, intent: Intent) 
                 // Set the room number
                 views.setTextViewText(R.id.lesson_room, lesson.room)
 
-                // Generate and apply a color based on the lesson title
-                views.setInt(R.id.lesson_title, "setTextColor", lesson.widgetDisplayColor)
-                views.setInt(R.id.lesson_instructor, "setTextColor", lesson.widgetDisplayColor)
-                views.setInt(R.id.lesson_room, "setTextColor", lesson.widgetDisplayColor)
-                views.setInt(R.id.lesson_divider, "setBackgroundColor", lesson.widgetDisplayColor)
-                views.setInt(R.id.lesson_time_divider, "setBackgroundColor", lesson.widgetDisplayColor)
-                views.setInt(R.id.lesson_start_time, "setTextColor", lesson.widgetDisplayColor)
-                views.setInt(R.id.lesson_end_time, "setTextColor", lesson.widgetDisplayColor)
+                // Get the default color based on the current theme
+                val defaultColor = if ((context.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES) {
+                    androidx.core.content.res.ResourcesCompat.getColor(context.resources, R.color.primary_dark, null)
+                } else {
+                    androidx.core.content.res.ResourcesCompat.getColor(context.resources, R.color.primary_light, null)
+                }
+                views.setInt(R.id.lesson_title, "setTextColor", lesson.widgetDisplayColor ?: defaultColor) 
+                views.setInt(R.id.lesson_instructor, "setTextColor", lesson.widgetDisplayColor ?: defaultColor )
+                views.setInt(R.id.lesson_room, "setTextColor", lesson.widgetDisplayColor ?: defaultColor)
+                views.setInt(R.id.lesson_divider, "setBackgroundColor", lesson.widgetDisplayColor ?: defaultColor )
+                views.setInt(R.id.lesson_time_divider, "setBackgroundColor", lesson.widgetDisplayColor ?: defaultColor )
+                views.setInt(R.id.lesson_start_time, "setTextColor", lesson.widgetDisplayColor ?: defaultColor )
+                views.setInt(R.id.lesson_end_time, "setTextColor", lesson.widgetDisplayColor ?: defaultColor )
             }
             is LessonItem.Empty -> {
                 // Create a RemoteViews for the empty item

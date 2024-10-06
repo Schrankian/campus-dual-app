@@ -1,3 +1,4 @@
+import 'package:campus_dual_android/background/widget.dart';
 import 'package:campus_dual_android/extensions/date.dart';
 import 'package:campus_dual_android/scripts/campus_dual_manager.dart';
 import 'package:campus_dual_android/scripts/event_bus.dart';
@@ -76,7 +77,7 @@ class _TimeTableState extends State<TimeTable> with AutomaticKeepAliveClientMixi
 
     final cd = CampusDualManager();
     final lessons = await cd.fetchTimeTable(nowDay.subtract(const Duration(days: bufferSize)), nowDay.add(const Duration(days: bufferSize)));
-    storage.saveObject("timetable", lessons.map((key, value) => MapEntry(key.toIso8601String(), value.map((e) => e.toJson()).toList())));
+    storage.saveObject("timetable", lessons.map((key, value) => MapEntry(key.toIso8601String(), value.map((e) => e.toJson()).toList()))).then((_) => updateWidget());
     dataCache = lessons;
     yield lessons;
   }
@@ -101,7 +102,7 @@ class _TimeTableState extends State<TimeTable> with AutomaticKeepAliveClientMixi
   }
 
   void _changeRules(dynamic args) {
-    StorageManager().saveObjectList("evaluationRules", args);
+    StorageManager().saveObjectList("evaluationRules", args).then((_) => updateWidget());
 
     _dateSectionKey.currentState!.setState(() {
       rules = args;
@@ -109,7 +110,7 @@ class _TimeTableState extends State<TimeTable> with AutomaticKeepAliveClientMixi
   }
 
   void _changeUseFuzzyColor(dynamic args) {
-    StorageManager().saveBool("useFuzzyColor", args);
+    StorageManager().saveBool("useFuzzyColor", args).then((_) => updateWidget());
 
     _dateSectionKey.currentState!.setState(() {
       useFuzzyColor = args;

@@ -6,19 +6,16 @@
     android:gravity="center_vertical">
 
     <TextView 
-        xmlns:android="http://schemas.android.com/apk/res/android" 
+        style="@style/TimetableWidget.TextView.Primary"
         android:id="@+id/day_header" 
-        android:layout_width="wrap_content" 
-        android:layout_height="wrap_content" 
         android:padding="8dp" 
-        android:textColor="@color/primary_dark" 
         android:textSize="18sp" 
         android:textStyle="bold" />
 
     <LinearLayout 
+        style="@style/TimetableWidget.Divider.Primary"
         android:layout_width="match_parent" 
-        android:layout_height="2dp" 
-        android:background="@color/primary_dark"/>
+        android:layout_height="2dp" />
 
 
 </LinearLayout>
