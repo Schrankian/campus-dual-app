@@ -8,8 +8,8 @@
     <TextView 
         style="@style/TimetableWidget.TextView.Primary"
         android:id="@+id/day_header" 
-        android:padding="8dp" 
-        android:textSize="18sp" 
+        android:padding="6dp" 
+        android:textSize="16sp" 
         android:textStyle="bold" />
 
     <LinearLayout 

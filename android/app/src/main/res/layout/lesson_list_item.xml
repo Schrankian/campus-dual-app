@@ -3,7 +3,7 @@
     android:layout_width="match_parent" 
     android:layout_height="wrap_content" 
     android:orientation="horizontal" 
-    android:padding="8dp" 
+    android:padding="6dp" 
     android:background="@android:color/transparent" 
     android:gravity="center_vertical"
     android:id="@+id/lesson_list_item">
@@ -25,7 +25,7 @@
             style="@style/TimetableWidget.Divider.Primary"
             android:id="@+id/lesson_time_divider"
             android:layout_width= "2dp"
-            android:layout_height= "15dp"/>
+            android:layout_height= "13dp"/>
 
         <TextView 
             style="@style/TimetableWidget.TextView.Primary"        
@@ -50,13 +50,13 @@
         <TextView
             style="@style/TimetableWidget.TextView.Primary"
             android:id="@+id/lesson_title"
-            android:textSize="16sp"/>
+            android:textSize="14sp"/>
         
         <!-- Professor name -->
         <TextView 
             style="@style/TimetableWidget.TextView.Primary"
             android:id="@+id/lesson_instructor" 
-            android:textSize="14sp" />
+            android:textSize="12sp" />
 
         <!-- Room -->
         <TextView 

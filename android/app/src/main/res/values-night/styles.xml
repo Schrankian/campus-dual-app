@@ -24,7 +24,7 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:background">@android:color/transparent</item>
         <item name="android:textColor">@color/on_background_dark</item>
-        <item name="android:textSize">15sp</item>
+        <item name="android:textSize">13sp</item>
     </style>
     <style name="TimetableWidget.TextView.Primary" parent="TimetableWidget.TextView">
         <item name="android:textColor">@color/primary_dark</item>

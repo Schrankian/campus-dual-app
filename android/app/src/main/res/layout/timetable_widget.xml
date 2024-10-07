@@ -25,7 +25,7 @@
             android:layout_centerInParent="true"
             android:gravity="center"
             android:text="Stundenplan"
-            android:textSize="24sp"
+            android:textSize="22sp"
             android:textStyle="bold" />
 
         <ImageView
@@ -33,7 +33,9 @@
             android:id="@+id/reload_icon"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:padding="8dp"/>
+            android:paddingEnd="8dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="4dp"/>
     </RelativeLayout>
 
     <!-- Use a ListView or StackView for the list of lessons -->
@@ -44,7 +46,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:divider="@android:color/transparent"
-        android:padding="8dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="8dp"
+        android:paddingTop="0dp"
         android:dividerHeight="0dp" />
     
     <!-- Add this empty view to show when the list is empty -->
@@ -55,7 +60,7 @@
         android:layout_height="match_parent" 
         android:gravity="center" 
         android:text="Lädt..." 
-        android:textSize="24sp"
+        android:textSize="22sp"
         android:visibility="gone" />
 
 </LinearLayout>
