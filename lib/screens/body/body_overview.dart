@@ -104,42 +104,77 @@ class _OverviewState extends State<Overview> with AutomaticKeepAliveClientMixin<
               SafeArea(
                 child: Padding(
                   padding: const EdgeInsets.only(top: 10, bottom: 20),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(left: 30),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Hey,',
-                              style: TextStyle(
-                                color: onPrimaryOverride,
-                                fontSize: 22,
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: Stack(
+                      alignment: AlignmentDirectional.topStart,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(left: 30),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Text(
+                                    "Hey",
+                                    style: TextStyle(
+                                      color: onPrimaryOverride,
+                                      fontSize: 22,
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                    width: 10,
+                                  ),
+                                  Text(
+                                    dataHasArrived ? "${data.generalUserData.firstName} (${CampusDualManager.userCreds!.username})" : '...',
+                                    style: TextStyle(
+                                      color: onPrimaryOverride,
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.w300,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                            const SizedBox(
-                              height: 15,
-                            ),
-                            Text(
-                              dataHasArrived ? "${data.generalUserData.firstName} (${CampusDualManager.userCreds!.username})" : '... (${CampusDualManager.userCreds!.username})',
-                              style: TextStyle(
-                                color: onPrimaryOverride,
-                                fontSize: 22,
+                              const SizedBox(
+                                height: 15,
                               ),
-                            ),
-                          ],
+                              Row(
+                                children: [
+                                  Text(
+                                    "Seminargruppe:",
+                                    style: TextStyle(
+                                      color: onPrimaryOverride,
+                                      fontSize: 22,
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                    width: 10,
+                                  ),
+                                  Text(
+                                    dataHasArrived ? data.generalUserData.group : '...',
+                                    style: TextStyle(
+                                      color: onPrimaryOverride,
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.w300,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      SyncIndicator(
-                        state: snapshot.connectionState,
-                        hasData: snapshot.hasData,
-                        error: snapshot.error,
-                      ),
-                    ],
+                        Positioned(
+                          top: 0,
+                          right: 0,
+                          child: SyncIndicator(
+                            state: snapshot.connectionState,
+                            hasData: snapshot.hasData,
+                            error: snapshot.error,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -160,6 +195,17 @@ class _OverviewState extends State<Overview> with AutomaticKeepAliveClientMixin<
                   child: ListView(
                     physics: const ScrollPhysics(),
                     children: [
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 10, left: 10, right: 10),
+                        child: Text(
+                          dataHasArrived ? data.generalUserData.course : '',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 19,
+                            overflow: TextOverflow.clip,
+                          ),
+                        ),
+                      ),
                       Padding(
                         padding: const EdgeInsets.only(top: 20, left: 20, right: 20),
                         child: Row(
