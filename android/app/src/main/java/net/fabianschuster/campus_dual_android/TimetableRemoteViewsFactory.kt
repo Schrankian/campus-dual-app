@@ -18,6 +18,8 @@ import net.fabianschuster.campus_dual_android.R
 import java.security.MessageDigest
 import java.io.ByteArrayInputStream
 import java.io.ObjectInputStream
+import android.net.Uri
+import es.antonborri.home_widget.HomeWidgetLaunchIntent
 
 fun generateColorFromString(input: String): Int {
     val salt = "Salt"  // Add a salt to the string to avoid predictable colors
@@ -297,6 +299,10 @@ class TimetableRemoteViewsFactory(private val context: Context, intent: Intent) 
                 views.setInt(R.id.lesson_time_divider, "setBackgroundColor", adjustContrast(lesson.widgetDisplayColor ?: defaultColor, backgroundColor) )
                 views.setInt(R.id.lesson_start_time, "setTextColor", adjustContrast(lesson.widgetDisplayColor ?: defaultColor, backgroundColor) )
                 views.setInt(R.id.lesson_end_time, "setTextColor", adjustContrast(lesson.widgetDisplayColor ?: defaultColor, backgroundColor) )
+
+                // Set the intent, the acutal pending intent is sent from the widget provider
+                val intentWithData = Intent()
+                views.setOnClickFillInIntent(R.id.lesson_list_item, intentWithData)
             }
             is LessonItem.Empty -> {
                 // Create a RemoteViews for the empty item

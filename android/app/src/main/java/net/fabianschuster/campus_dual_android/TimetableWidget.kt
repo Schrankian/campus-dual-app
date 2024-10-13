@@ -57,12 +57,14 @@ internal fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManage
     )
     views.setOnClickPendingIntent(R.id.reload_icon, reloadIntent)
 
+    // Create an Intent to open the app on click
+    // This intent is triggered by each item in the list view in which the fillInIntent method is called
     val pendingIntentWithData = HomeWidgetLaunchIntent.getActivity(
         context,
         MainActivity::class.java,
-        Uri.parse("timetableWidget://openTimetable?date=1")
+        Uri.parse("timetableWidget://openTimetable")
     )
-    views.setOnClickPendingIntent(R.id.appwidget_text, pendingIntentWithData)
+    views.setPendingIntentTemplate(R.id.lessons_list, pendingIntentWithData)
 
     // Update the widget
     appWidgetManager.updateAppWidget(appWidgetId, views)
