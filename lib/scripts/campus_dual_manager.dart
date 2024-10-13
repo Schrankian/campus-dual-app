@@ -212,8 +212,8 @@ class CampusDualManager {
     for (int i = 0; i < studInfo.nodes.length; i++) {
       final child = studInfo.nodes[i].text!.trim();
 
-      if (child.contains("Studiengang")) {
-        course = child.replaceAll("Studiengang ", "");
+      if (child.contains("SG")) {
+        course = child.replaceAll("SG ", "").replaceAll("SR", "");
         continue;
       }
       switch (child) {
@@ -304,7 +304,7 @@ class CampusDualManager {
 
         final gradeElement = element.children[1].querySelector(".mscore")!;
         final grade = double.tryParse(gradeElement.text.trim().replaceAll(",", ".")) ?? -1;
-        final gradeDistribution = await fetchGradeDistribution(gradeElement.attributes["data-module"]!, gradeElement.attributes["data-peryr"]!, gradeElement.attributes["data-perid"]!);
+        final gradeDistributionArguments = [gradeElement.attributes["data-module"]!, gradeElement.attributes["data-peryr"]!, gradeElement.attributes["data-perid"]!];
 
         final isPassed = element.children[2].querySelector("img")!.attributes["src"]! == "/images/green.png";
 
@@ -318,7 +318,17 @@ class CampusDualManager {
         final semester = formatSemester(element.children.last.text.trim());
 
         evaluations.last.subEvaluations.add(Evaluation(
-            pIndex: pIndex, module: module, title: title, type: type, grade: grade, gradeDistribution: gradeDistribution, isPassed: isPassed, dateGraded: dateGraded, dateAnnounced: dateAnnounced, isPartlyGraded: isPartlyGraded, semester: semester));
+            pIndex: pIndex,
+            module: module,
+            title: title,
+            type: type,
+            grade: grade,
+            gradeDistributionArguments: gradeDistributionArguments,
+            isPassed: isPassed,
+            dateGraded: dateGraded,
+            dateAnnounced: dateAnnounced,
+            isPartlyGraded: isPartlyGraded,
+            semester: semester));
       }
     }
 
