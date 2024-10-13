@@ -4,7 +4,7 @@ import android.content.Context
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
 import android.content.Intent
-import android.graphics.Color.parseColor
+import android.graphics.Color
 import android.util.Base64
 import android.app.PendingIntent
 import java.time.LocalDateTime
@@ -23,7 +23,49 @@ fun generateColorFromString(input: String): Int {
     val salt = "Salt"  // Add a salt to the string to avoid predictable colors
     val bytes = MessageDigest.getInstance("SHA-256").digest((input + salt).toByteArray(Charsets.UTF_8))
     val hexColor = bytes.take(3).joinToString("") { "%02x".format(it) }  // Get the first 3 bytes as hex
-    return parseColor("#FF$hexColor")  // Use Color.parseColor to handle the color string
+    return Color.parseColor("#FF$hexColor")  // Use Color.parseColor to handle the color string
+}
+
+fun adjustContrast(textColor: Int, baseColor: Int): Int {
+    // Calculate contrast ratio
+    val contrastRatio = calculateContrastRatio(textColor, baseColor)
+
+    var newTextColor = textColor
+
+    // If contrast ratio is below threshold, adjust the generated color
+    if (contrastRatio < 3) {
+        // Adjust color for contrast
+        // TODO: Implement a better algorithm for adjusting the color instead of just inverting it
+        newTextColor  = Color.rgb(
+            255 - Color.red(textColor), 
+            255 - Color.green(textColor), 
+            255 - Color.blue(textColor)
+        )
+    }
+
+    return newTextColor
+}
+
+fun calculateContrastRatio(color1: Int, color2: Int): Double {
+    val luminance1 = calculateLuminance(color1)
+    val luminance2 = calculateLuminance(color2)
+    return if (luminance1 > luminance2) {
+        (luminance1 + 0.05) / (luminance2 + 0.05)
+    } else {
+        (luminance2 + 0.05) / (luminance1 + 0.05)
+    }
+}
+
+fun calculateLuminance(color: Int): Double {
+    val r = Color.red(color) / 255.0
+    val g = Color.green(color) / 255.0
+    val b = Color.blue(color) / 255.0
+
+    val rL = if (r <= 0.03928) r / 12.92 else Math.pow((r + 0.055) / 1.055, 2.4)
+    val gL = if (g <= 0.03928) g / 12.92 else Math.pow((g + 0.055) / 1.055, 2.4)
+    val bL = if (b <= 0.03928) b / 12.92 else Math.pow((b + 0.055) / 1.055, 2.4)
+
+    return 0.2126 * rL + 0.7152 * gL + 0.0722 * bL
 }
 
 data class EvaluationRule(
@@ -81,7 +123,7 @@ data class Lesson(
                 if (ruleMatch.hide) {
                     return null
                 }
-                widgetDisplayColor = parseColor(ruleMatch.color)
+                widgetDisplayColor = Color.parseColor(ruleMatch.color)
             } else if (useFuzzyColor) {
                 widgetDisplayColor = generateColorFromString(json["title"] as? String ?: "")
             }
@@ -135,6 +177,9 @@ fun parseEvaluationRulesJson(rulesJson: List<String>): List<EvaluationRule> {
 // Decode the base64 encode string list implemented by the Flutter SharedPreferences plugin
 const val LIST_PREFIX = "VGhpcyBpcyB0aGUgcHJlZml4IGZvciBhIGxpc3Qu"
 fun decodeStringList(input: String): List<String> {
+    if(input.isEmpty()) {
+        return emptyList()
+    }
     val actualInput = input.substring(LIST_PREFIX.length)
 
     val byteArray = Base64.decode(actualInput, 0)
@@ -229,19 +274,29 @@ class TimetableRemoteViewsFactory(private val context: Context, intent: Intent) 
                 // Set the room number
                 views.setTextViewText(R.id.lesson_room, lesson.room)
 
+                // Determine if the current theme is dark mode
+                val isDarkMode = (context.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES
+
                 // Get the default color based on the current theme
-                val defaultColor = if ((context.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES) {
+                val defaultColor = if (isDarkMode) {
                     androidx.core.content.res.ResourcesCompat.getColor(context.resources, R.color.primary_dark, null)
                 } else {
                     androidx.core.content.res.ResourcesCompat.getColor(context.resources, R.color.primary_light, null)
                 }
-                views.setInt(R.id.lesson_title, "setTextColor", lesson.widgetDisplayColor ?: defaultColor) 
-                views.setInt(R.id.lesson_instructor, "setTextColor", lesson.widgetDisplayColor ?: defaultColor )
-                views.setInt(R.id.lesson_room, "setTextColor", lesson.widgetDisplayColor ?: defaultColor)
-                views.setInt(R.id.lesson_divider, "setBackgroundColor", lesson.widgetDisplayColor ?: defaultColor )
-                views.setInt(R.id.lesson_time_divider, "setBackgroundColor", lesson.widgetDisplayColor ?: defaultColor )
-                views.setInt(R.id.lesson_start_time, "setTextColor", lesson.widgetDisplayColor ?: defaultColor )
-                views.setInt(R.id.lesson_end_time, "setTextColor", lesson.widgetDisplayColor ?: defaultColor )
+
+                // Get the background color based on the current theme
+                val backgroundColor = if (isDarkMode) {
+                    androidx.core.content.res.ResourcesCompat.getColor(context.resources, R.color.background_dark, null)
+                } else {
+                    androidx.core.content.res.ResourcesCompat.getColor(context.resources, R.color.background_light, null)
+                }
+                views.setInt(R.id.lesson_title, "setTextColor", adjustContrast(lesson.widgetDisplayColor ?: defaultColor, backgroundColor)) 
+                views.setInt(R.id.lesson_instructor, "setTextColor", adjustContrast(lesson.widgetDisplayColor ?: defaultColor, backgroundColor) )
+                views.setInt(R.id.lesson_room, "setTextColor", adjustContrast(lesson.widgetDisplayColor ?: defaultColor, backgroundColor))
+                views.setInt(R.id.lesson_divider, "setBackgroundColor", adjustContrast(lesson.widgetDisplayColor ?: defaultColor, backgroundColor) )
+                views.setInt(R.id.lesson_time_divider, "setBackgroundColor", adjustContrast(lesson.widgetDisplayColor ?: defaultColor, backgroundColor) )
+                views.setInt(R.id.lesson_start_time, "setTextColor", adjustContrast(lesson.widgetDisplayColor ?: defaultColor, backgroundColor) )
+                views.setInt(R.id.lesson_end_time, "setTextColor", adjustContrast(lesson.widgetDisplayColor ?: defaultColor, backgroundColor) )
             }
             is LessonItem.Empty -> {
                 // Create a RemoteViews for the empty item
