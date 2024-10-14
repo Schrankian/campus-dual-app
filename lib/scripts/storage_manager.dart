@@ -104,6 +104,20 @@ class StorageManager {
     _saveData(disk, "isDarkMode", theme == ThemeMode.dark);
   }
 
+  Future<DateTime?> loadDateTime(String key) async {
+    final disk = await SharedPreferences.getInstance();
+    final dateTime = _getData(disk, key, type: Type.string);
+    if (dateTime == null) {
+      return null;
+    }
+    return DateTime.parse(dateTime);
+  }
+
+  Future<void> saveDateTime(String key, DateTime value) async {
+    final disk = await SharedPreferences.getInstance();
+    _saveData(disk, key, value.toIso8601String());
+  }
+
   Future<Map<String, dynamic>?> loadObject(String key) async {
     final disk = await SharedPreferences.getInstance();
     final jsonData = _getData(disk, key, type: Type.string);

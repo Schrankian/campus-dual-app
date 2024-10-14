@@ -46,6 +46,9 @@ FutureOr<void> backgroundCallback(Uri? data) async {
           // Save the timetable to the storage
           await StorageManager().saveObject("timetable", lessons.map((key, value) => MapEntry(key.toIso8601String(), value.map((e) => e.toJson()).toList())));
 
+          // Save the last update time
+          await StorageManager().saveDateTime("timetableUpdateTime", DateTime.now());
+
           // Notify the widget to update
           updateWidget();
         } catch (e, stack) {

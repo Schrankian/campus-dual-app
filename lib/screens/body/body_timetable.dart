@@ -77,6 +77,7 @@ class _TimeTableState extends State<TimeTable> with AutomaticKeepAliveClientMixi
 
     final cd = CampusDualManager();
     final lessons = await cd.fetchTimeTable(nowDay.subtract(const Duration(days: bufferSize)), nowDay.add(const Duration(days: bufferSize)));
+    storage.saveDateTime("timetableUpdateTime", DateTime.now());
     storage.saveObject("timetable", lessons.map((key, value) => MapEntry(key.toIso8601String(), value.map((e) => e.toJson()).toList()))).then((_) => updateWidget());
     dataCache = lessons;
     yield lessons;

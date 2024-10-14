@@ -38,6 +38,12 @@
     <style name="TimetableWidget.Divider.Secondary" parent="android:Widget">
         <item name="android:background">@color/primary_light</item>
     </style>
+    <style name="TimetableWidget.ProgressBar" parent="android:Widget">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:indeterminateTint">@color/on_background_dark</item>
+    </style>
     <style name="TimetableWidget.ReloadIcon" parent="android:Widget">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
