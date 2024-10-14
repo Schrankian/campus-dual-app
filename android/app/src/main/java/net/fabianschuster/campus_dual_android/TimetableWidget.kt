@@ -137,7 +137,7 @@ internal fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManage
     val reloadIntent = Intent(context, TimetableWidget::class.java).apply {
         action = "timetableWidget://reload"
     }
-    val reloadPendingIntent = PendingIntent.getBroadcast(context, 0, reloadIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+    val reloadPendingIntent = PendingIntent.getBroadcast(context, 0, reloadIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
     views.setOnClickPendingIntent(R.id.reload_icon, reloadPendingIntent)
 
     // Create an Intent to open the app on click
