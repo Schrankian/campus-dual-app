@@ -29,7 +29,7 @@ class StorageManager {
     }
   }
 
-  void _saveData(SharedPreferences source, String key, dynamic value) async {
+  Future<void> _saveData(SharedPreferences source, String key, dynamic value) async {
     if (value is int) {
       await source.setInt(key, value);
     }
@@ -47,7 +47,7 @@ class StorageManager {
     }
   }
 
-  void clearAll() async {
+  Future<void> clearAll() async {
     // Things to persist
     final theme = await loadTheme();
     final evaluationRules = await loadObjectList("evaluationRules");
@@ -82,7 +82,7 @@ class StorageManager {
     return creds;
   }
 
-  void saveUserAuthData(UserCredentials data) async {
+  Future<void> saveUserAuthData(UserCredentials data) async {
     const secureDisk = FlutterSecureStorage();
     secureDisk.write(key: "username", value: data.username);
     secureDisk.write(key: "password", value: data.password);
@@ -99,9 +99,23 @@ class StorageManager {
     return isDarkMode ? ThemeMode.dark : ThemeMode.light;
   }
 
-  void saveTheme(ThemeMode theme) async {
+  Future<void> saveTheme(ThemeMode theme) async {
     final disk = await SharedPreferences.getInstance();
     _saveData(disk, "isDarkMode", theme == ThemeMode.dark);
+  }
+
+  Future<DateTime?> loadDateTime(String key) async {
+    final disk = await SharedPreferences.getInstance();
+    final dateTime = _getData(disk, key, type: Type.string);
+    if (dateTime == null) {
+      return null;
+    }
+    return DateTime.parse(dateTime);
+  }
+
+  Future<void> saveDateTime(String key, DateTime value) async {
+    final disk = await SharedPreferences.getInstance();
+    _saveData(disk, key, value.toIso8601String());
   }
 
   Future<Map<String, dynamic>?> loadObject(String key) async {
@@ -113,7 +127,7 @@ class StorageManager {
     return jsonDecode(jsonData);
   }
 
-  void saveObject(String key, Object data) async {
+  Future<void> saveObject(String key, Object data) async {
     final disk = await SharedPreferences.getInstance();
     _saveData(disk, key, jsonEncode(data));
   }
@@ -127,7 +141,7 @@ class StorageManager {
     return jsonData.map((e) => jsonDecode(e) as Map<String, dynamic>).toList();
   }
 
-  void saveObjectList(String key, List<Object> data) async {
+  Future<void> saveObjectList(String key, List<Object> data) async {
     final disk = await SharedPreferences.getInstance();
     _saveData(disk, key, data.map((e) => jsonEncode(e)).toList());
   }
@@ -137,7 +151,7 @@ class StorageManager {
     return _getData(disk, key, type: Type.int);
   }
 
-  void saveInt(String key, int value) async {
+  Future<void> saveInt(String key, int value) async {
     final disk = await SharedPreferences.getInstance();
     _saveData(disk, key, value);
   }
@@ -147,7 +161,7 @@ class StorageManager {
     return _getData(disk, key, type: Type.bool);
   }
 
-  void saveBool(String key, bool value) async {
+  Future<void> saveBool(String key, bool value) async {
     final disk = await SharedPreferences.getInstance();
     _saveData(disk, key, value);
   }

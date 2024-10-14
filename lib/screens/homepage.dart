@@ -2,6 +2,7 @@ import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.da
 import 'package:campus_dual_android/screens/body/body_evaluations.dart';
 import 'package:campus_dual_android/screens/body/body_news.dart';
 import 'package:campus_dual_android/widgets/sync_starter.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:preload_page_view/preload_page_view.dart';
 import '../widgets/settings_popup.dart';
 import 'package:flutter/material.dart';
@@ -36,12 +37,25 @@ class _HomePageState extends State<HomePage> {
       Overview(key: keys[2]),
       TimeTable(key: keys[3]),
     ];
+    mainBus.onBus(event: "SetMainNavigationIndex", onEvent: _setMainNavigationIndex);
   }
 
   @override
   void dispose() {
     _pageController.dispose();
+    mainBus.offBus(event: "SetMainNavigationIndex", callBack: _setMainNavigationIndex);
     super.dispose();
+  }
+
+  void _setMainNavigationIndex(dynamic args) {
+    if (args < body.length) {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        setState(() {
+          _currentIndex = args;
+          _pageController.animateToPage(args, duration: const Duration(milliseconds: 250), curve: Curves.easeOut);
+        });
+      });
+    }
   }
 
   // The list for all possible pages together with their keys. Is initialized in initState

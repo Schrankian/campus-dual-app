@@ -1,0 +1,86 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/Widget.Android.AppWidgetContainer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:alpha="100"
+    android:orientation="vertical">
+
+
+    <RelativeLayout android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:paddingTop="4dp"
+            android:paddingStart="8dp"
+            android:gravity="start">
+
+            <TextView style="@style/TimetableWidget.TextView"
+                android:text="Sync:"
+                android:textSize="11sp"/>
+
+
+            <TextView style="@style/TimetableWidget.TextView"
+                android:id="@+id/sync_time"
+                android:text="Vor 59min"
+                android:textSize="10sp"/>
+
+        </LinearLayout>
+
+        <TextView style="@style/TimetableWidget.TextView"
+            android:id="@+id/appwidget_text"
+            android:layout_centerInParent="true"
+            android:gravity="center"
+            android:text="Stundenplan"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <ImageView style="@style/TimetableWidget.ReloadIcon"
+            android:id="@+id/reload_icon"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:paddingEnd="8dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="4dp"/>
+
+        <ProgressBar
+            style="@style/TimetableWidget.ProgressBar"
+            android:id="@+id/reload_spinner"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_width="37.5dp"
+            android:layout_height="37.5dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="4dp"
+            android:visibility="gone"/>
+
+    </RelativeLayout>
+
+    <!-- Use a ListView or StackView for the list of lessons -->
+    <ListView android:id="@+id/lessons_list"
+        android:clickable="true"
+        android:focusable="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="@android:color/transparent"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="8dp"
+        android:paddingTop="0dp"
+        android:dividerHeight="0dp" />
+
+    <!-- Add this empty view to show when the list is empty -->
+    <TextView style="@style/TimetableWidget.TextView"
+        android:id="@+id/empty_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="Lädt..."
+        android:textSize="22sp"
+        android:visibility="gone" />
+
+</LinearLayout>

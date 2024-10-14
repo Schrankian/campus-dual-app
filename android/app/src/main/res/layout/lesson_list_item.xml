@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" 
+    android:layout_width="match_parent" 
+    android:layout_height="wrap_content" 
+    android:orientation="horizontal" 
+    android:padding="6dp" 
+    android:background="@android:color/transparent" 
+    android:gravity="center_vertical"
+    android:id="@+id/lesson_list_item">
+
+    <!-- Time section on the left -->
+    <LinearLayout 
+        android:id="@+id/lesson_time"
+        android:layout_width="0dp" 
+        android:layout_height="wrap_content" 
+        android:layout_weight="1" 
+        android:orientation="vertical" 
+        android:gravity="center">
+
+        <TextView 
+            style="@style/TimetableWidget.TextView.Primary"
+            android:id="@+id/lesson_start_time"/>
+
+        <LinearLayout
+            style="@style/TimetableWidget.Divider.Primary"
+            android:id="@+id/lesson_time_divider"
+            android:layout_width= "2dp"
+            android:layout_height= "13dp"/>
+
+        <TextView 
+            style="@style/TimetableWidget.TextView.Primary"        
+            android:id="@+id/lesson_end_time" />
+
+    </LinearLayout>
+
+    <LinearLayout 
+        style="@style/TimetableWidget.Divider.Primary"
+        android:id="@+id/lesson_divider"
+        android:layout_width="2dp" 
+        android:layout_height="match_parent" 
+        android:layout_marginEnd="8dp" />
+
+    <LinearLayout 
+        android:id="@+id/lesson_info"
+        android:layout_width="0dp" 
+        android:layout_height="wrap_content" 
+        android:layout_weight="4" 
+        android:orientation="vertical">
+
+        <TextView
+            style="@style/TimetableWidget.TextView.Primary"
+            android:id="@+id/lesson_title"
+            android:textSize="14sp"/>
+        
+        <!-- Professor name -->
+        <TextView 
+            style="@style/TimetableWidget.TextView.Primary"
+            android:id="@+id/lesson_instructor" 
+            android:textSize="12sp" />
+
+        <!-- Room -->
+        <TextView 
+            style="@style/TimetableWidget.TextView.Primary"
+            android:id="@+id/lesson_room" 
+            android:textStyle="italic" 
+            android:textSize="12sp" />
+
+    </LinearLayout>
+</LinearLayout>
