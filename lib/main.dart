@@ -15,6 +15,9 @@ import "package:campus_dual_android/scripts/campus_dual_manager.models.dart";
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Fix some issues related to reinstalling the app
+  await StorageManager().fixFirstLaunchIssues();
+
   // Load campus dual certificate
   Future<ByteData> data = PlatformAssetBundle().load('assets/ca/selfservice.campus-dual.de.crt');
   Future<ThemeMode> initTheme = StorageManager().loadTheme();
