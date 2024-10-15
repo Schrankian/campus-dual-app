@@ -47,6 +47,18 @@ class StorageManager {
     }
   }
 
+  // If the app is reinstalled, the old flutterSecureStorage data is still there but the key has changed which will likely cause issues
+  // So on the first launch, all the stored data should be deleted, as it should be
+  // FEATURE: Add  <application android:allowBackup="false" android:fullBackupContent="false"> to the android manifest
+  Future<void> fixFirstLaunchIssues() async {
+    final disk = await SharedPreferences.getInstance();
+    if (_getData(disk, "first_run", type: Type.bool) ?? true) {
+      const secureDisk = FlutterSecureStorage();
+      await secureDisk.deleteAll();
+      _saveData(disk, "first_run", false);
+    }
+  }
+
   Future<void> clearAll() async {
     // Things to persist
     final theme = await loadTheme();

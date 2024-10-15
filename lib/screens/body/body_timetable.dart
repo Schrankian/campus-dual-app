@@ -174,11 +174,11 @@ class _TimeTableState extends State<TimeTable> with AutomaticKeepAliveClientMixi
                         onHorizontalDragEnd: (details) {
                           if (details.primaryVelocity! > 10) {
                             setState(() {
-                              currentDate = currentDate.subtract(const Duration(days: 1)).trim();
+                              currentDate = currentDate.subtractDay(1);
                             });
                           } else if (details.primaryVelocity! < -10) {
                             setState(() {
-                              currentDate = currentDate.add(const Duration(days: 1)).trim();
+                              currentDate = currentDate.addDay(1);
                             });
                           }
                         },
