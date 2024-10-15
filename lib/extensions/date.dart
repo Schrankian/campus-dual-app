@@ -14,6 +14,14 @@ extension DateExtension on DateTime {
     return DateTime(year, month, day);
   }
 
+  DateTime addDay(int days) {
+    return DateTime(year, month, day + days);
+  }
+
+  DateTime subtractDay(int days) {
+    return DateTime(year, month, day - days);
+  }
+
   DateTime toCet() {
     final utc = toUtc();
     final year = utc.year;
