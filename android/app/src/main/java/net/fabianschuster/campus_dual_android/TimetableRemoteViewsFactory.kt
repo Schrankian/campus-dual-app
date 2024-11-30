@@ -10,6 +10,7 @@ import android.app.PendingIntent
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.LocalDate
+import java.time.LocalTime
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.time.format.TextStyle
@@ -73,31 +74,52 @@ fun calculateLuminance(color: Int): Double {
 data class EvaluationRule(
     val pattern: String,
     val color: String,
-    val hide: Boolean
+    val hide: Boolean,
+    val startTime: LocalTime = LocalTime.of(0, 0),
+    val endTime: LocalTime = LocalTime.of(23, 59)
 ) {
     companion object {
         fun fromJson(json: Map<String, Any?>): EvaluationRule {
             return EvaluationRule(
                 pattern = json["pattern"] as? String ?: "",
                 color = json["color"] as? String ?: "#FFFFFF", // Default color
-                hide = json["hide"] as? Boolean ?: false
+                hide = json["hide"] as? Boolean ?: false,
+                startTime = parseTime(json["startTime"] as? String ?: "00:00"),
+                endTime = parseTime(json["endTime"] as? String ?: "23:59")
             )
         }
-        fun getMatch(rules: List<EvaluationRule>, title: String): EvaluationRule? {
+
+        private fun parseTime(time: String): LocalTime {
+            if (time == "24:00") {
+                return LocalTime.of(23, 59)
+            } else {
+                // Handle 24:xx as 00:xx, because LocalTime only supports 0-23
+                return LocalTime.parse(time.replace("24:", "00:"))
+            }
+        }
+
+        fun getMatch(rules: List<EvaluationRule>, lesson: LessonMatcher): EvaluationRule? {
             for (rule in rules) {
-                if (Regex(rule.pattern, RegexOption.IGNORE_CASE).containsMatchIn(title)) {
+                if (Regex(rule.pattern, RegexOption.IGNORE_CASE).containsMatchIn(lesson.title) &&
+                    lesson.startTime <= rule.endTime && lesson.endTime >= rule.startTime) {
                     return rule
                 }
             }
             return null
         }
 
-        fun shouldHide(rules: List<EvaluationRule>, title: String): Boolean {
-            val match = getMatch(rules, title)
+        fun shouldHide(rules: List<EvaluationRule>, lesson: LessonMatcher): Boolean {
+            val match = getMatch(rules, lesson)
             return match?.hide ?: false
         }
     }
 }
+
+data class LessonMatcher(
+    val title: String,
+    val startTime: LocalTime,
+    val endTime: LocalTime
+)
 
 data class Lesson(
     val title: String,
@@ -119,7 +141,12 @@ data class Lesson(
     companion object {
         fun fromJson(json: Map<String, Any?>, useFuzzyColor: Boolean, rules: List<EvaluationRule>): Lesson? {
             val formatter = DateTimeFormatter.ISO_DATE_TIME
-            val ruleMatch = EvaluationRule.getMatch(rules, json["title"] as? String ?: "")
+            val lessonMatcher = LessonMatcher(
+                title = json["title"] as? String ?: "",
+                startTime = LocalDateTime.parse(json["start"] as? String ?: "", formatter).toLocalTime(),
+                endTime = LocalDateTime.parse(json["end"] as? String ?: "", formatter).toLocalTime()
+            )
+            val ruleMatch = EvaluationRule.getMatch(rules, lessonMatcher)
             var widgetDisplayColor: Int? = null
             if (ruleMatch != null){
                 if (ruleMatch.hide) {
@@ -144,7 +171,7 @@ data class Lesson(
                 remarks = json["remarks"] as? String ?: "",
                 type = json["type"] as? String ?: "",
                 widgetDisplayColor = widgetDisplayColor,
-                widgetHideDisplay = EvaluationRule.shouldHide(rules, json["title"] as? String ?: "")
+                widgetHideDisplay = EvaluationRule.shouldHide(rules, lessonMatcher)
             )
         }
     }
@@ -176,7 +203,7 @@ fun parseEvaluationRulesJson(rulesJson: List<String>): List<EvaluationRule> {
     }
 }
 
-// Decode the base64 encode string list implemented by the Flutter SharedPreferences plugin
+// Decode the base64 encoded string list implemented by the Flutter SharedPreferences plugin
 const val LIST_PREFIX = "VGhpcyBpcyB0aGUgcHJlZml4IGZvciBhIGxpc3Qu"
 fun decodeStringList(input: String): List<String> {
     if(input.isEmpty()) {

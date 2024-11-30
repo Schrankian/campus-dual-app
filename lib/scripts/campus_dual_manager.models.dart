@@ -1,4 +1,5 @@
 import 'package:campus_dual_android/extensions/date.dart';
+import 'package:campus_dual_android/extensions/timeOfDay.dart';
 
 import '../extensions/color.dart';
 import 'package:flutter/material.dart';
@@ -668,28 +669,35 @@ class Notifications {
   }
 }
 
+// This name might be a bit missleading, but i guess it's too late to change now :/
+// A better name would be "LessonRule", as this is used for Lessons and not for Evaluations
 class EvaluationRule {
   String pattern;
   Color color;
   bool hide;
+  TimeOfDay startTime;
+  TimeOfDay endTime;
+  // TODO add priority
 
   EvaluationRule({
     required this.pattern,
     required this.color,
     required this.hide,
+    this.startTime = const TimeOfDay(hour: 0, minute: 0),
+    this.endTime = const TimeOfDay(hour: 23, minute: 59),
   });
 
-  static EvaluationRule? getMatch(List<EvaluationRule> rules, String title) {
+  static EvaluationRule? getMatch(List<EvaluationRule> rules, Lesson lesson) {
     for (final rule in rules) {
-      if (RegExp(rule.pattern, caseSensitive: false).hasMatch(title)) {
+      if (RegExp(rule.pattern, caseSensitive: false).hasMatch(lesson.title) && lesson.start.timeOfDay <= rule.endTime && lesson.end.timeOfDay >= rule.startTime) {
         return rule;
       }
     }
     return null;
   }
 
-  static bool shouldHide(List<EvaluationRule> rules, String title) {
-    final match = getMatch(rules, title);
+  static bool shouldHide(List<EvaluationRule> rules, Lesson lesson) {
+    final match = getMatch(rules, lesson);
 
     if (match != null) {
       return match.hide;
@@ -703,6 +711,8 @@ class EvaluationRule {
       'pattern': pattern,
       'color': color.toHex(),
       'hide': hide,
+      'startTime': startTime.formatTime(),
+      'endTime': endTime.formatTime(),
     };
   }
 
@@ -711,6 +721,8 @@ class EvaluationRule {
       pattern: json['pattern'] as String,
       color: HexColor.fromHex(json['color'] as String),
       hide: json['hide'] as bool,
+      startTime: ExtTimeOfDay.fromString(json['startTime'] as String? ?? "00:00"),
+      endTime: ExtTimeOfDay.fromString(json['endTime'] as String? ?? "23:59"),
     );
   }
 

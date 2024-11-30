@@ -22,14 +22,14 @@ extension HexColor on Color {
 }
 
 extension BaColor on Color {
-  static Color fromRule(List<EvaluationRule> rules, String title, bool useFuzzyColor, BuildContext context) {
-    final match = EvaluationRule.getMatch(rules, title);
+  static Color fromRule(List<EvaluationRule> rules, Lesson lesson, bool useFuzzyColor, BuildContext context) {
+    final match = EvaluationRule.getMatch(rules, lesson);
     if (match != null) {
       return match.color;
     }
 
     if (useFuzzyColor) {
-      return FuzzyColor.fromString(title);
+      return FuzzyColor.fromString(lesson.title);
     }
 
     return Theme.of(context).colorScheme.primary;
