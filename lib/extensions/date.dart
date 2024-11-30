@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 extension DateExtension on DateTime {
   // Returns the date in the format 'dd.MM.yyyy'
   String toDateString() {
@@ -56,4 +58,6 @@ extension DateExtension on DateTime {
     if (!showDifference) return '${toTimeString()}->${end.toTimeString()}';
     return '${toTimeString()}->${end.toTimeString()} (${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}h)';
   }
+
+  TimeOfDay get timeOfDay => TimeOfDay.fromDateTime(this);
 }

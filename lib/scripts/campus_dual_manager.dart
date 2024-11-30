@@ -187,7 +187,6 @@ class CampusDualManager {
       orElse: () => Cookie("MYSAPSSO2", ""),
     );
 
-    print(token.value);
     return token.value;
   }
 

@@ -48,7 +48,7 @@ class _DayCalendarState extends State<DayCalendar> {
     itemsStacked = [[]];
     if (widget.items != null) {
       for (final item in widget.items!) {
-        if (EvaluationRule.shouldHide(widget.rules ?? [], item.title)) {
+        if (EvaluationRule.shouldHide(widget.rules ?? [], item)) {
           continue;
         }
         if (itemsStacked.last.isEmpty) {
@@ -121,7 +121,7 @@ class _DayCalendarState extends State<DayCalendar> {
                           decoration: BoxDecoration(
                             color: Theme.of(context).colorScheme.surface,
                             border: Border.all(
-                              color: BaColor.fromRule(widget.rules ?? [], item.title, widget.useFuzzyColor, context),
+                              color: BaColor.fromRule(widget.rules ?? [], item, widget.useFuzzyColor, context),
                             ),
                             borderRadius: BorderRadius.circular(3),
                           ),
@@ -129,7 +129,7 @@ class _DayCalendarState extends State<DayCalendar> {
                             children: [
                               Container(
                                 width: 10,
-                                color: BaColor.fromRule(widget.rules ?? [], item.title, widget.useFuzzyColor, context),
+                                color: BaColor.fromRule(widget.rules ?? [], item, widget.useFuzzyColor, context),
                               ),
                               Expanded(
                                 child: ListTile(
