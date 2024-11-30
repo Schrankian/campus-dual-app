@@ -105,6 +105,57 @@ class _DayCalendarState extends State<DayCalendar> {
                       left: 50 + items.indexOf(item) * 15,
                       right: 10 + items.indexOf(item) * -5,
                       child: InkWell(
+                        onLongPress: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return AlertDialog(
+                                title: Text(item.title),
+                                content: Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        Text("Raum:"),
+                                        Text("Dozent:"),
+                                        Text("Typ:"),
+                                        Text("Dauer:"),
+                                        Text("Beschreibung:"),
+                                      ],
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        mainAxisSize: MainAxisSize.min,
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        children: [
+                                          Text(item.room),
+                                          Text(item.instructor),
+                                          const Text("<<Leer>>"), // TODO add type
+                                          Text(item.start.toTimeDiff(item.end, showDifference: true)),
+                                          Text(item.description),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: const Text('Schließen'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
                         onTap: () {
                           setState(() {
                             itemsStacked = itemsStacked.map((items) {

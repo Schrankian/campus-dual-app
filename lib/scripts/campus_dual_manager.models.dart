@@ -669,6 +669,8 @@ class Notifications {
   }
 }
 
+// This name might be a bit missleading, but i guess it's too late to change now :/
+// A better name would be "LessonRule", as this is used for Lessons and not for Evaluations
 class EvaluationRule {
   String pattern;
   Color color;
