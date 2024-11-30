@@ -1,0 +1,8 @@
+Diese App bietet eingeschränkte Funktionalitäten der Campus Dual Webseite.
+Dafür werden die Zugangsdaten lokal auf dem Gerät gespeichert und anschließend mit diesen alle nötigen Daten vom SAP-Server heruntergeladen.
+Akteulle in der App verfügbare Funktionen:
+- Übersicht über Studienfortschritt (Semester, Credits, etc...)
+- Übersicht über alle abgeschlossenen Prüfungen (Inklusive Notenverteilung)
+- Integrierter Stundenplan (auch als Widget verfügbar)
+- Anzeigen von Neuigkeiten (Neue Prüfungsergebnisse, Anstehende Prüfungen)
+- Offline verfügbar (Daten werden nur bei verfügbarer Internetverbindung synchronisiert)
