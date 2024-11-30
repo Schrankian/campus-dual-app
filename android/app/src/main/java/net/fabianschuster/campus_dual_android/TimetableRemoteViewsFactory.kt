@@ -242,7 +242,7 @@ class TimetableRemoteViewsFactory(private val context: Context, intent: Intent) 
 
 
         // Collect lessons for the next 7 days (including today)
-        val startDate = LocalDate.now().minusMonths(1)
+        val startDate = LocalDate.now()
         val daysToShow = 31
         val tempLessonItems = mutableListOf<LessonItem>()
 
