@@ -6,6 +6,7 @@ import 'package:campus_dual_android/screens/login.dart';
 import 'package:campus_dual_android/scripts/campus_dual_manager.dart';
 import 'package:campus_dual_android/scripts/event_bus.dart';
 import 'package:campus_dual_android/scripts/storage_manager.dart';
+import 'package:timezone/data/latest.dart' as tz;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:home_widget/home_widget.dart';
@@ -27,6 +28,9 @@ void main() async {
 
   SecurityContext.defaultContext.setTrustedCertificatesBytes((result[0] as ByteData).buffer.asUint8List());
   CampusDualManager.userCreds = result[2] as UserCredentials?;
+
+  // Initialize timezones
+  tz.initializeTimeZones();
 
   runApp(
     MyApp(initTheme: result[1] as ThemeMode),

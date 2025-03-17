@@ -401,8 +401,8 @@ class Lesson {
   factory Lesson.fromJson(Map<String, dynamic> json) {
     return Lesson(
       title: json['title'] as String,
-      start: DateTime.parse(json['start'] as String),
-      end: DateTime.parse(json['end'] as String),
+      start: DateTime.parse(json['start'] as String).toCet(),
+      end: DateTime.parse(json['end'] as String).toCet(),
       allDay: json['allDay'] as bool,
       description: json['description'] as String,
       color: HexColor.fromHex(json['color'] as String),
