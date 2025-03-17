@@ -49,6 +49,7 @@ dependencies:
   flutter_secure_storage: ^9.2.2
   flutter_colorpicker: ^1.1.0
   home_widget: ^0.7.0
+  timezone: ^0.10.0
 
 dev_dependencies:
   flutter_test:

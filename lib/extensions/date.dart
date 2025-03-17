@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:timezone/standalone.dart' as tz;
 
 extension DateExtension on DateTime {
   // Returns the date in the format 'dd.MM.yyyy'
@@ -25,29 +26,7 @@ extension DateExtension on DateTime {
   }
 
   DateTime toCet() {
-    final utc = toUtc();
-    final year = utc.year;
-
-    // Calculate the last Sunday in March (start of Sommerzeit)
-    DateTime lastSundayInMarch = DateTime(year, 3, 31);
-    while (lastSundayInMarch.weekday != DateTime.sunday) {
-      lastSundayInMarch = lastSundayInMarch.subtract(Duration(days: 1));
-    }
-
-    // Calculate the last Sunday in October (end of Sommerzeit)
-    DateTime lastSundayInOctober = DateTime(year, 10, 31);
-    while (lastSundayInOctober.weekday != DateTime.sunday) {
-      lastSundayInOctober = lastSundayInOctober.subtract(Duration(days: 1));
-    }
-
-    // Determine if the current date is within the Sommerzeit period
-    if (utc.isAfter(lastSundayInMarch.add(Duration(hours: 1))) && utc.isBefore(lastSundayInOctober.add(Duration(hours: 1)))) {
-      // Sommerzeit (CEST)
-      return utc.add(Duration(hours: 2));
-    } else {
-      // Winterzeit (CET)
-      return utc.add(Duration(hours: 1));
-    }
+    return tz.TZDateTime.from(toUtc(), tz.getLocation('Europe/Berlin'));
   }
 
   String toTimeDiff(DateTime end, {bool showDifference = true}) {
