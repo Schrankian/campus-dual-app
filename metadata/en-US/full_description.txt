@@ -1,8 +1,0 @@
-This app tries to wrap the Campus-Dual Website into a nice looking ui on android. 
-All data is synced locally an only known to you and the University-Server. 
-Currently supported features:
-- Overview of general information like Semester, Credits, etc...
-- Overview of completed exams and grade distributions
-- Integrated timetable (in the app or as widget)
-- Shows some important key points, like upcoming exams or new test results
-- Available offline (but needs to be online to sync the data)

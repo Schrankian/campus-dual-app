@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            position: relative;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        .content {
+            display: none;
+        }
+        .content.active {
+            display: block;
+        }
+        .toggle-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        .toggle-btn {
+            padding: 8px 16px;
+            cursor: pointer;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .toggle-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="toggle-container">
+        <button id="toggle-btn" class="toggle-btn" onclick="toggleLanguage()">Deutsch</button>
+    </div>
+
+    <h1 id="heading">Privacy Policy</h1>
+
+    <div id="english" class="content active">
+        <p>
+            This app does not collect, store, or transmit any personal data.  
+            The app only connects to the university server to display data locally on your device.  
+            No information is sent to third parties or stored remotely.  
+            We do not track any usage statistics or crash reports.  
+        </p>
+        <h3>Contact</h3>
+        <p>
+            If you have any questions, you can contact me at:  
+            <br><a href="mailto:contact@fabianschuster.net">contact@fabianschuster.net</a>  
+            <br><a href="https://www.fabianschuster.net/contact">www.fabianschuster.net/contact</a>  
+        </p>
+    </div>
+
+    <div id="german" class="content">
+        <p>
+            Diese App sammelt, speichert oder überträgt keinerlei persönliche Daten.  
+            Die App verbindet sich lediglich mit dem Universitätsserver, um Daten lokal auf Ihrem Gerät anzuzeigen.  
+            Es werden keine Informationen an Dritte gesendet oder extern gespeichert.  
+            Wir erfassen keine Nutzungsstatistiken oder Absturzberichte.  
+        </p>
+        <h3>Kontakt</h3>
+        <p>
+            Falls Sie Fragen haben, können Sie mich unter folgender Adresse kontaktieren:  
+            <br><a href="mailto:contact@fabianschuster.net">contact@fabianschuster.net</a>  
+            <br><a href="https://www.fabianschuster.net/contact">www.fabianschuster.net/contact</a>  
+        </p>
+    </div>
+
+    <script>
+        function toggleLanguage() {
+            let englishContent = document.getElementById('english');
+            let germanContent = document.getElementById('german');
+            let heading = document.getElementById('heading');
+            let toggleBtn = document.getElementById('toggle-btn');
+
+            englishContent.classList.toggle('active');
+            germanContent.classList.toggle('active');
+
+            if (englishContent.classList.contains('active')) {
+                heading.textContent = "Privacy Policy";
+                toggleBtn.textContent = "Deutsch";
+            } else {
+                heading.textContent = "Datenschutzrichtlinie";
+                toggleBtn.textContent = "English";
+            }
+        }
+    </script>
+
+</body>
+</html>
