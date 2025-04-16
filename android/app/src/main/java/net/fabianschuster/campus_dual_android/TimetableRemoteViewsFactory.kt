@@ -140,7 +140,7 @@ data class Lesson(
 ) {
     companion object {
         fun fromJson(json: Map<String, Any?>, useFuzzyColor: Boolean, rules: List<EvaluationRule>): Lesson? {
-            val formatter = DateTimeFormatter.ISO_DATE_TIME
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
             val lessonMatcher = LessonMatcher(
                 title = json["title"] as? String ?: "",
                 startTime = LocalDateTime.parse(json["start"] as? String ?: "", formatter).toLocalTime(),

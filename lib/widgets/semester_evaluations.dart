@@ -15,15 +15,9 @@ class _SemesterEvaluationsState extends State<SemesterEvaluations> {
   final Map<String, List<Evaluation>> _groupedItems = {};
 
   double calculateAverage(List<Evaluation> evaluations) {
-    double sum = 0;
-    int count = 0;
-    for (final Evaluation evaluation in evaluations) {
-      if (evaluation.grade != -1) {
-        sum += evaluation.grade;
-        count++;
-      }
-    }
-    return sum / count;
+    final validEvaluations = evaluations.where((evaluation) => evaluation.grade != -1);
+    final sum = validEvaluations.fold(0.0, (total, evaluation) => total + evaluation.grade);
+    return sum / validEvaluations.length;
   }
 
   @override

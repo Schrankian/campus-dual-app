@@ -107,6 +107,12 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
     );
   }
 
+  double calculateAverage(List<MasterEvaluation> evaluations) {
+    final weightedSum = evaluations.where((e) => e.grade != -1).map((e) => e.grade * e.credits).reduce((a, b) => a + b);
+    final totalCredits = evaluations.where((e) => e.grade != -1).map((e) => e.credits).reduce((a, b) => a + b);
+    return weightedSum / totalCredits;
+  }
+
   @override
   bool get wantKeepAlive => true;
 
@@ -166,7 +172,7 @@ class _EvaluationsPageState extends State<EvaluationsPage> with AutomaticKeepAli
                                       ),
                                     ),
                                     Text(
-                                      (data.where((e) => e.grade != -1).map((e) => e.grade).reduce((a, b) => a + b) / data.where((e) => e.grade != -1).length).toStringAsFixed(2).replaceAll(".", ","),
+                                      (calculateAverage(data)).toStringAsFixed(2).replaceAll(".", ","),
                                       style: const TextStyle(
                                         fontSize: 24,
                                       ),
