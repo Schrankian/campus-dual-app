@@ -1,7 +1,9 @@
 import 'dart:convert';
+// import 'dart:io';
 import 'package:campus_dual_android/extensions/date.dart';
 import 'package:html/dom.dart';
 import 'package:http/http.dart' as http;
+// import 'package:http/io_client.dart';
 import 'package:http_cookie_store/http_cookie_store.dart';
 import 'package:html/parser.dart';
 import './campus_dual_manager.models.dart';
@@ -40,6 +42,13 @@ class CampusDualManager {
     manager.sharedSession = await manager._initAuthSession();
     return manager;
   }
+
+  // Fallback if the certificate is not trusted
+  // http.Client _createInsecureClient() {
+  //   final httpClient = HttpClient()..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+
+  //   return IOClient(httpClient);
+  // }
 
   Future<http.Response> _fetch(String uri) async {
     final response = await http.get(Uri.parse(uri));
