@@ -6,11 +6,23 @@ import 'package:flutter/material.dart';
 
 extension HexColor on Color {
   /// String is in the format "aabbcc" or "ffaabbcc" with an optional leading "#".
-  static Color fromHex(String hexString) {
-    final buffer = StringBuffer();
-    if (hexString.length == 6 || hexString.length == 7) buffer.write('ff');
-    buffer.write(hexString.replaceFirst('#', ''));
-    return Color(int.parse(buffer.toString(), radix: 16));
+  static Color fromHex(String hexString, {Color fallback = Colors.grey}) {
+    try {
+      final sanitized = hexString.trim().replaceFirst('#', '').toLowerCase();
+
+      // Match valid hex formats: 6 (RGB) or 8 (ARGB)
+      final isValid = RegExp(r'^[0-9a-f]{6}$|^[0-9a-f]{8}$').hasMatch(sanitized);
+      if (!isValid) return fallback;
+
+      final buffer = StringBuffer();
+      if (sanitized.length == 6) buffer.write('ff'); // Default alpha
+      buffer.write(sanitized);
+
+      final colorInt = int.parse(buffer.toString(), radix: 16);
+      return Color(colorInt);
+    } catch (_) {
+      return fallback;
+    }
   }
 
   /// Prefixes a hash sign if [leadingHashSign] is set to `true` (default is `true`).
