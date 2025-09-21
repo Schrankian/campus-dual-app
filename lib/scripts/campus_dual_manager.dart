@@ -1,6 +1,8 @@
 import 'dart:convert';
 // import 'dart:io';
 import 'package:campus_dual_android/extensions/date.dart';
+import 'package:flutter/material.dart' as flutter;
+import 'package:campus_dual_android/globals.dart';
 import 'package:html/dom.dart';
 import 'package:http/http.dart' as http;
 // import 'package:http/io_client.dart';
@@ -277,6 +279,7 @@ class CampusDualManager {
     final table = doc.querySelector("#acwork")!.querySelector("tbody")!;
 
     final evaluations = <MasterEvaluation>[];
+    var errorCount = 0;
 
     String formatSemester(String semester) {
       if (semester.contains("SS")) {
@@ -288,56 +291,117 @@ class CampusDualManager {
     }
 
     for (final element in table.children) {
-      if (element.className.contains("child-of-node-0")) {
-        final moduleTitleString = element.children[0].querySelector("strong")!.text.trim().split(" ");
-        final module = moduleTitleString[moduleTitleString.length - 1].replaceAll(r'\(|\)', "");
-        final title = moduleTitleString.sublist(0, moduleTitleString.length - 1).join(" ");
+      try {
+        if (element.className.contains("child-of-node-0")) {
+          // Extract title and module safely
+          final strong = element.children.isNotEmpty ? element.children[0].querySelector("strong") : null;
+          final moduleTitleString = strong?.text.trim().split(" ") ?? [];
+          if (moduleTitleString.isEmpty) throw Exception("Failed to parse module and title of evaluation entry");
 
-        final grade = double.tryParse(element.children[1].querySelector("#none")!.text.trim().replaceAll(",", ".")) ?? -1;
-        final isPassed = element.children[2].querySelector("img")!.attributes["src"]! == "/images/green.png";
-        final credits = int.tryParse(element.children[3].text.trim());
-        final isPartlyGraded = false; //TODO: Implement
-        final semester = formatSemester(element.children.last.text.trim());
-        evaluations.add(MasterEvaluation(module: module, title: title, grade: grade, isPassed: isPassed, isPartlyGraded: isPartlyGraded, semester: semester, credits: credits ?? 0, subEvaluations: <Evaluation>[]));
-      } else if (!element.className.contains("head")) {
-        final titleRegex = RegExp(r'^([^ ]+) *([^ ]+.*?)?(?: *\((.*?)\))? *\((.*?)\)$');
-        final match = titleRegex.firstMatch(element.children[0].text.trim());
+          final module = moduleTitleString.isNotEmpty ? moduleTitleString.last.replaceAll(RegExp(r'\(|\)'), "") : '';
+          final title = moduleTitleString.length > 1 ? moduleTitleString.sublist(0, moduleTitleString.length - 1).join(" ") : module;
+          if (title.isEmpty) throw Exception("Failed to parse title and module of evaluation entry");
 
-        final pIndexString = match!.group(1)!.trim();
-        final pIndex = int.tryParse(pIndexString.replaceAll("P", "").replaceAll("p", "")) ?? 0;
+          // Parse grade
+          final gradeText = element.children.length > 1 ? element.children[1].querySelector("#none")?.text.trim() : null;
+          final grade = double.tryParse(gradeText?.replaceAll(RegExp(r"[tT]"), "-1").replaceAll(",", ".") ?? "");
+          if (grade == null) throw Exception("Failed to parse grade of evaluation entry");
 
-        final title = match.group(2)!.trim();
-        final type = match.group(3)?.trim() ?? '';
-        final module = match.group(4)!.trim();
+          // Parse passed state
+          final isPassed = element.children.length > 2 && element.children[2].querySelector("img")?.attributes["src"] == "/images/green.png";
 
-        final gradeElement = element.children[1].querySelector(".mscore")!;
-        final grade = double.tryParse(gradeElement.text.trim().replaceAll(",", ".")) ?? -1;
-        final gradeDistributionArguments = [gradeElement.attributes["data-module"]!, gradeElement.attributes["data-peryr"]!, gradeElement.attributes["data-perid"]!];
+          // Parse credits
+          final creditsText = element.children.length > 3 ? element.children[3].text.trim() : null;
+          final credits = int.tryParse(creditsText ?? "");
+          if (credits == null) throw Exception("Failed to parse credits of evaluation entry");
 
-        final isPassed = element.children[2].querySelector("img")!.attributes["src"]! == "/images/green.png";
+          // Parse semester
+          final semesterText = element.children.isNotEmpty ? element.children.last.text.trim() : null;
+          if (semesterText == null) throw Exception("Failed to parse semester of evaluation entry");
+          final semester = formatSemester(semesterText);
 
-        final splitDateGraded = element.children[4].text.split(".");
-        final dateGraded = DateTime.parse(splitDateGraded[2] + splitDateGraded[1] + splitDateGraded[0]);
-
-        final splitDateAnnounced = element.children[5].text.split(".");
-        final dateAnnounced = DateTime.parse(splitDateAnnounced[2] + splitDateAnnounced[1] + splitDateAnnounced[0]);
-
-        final isPartlyGraded = false; // TODO: implement
-        final semester = formatSemester(element.children.last.text.trim());
-
-        evaluations.last.subEvaluations.add(Evaluation(
-            pIndex: pIndex,
+          evaluations.add(MasterEvaluation(
             module: module,
             title: title,
-            type: type,
             grade: grade,
-            gradeDistributionArguments: gradeDistributionArguments,
             isPassed: isPassed,
-            dateGraded: dateGraded,
-            dateAnnounced: dateAnnounced,
-            isPartlyGraded: isPartlyGraded,
-            semester: semester));
+            isPartlyGraded: false, // TODO
+            semester: semester,
+            credits: credits,
+            subEvaluations: <Evaluation>[],
+          ));
+        } else if (!element.className.contains("head")) {
+          // Match regex safely
+          final text = element.children.isNotEmpty ? element.children[0].text.trim() : '';
+          final titleRegex = RegExp(r'^([^ ]+) *([^ ]+.*?)?(?: *\((.*?)\))? *\((.*?)\)$');
+          final match = titleRegex.firstMatch(text);
+          if (match == null) throw Exception("Failed to parse module and title of sub-evaluation entry");
+
+          final pIndexString = match.group(1)?.trim() ?? '';
+          // For some reason - unknown to me - all of my exams are prefixed with P, except the Bachelor Thesis which is prefixed with T
+          final pIndex = int.tryParse(pIndexString.replaceAll(RegExp(r"[tT]"), "-1").replaceAll(RegExp(r"[A-Za-z]"), "")) ?? 0;
+
+          final module = match.group(4)?.trim() ?? '';
+          final title = match.group(2)?.trim() ?? module;
+          if (title.isEmpty) throw Exception("Failed to parse title and module of sub-evaluation entry");
+
+          final type = match.group(3)?.trim() ?? '';
+
+          // Parse grade and attributes
+          final gradeElement = element.children.length > 1 ? element.children[1].querySelector(".mscore") : null;
+          final grade = double.tryParse(gradeElement?.text.trim().replaceAll(RegExp(r"[tT]"), "-1").replaceAll(",", ".") ?? "");
+          if (grade == null) throw Exception("Failed to parse grade of sub-evaluation entry");
+          final gradeDistributionArguments = [gradeElement?.attributes["data-module"] ?? '', gradeElement?.attributes["data-peryr"] ?? '', gradeElement?.attributes["data-perid"] ?? ''];
+
+          // Passed check
+          final isPassed = element.children.length > 2 && element.children[2].querySelector("img")?.attributes["src"] == "/images/green.png";
+
+          // Parse dates
+          DateTime? parseDate(String text) {
+            final parts = text.split(".");
+            if (parts.length != 3) return null;
+            final dateStr = parts[2] + parts[1] + parts[0];
+            return DateTime.tryParse(dateStr);
+          }
+
+          final dateGraded = element.children.length > 4 ? parseDate(element.children[4].text.trim()) : null;
+          final dateAnnounced = element.children.length > 5 ? parseDate(element.children[5].text.trim()) : null;
+          if (dateGraded == null && dateAnnounced == null) {
+            throw Exception("No date could be parsed");
+          }
+
+          final semesterText = element.children.isNotEmpty ? element.children.last.text.trim() : '';
+          final semester = formatSemester(semesterText);
+
+          if (evaluations.isNotEmpty) {
+            evaluations.last.subEvaluations.add(Evaluation(
+              pIndex: pIndex,
+              module: module,
+              title: title,
+              type: type,
+              grade: grade,
+              gradeDistributionArguments: gradeDistributionArguments,
+              isPassed: isPassed,
+              dateGraded: dateGraded ?? dateAnnounced!,
+              dateAnnounced: dateAnnounced ?? dateGraded!,
+              isPartlyGraded: false, // TODO
+              semester: semester,
+            ));
+          }
+        }
+      } catch (e, st) {
+        flutter.debugPrint("Failed to parse evaluation entry: $e\n$st");
+        errorCount++;
+        continue;
       }
+    }
+
+    if (errorCount > 0) {
+      final flutter.SnackBar snackBar = flutter.SnackBar(
+        content: flutter.Text("$errorCount ${errorCount == 1 ? "Prüfung konnte" : "Prüfungen konnten"} nicht geladen werden"),
+        backgroundColor: flutter.Colors.deepOrange,
+      );
+      snackbarKey.currentState?.showSnackBar(snackBar);
     }
 
     return evaluations;
