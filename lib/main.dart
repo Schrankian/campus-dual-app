@@ -12,6 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:home_widget/home_widget.dart';
 import 'theme/themes.dart';
 import "package:campus_dual_android/scripts/campus_dual_manager.models.dart";
+import 'globals.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -107,6 +108,7 @@ class _MyAppState extends State<MyApp> {
     ]);
     return MaterialApp(
       title: 'Campus Dual',
+      scaffoldMessengerKey: snackbarKey,
       themeMode: themeMode, //can also be ThemeMode.light or ThemeMode.dark
       theme: themes.cleanLight,
       darkTheme: themes.cleanDark,
