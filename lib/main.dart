@@ -21,7 +21,7 @@ void main() async {
   await StorageManager().fixFirstLaunchIssues();
 
   // Load campus dual certificate
-  Future<ByteData> data = PlatformAssetBundle().load('assets/ca/GEANT OV RSA CA 4.crt');
+  Future<ByteData> data = PlatformAssetBundle().load('assets/ca/HARICA_TLS_RSA_Root_CA_2021.pem');
   Future<ThemeMode> initTheme = StorageManager().loadTheme();
   Future<UserCredentials?> creds = StorageManager().loadUserAuthData();
 
