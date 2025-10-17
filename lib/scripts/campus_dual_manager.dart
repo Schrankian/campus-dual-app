@@ -1,16 +1,25 @@
 import 'dart:convert';
+import 'dart:io';
 // import 'dart:io';
 import 'package:campus_dual_android/extensions/date.dart';
 import 'package:flutter/material.dart' as flutter;
 import 'package:campus_dual_android/globals.dart';
 import 'package:html/dom.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/io_client.dart';
 // import 'package:http/io_client.dart';
 import 'package:http_cookie_store/http_cookie_store.dart';
 import 'package:html/parser.dart';
 import './campus_dual_manager.models.dart';
 
 class CampusDualManager {
+  // ---------------------------------------------------------------------------------------------------------------------------------------------
+  // This variable disables certificate checking
+  // Read here why this is bad: https://stackoverflow.com/questions/59303814/what-are-the-implications-of-ignoring-ssl-certificate-verification
+  // It is overrided via user settings
+  static bool insecureMode = false;
+  // ---------------------------------------------------------------------------------------------------------------------------------------------
+
   static UserCredentials? userCreds;
   CookieClient? sharedSession;
 
@@ -46,14 +55,18 @@ class CampusDualManager {
   }
 
   // Fallback if the certificate is not trusted
-  // http.Client _createInsecureClient() {
-  //   final httpClient = HttpClient()..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+  http.Client _createHttpClient() {
+    if (insecureMode) {
+      final httpClient = HttpClient()..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+      return IOClient(httpClient);
+    }
 
-  //   return IOClient(httpClient);
-  // }
+    return IOClient(HttpClient());
+  }
 
   Future<http.Response> _fetch(String uri) async {
-    final response = await http.get(Uri.parse(uri));
+    final client = _createHttpClient();
+    final response = await client.get(Uri.parse(uri));
 
     if (response.statusCode == 200) {
       return response;
@@ -78,7 +91,7 @@ class CampusDualManager {
   Future<CookieClient> _initAuthSession({String? username, String? password}) async {
     final Uri loginUri = Uri.parse("https://erp.campus-dual.de/sap/bc/webdynpro/sap/zba_initss?sap-client=100&sap-language=de&uri=https%3a%2f%2fselfservice.campus-dual.de%2findex%2flogin");
 
-    CookieClient session = CookieClient();
+    CookieClient session = CookieClient(inner: _createHttpClient());
 
     // Initial request to get the XSRF token and the xsrf cookie
     final initResponse = await session.get(loginUri, headers: stdHeaders);

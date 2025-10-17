@@ -21,7 +21,7 @@ void main() async {
   await StorageManager().fixFirstLaunchIssues();
 
   // Load campus dual certificate
-  Future<ByteData> data = PlatformAssetBundle().load('assets/ca/GEANT OV RSA CA 4.crt');
+  Future<ByteData> data = PlatformAssetBundle().load('assets/ca/GEANT TLS RSA 1.crt');
   Future<ThemeMode> initTheme = StorageManager().loadTheme();
   Future<UserCredentials?> creds = StorageManager().loadUserAuthData();
 
@@ -29,6 +29,14 @@ void main() async {
 
   SecurityContext.defaultContext.setTrustedCertificatesBytes((result[0] as ByteData).buffer.asUint8List());
   CampusDualManager.userCreds = result[2] as UserCredentials?;
+
+  // Handle this separetely, because its not that important but would create an unnecessary issue if it throws
+  try {
+    bool useUntrustedHTTP = await StorageManager().loadBool("useUntrustedHTTP") ?? false;
+    CampusDualManager.insecureMode = useUntrustedHTTP;
+  } catch (e) {
+    // Do nothing, because its not that important
+  }
 
   // Initialize timezones
   tz.initializeTimeZones();
