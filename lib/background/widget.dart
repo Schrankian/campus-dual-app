@@ -27,8 +27,11 @@ FutureOr<void> backgroundCallback(Uri? data) async {
         try {
           debugPrint("Reloading timetable and updating widget...");
           // Load campus dual certificate
-          ByteData data = await PlatformAssetBundle().load('assets/ca/selfservice.campus-dual.de.crt');
+          ByteData data = await PlatformAssetBundle().load('assets/ca/GEANT TLS RSA 1.crt');
           SecurityContext.defaultContext.setTrustedCertificatesBytes(data.buffer.asUint8List());
+
+          bool useUntrustedHTTP = await StorageManager().loadBool("useUntrustedHTTP") ?? false;
+          CampusDualManager.insecureMode = useUntrustedHTTP;
 
           // Load the user auth data
           final userCreds = await StorageManager().loadUserAuthData();

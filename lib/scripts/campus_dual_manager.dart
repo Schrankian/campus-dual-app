@@ -16,7 +16,7 @@ class CampusDualManager {
   // ---------------------------------------------------------------------------------------------------------------------------------------------
   // This variable disables certificate checking
   // Read here why this is bad: https://stackoverflow.com/questions/59303814/what-are-the-implications-of-ignoring-ssl-certificate-verification
-  // It is overrided via user settings
+  // It is overridden via user settings
   static bool insecureMode = false;
   // ---------------------------------------------------------------------------------------------------------------------------------------------
 

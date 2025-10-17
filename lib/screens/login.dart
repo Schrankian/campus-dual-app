@@ -23,6 +23,7 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool _forceMode = false;
 
   Future<UserCredentials?> _testCredentials(String username, String password) async {
     if (username == "11111" && password == "11111") {
@@ -34,6 +35,13 @@ class _LoginState extends State<Login> {
       hash = await cd.scrapeHash(username: username, password: password);
     } catch (e) {
       debugPrint(e.toString());
+      if (!e.toString().contains("Failed to login")) {
+        // We take "Failed to login" as the default error for wrong credentials
+        // Anything else is considered a connection error and enables the force mode
+        setState(() {
+          _forceMode = true;
+        });
+      }
       return null;
     }
     return UserCredentials(username, password, hash, false);
@@ -61,6 +69,41 @@ class _LoginState extends State<Login> {
       return ValidationState.valid;
     }
     return ValidationState.empty;
+  }
+
+  void _login(bool force) async {
+    setState(() {
+      isLoading = true;
+    });
+
+    FocusManager.instance.primaryFocus?.unfocus();
+    final stopwatch = Stopwatch()..start();
+    if (force) {
+      CampusDualManager.insecureMode = true;
+    }
+    final userCreds = await _testCredentials(_usernameController.text, _passwordController.text);
+    final elapsed = stopwatch.elapsed;
+
+    // Make sure the loading spinner is shown for at least 1 second
+    if (elapsed < const Duration(seconds: 1)) {
+      await Future.delayed(const Duration(seconds: 1) - elapsed);
+    }
+
+    setState(() {
+      isLoading = false;
+    });
+
+    if (userCreds != null) {
+      mainBus.emit(event: "Login", args: userCreds);
+      return;
+    }
+
+    setState(() {
+      lastErrors.add({
+        "username": _usernameController.text,
+        "password": _passwordController.text,
+      });
+    });
   }
 
   @override
@@ -148,57 +191,83 @@ class _LoginState extends State<Login> {
                         ),
                       ),
                     ),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                      ),
-                      onPressed: state == ValidationState.valid
-                          ? () async {
-                              setState(() {
-                                isLoading = true;
-                              });
-
-                              FocusManager.instance.primaryFocus?.unfocus();
-                              final stopwatch = Stopwatch()..start();
-                              final userCreds = await _testCredentials(_usernameController.text, _passwordController.text);
-                              final elapsed = stopwatch.elapsed;
-
-                              // Make sure the loading spinner is shown for at least 1 second
-                              if (elapsed < const Duration(seconds: 1)) {
-                                await Future.delayed(const Duration(seconds: 1) - elapsed);
-                              }
-
-                              setState(() {
-                                isLoading = false;
-                              });
-
-                              if (userCreds != null) {
-                                mainBus.emit(event: "Login", args: userCreds);
-                                return;
-                              }
-
-                              setState(() {
-                                lastErrors.add({
-                                  "username": _usernameController.text,
-                                  "password": _passwordController.text,
-                                });
-                              });
-                            }
-                          : null,
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 40, right: 40, top: 15, bottom: 15),
-                        child: state == ValidationState.loading
-                            ? const CircularProgressIndicator()
-                            : const Text(
-                                "Login",
-                                style: TextStyle(fontSize: 20),
+                    _forceMode && (state == ValidationState.wrong || state == ValidationState.lastWrong)
+                        ? ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                              backgroundColor: Theme.of(context).colorScheme.primary,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
                               ),
-                      ),
-                    ),
+                            ),
+                            onPressed: isLoading
+                                ? null
+                                : () => {
+                                      showDialog<void>(
+                                        context: context,
+                                        barrierDismissible: false, // user must tap button!
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: const Text('Login erzwingen'),
+                                            content: const SingleChildScrollView(
+                                              child: ListBody(
+                                                children: <Widget>[
+                                                  Text('Möchtest du den Login wirklich erzwingen?'),
+                                                  SizedBox(height: 10),
+                                                  Text('Damit wird das SSL-Zertifikat des Campus Dual Servers nicht mehr überprüft. Dies kann ein Sicherheitsrisiko darstellen.'),
+                                                  SizedBox(height: 10),
+                                                  Text('Beachte außerdem, dass die wiederholte Eingabe falscher Anmeldeinformationen zu einer Sperrung deines Accounts führen kann.'),
+                                                ],
+                                              ),
+                                            ),
+                                            actions: <Widget>[
+                                              TextButton(
+                                                child: const Text('Abbrechen'),
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
+                                                },
+                                              ),
+                                              TextButton(
+                                                child: const Text('Bestätigen'),
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
+                                                  _login(true);
+                                                },
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      ),
+                                    },
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 40, right: 40, top: 15, bottom: 15),
+                              child: isLoading
+                                  ? const CircularProgressIndicator()
+                                  : const Text(
+                                      "Login erzwingen",
+                                      style: TextStyle(fontSize: 20),
+                                    ),
+                            ),
+                          )
+                        : ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                              backgroundColor: Theme.of(context).colorScheme.primary,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                            ),
+                            onPressed: state == ValidationState.valid ? () => _login(false) : null,
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 40, right: 40, top: 15, bottom: 15),
+                              child: isLoading
+                                  ? const CircularProgressIndicator()
+                                  : const Text(
+                                      "Login",
+                                      style: TextStyle(fontSize: 20),
+                                    ),
+                            ),
+                          ),
                   ],
                 ),
               ),
