@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:campus_dual_android/screens/other/overrides.dart';
+import 'package:campus_dual_android/scripts/campus_dual_manager.dart';
 import 'package:campus_dual_android/scripts/campus_dual_manager.models.dart';
 import 'package:campus_dual_android/scripts/event_bus.dart';
 import 'package:campus_dual_android/scripts/storage_manager.dart';
@@ -24,6 +25,12 @@ class _SettingsState extends State<Settings> {
     final isFuzzyColor = await storage.loadBool("useFuzzyColor");
 
     return isFuzzyColor ?? false;
+  }
+
+  Future<void> _saveUseUntrustedHTTP(bool value) async {
+    CampusDualManager.insecureMode = value;
+    final storage = StorageManager();
+    await storage.saveBool("useUntrustedHTTP", value);
   }
 
   @override
@@ -108,6 +115,71 @@ class _SettingsState extends State<Settings> {
                       ),
                     ),
                   ),
+                ),
+              ),
+              Divider(
+                height: 40,
+                thickness: 1,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const Text(
+                " Sonstiges",
+                style: TextStyle(fontSize: 24),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 20, right: 20, bottom: 10),
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text("Deaktiviere Zertifikat-Validierung"),
+                    Switch(
+                      value: CampusDualManager.insecureMode,
+                      onChanged: (value) {
+                        if (value) {
+                          showDialog<void>(
+                            context: context,
+                            barrierDismissible: false, // user must tap button!
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text('Zertifikat-Validierung deaktivieren'),
+                                content: const SingleChildScrollView(
+                                  child: ListBody(
+                                    children: <Widget>[
+                                      Text('Dies deaktiviert die SSL-Zertifikat-Validierung, wodurch sich Angreifer einfacher als der Campus Dual Server ausgeben können. Z.B. könnte dadurch ein Angreifer deine Anmeldedaten abfangen.'),
+                                      SizedBox(height: 10),
+                                      Text('Nur aktivieren, wenn du dir der Risiken bewusst bist!'),
+                                    ],
+                                  ),
+                                ),
+                                actions: <Widget>[
+                                  TextButton(
+                                    child: const Text('Abbrechen'),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                  TextButton(
+                                    child: const Text('Bestätigen'),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                      setState(() {
+                                        _saveUseUntrustedHTTP(value);
+                                      });
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        } else {
+                          setState(() {
+                            _saveUseUntrustedHTTP(value);
+                          });
+                        }
+                      },
+                    ),
+                  ],
                 ),
               ),
               Divider(
